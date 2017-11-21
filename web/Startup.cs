@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace web
 {
@@ -28,6 +29,13 @@ namespace web
                 options.UseNpgsql(connectionString));
 
             services.AddMvc();
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(opt => {
+                    opt.Cookie.Name = "rcbene_auth";
+                    opt.Cookie.Expiration = TimeSpan.FromHours(2);
+                    opt.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict;
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -44,12 +52,15 @@ namespace web
 
             app.UseStaticFiles();
 
+            app.UseAuthentication();
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+
 
             // Astuce pour appeler une méthode de SeedData
             var serviceScopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
