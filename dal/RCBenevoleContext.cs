@@ -29,6 +29,19 @@ namespace dal
         public void SeedData()
         {
             this.Database.EnsureCreated();
+
+            if(this.Utilisateurs.Count() == 0)
+            {
+                var testadmin = new Utilisateur
+                {
+                    CentreGere = null,
+                    Login = "testadmin",
+                    Password = "testadmin",
+                };
+
+                this.Utilisateurs.Add(testadmin);
+                this.SaveChanges();
+            }
         }
     }
 }
