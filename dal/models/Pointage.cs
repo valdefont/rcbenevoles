@@ -10,15 +10,20 @@ namespace dal.models
         public int ID { get; set; }
 
         [Required]
+        [Display(Name = "Bénévole")]
         public Benevole Benevole { get; set; }
 
         [Required]
+        [Display(Name = "Date")]
+        [DataType(DataType.Date)]
         public DateTime Date { get; set; }
 
         [Required]
+        [Display(Name = "Nb demi-journées")]
         public int NbDemiJournees { get; set; }
 
         [Required]
+        [Display(Name = "Distance A/R")]
         public decimal Distance { get; set; }
     }
 }

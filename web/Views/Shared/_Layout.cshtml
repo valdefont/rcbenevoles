@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - web</title>
+    <title>@ViewData["Title"] - Accueil</title>
 
     <environment include="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
@@ -26,15 +26,29 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">web</a>
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">Accueil</a>
             </div>
+            @if (User.Identity.IsAuthenticated)
+            {
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
+                    <li><a asp-controller="Pointages" asp-action="Index">Pointages</a></li>
+                    <li><a asp-controller="Benevoles" asp-action="Index">Bénévoles</a></li>
+                    @if (User.HasClaim(cl => cl.Type == "http://rcbenevole/claims/superadmin"))
+                    {
+                    <li><a asp-controller="Centres" asp-action="Index">Centres</a></li>
+                    <li><a asp-controller="Utilisateurs" asp-action="Index">Utilisateurs</a></li>
+                    <li><a asp-controller="Parametres" asp-action="Index">Autres paramètres</a></li>
+                    }
+                    else if (User.HasClaim(cl => cl.Type == "http://rcbenevole/claims/centeradmin"))
+                    {
+                        <li><a asp-controller="Centres" asp-action="My">Mon centre</a></li>
+                        <li><a asp-controller="Utilisateurs" asp-action="Index">Utilisateurs</a></li>
+                    }
+                    <li><a asp-controller="Account" asp-action="Index">Mon compte</a></li>
                 </ul>
             </div>
+            }
         </div>
     </nav>
     <div class="container body-content">

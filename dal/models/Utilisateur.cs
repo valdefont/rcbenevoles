@@ -11,16 +11,19 @@ namespace dal.models
         public int ID { get; set; }
 
         [Required]
+        [Display(Name = "Identifiant")]
         public string Login { get; set; }
 
         [Required]
+        [Display(Name = "Mot de passe")]
         public string Password { get; set; }
 
+        [Display(Name = "Centre géré")]
         public Centre CentreGere { get; set; }
 
         public bool TestPassword(string password)
         {
-            return EncryptPassword(password, GetSalt()) == password;
+            return EncryptPassword(password, GetSalt()) == this.Password;
         }
 
         public void SetPassword(string password)

@@ -36,8 +36,9 @@ namespace dal
                 {
                     CentreGere = null,
                     Login = "testadmin",
-                    Password = "testadmin",
                 };
+
+                testadmin.SetPassword("testadmin");
 
                 this.Utilisateurs.Add(testadmin);
                 this.SaveChanges();

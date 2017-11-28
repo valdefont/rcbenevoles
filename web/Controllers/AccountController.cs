@@ -25,15 +25,10 @@ namespace web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> LogIn([FromBody] LoginPasswordModel model)
+        public async Task<IActionResult> Login(LoginPasswordModel model)
         {
             if (!ModelState.IsValid)
                 return View();
-
-            var user = new AppUser
-            {
-                Name = model.Login,
-            };
 
             var dbuser = _db.Utilisateurs.Where(u => u.Login == model.Login).SingleOrDefault();
 
@@ -43,11 +38,22 @@ namespace web.Controllers
                 return View();
             }
 
-            var identity = new ClaimsIdentity(user);
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, model.Login),
+                new Claim(ClaimTypes.Authentication, "true"),
+            };
 
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(user));
+            if (dbuser.CentreGere != null)
+                claims.Add(new Claim("http://rcbenevole/claims/centeradmin", dbuser.CentreGere.ID.ToString()));
+            else
+                claims.Add(new Claim("http://rcbenevole/claims/superadmin", "true"));
 
-            return View();
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+
+            return RedirectToAction("Index", "Home");
         }
     }
 }
