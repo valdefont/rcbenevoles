@@ -19,19 +19,7 @@
                     @Html.DisplayNameFor(model => model.Prenom)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.AdresseLigne1)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.AdresseLigne2)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.AdresseLigne3)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.CodePostal)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Ville)
+                    Adresse
                 </th>
                 <th>
                     @Html.DisplayNameFor(model => model.Telephone)
@@ -49,19 +37,7 @@
                 @Html.DisplayFor(modelItem => item.Prenom)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.AdresseLigne1)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.AdresseLigne2)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.AdresseLigne3)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CodePostal)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Ville)
+                @Html.Raw(item.GetAdresseComplete(true))
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Telephone)

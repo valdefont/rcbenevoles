@@ -44,5 +44,10 @@ namespace dal
                 this.SaveChanges();
             }
         }
+
+        public bool ContainsCentre(int id)
+        {
+            return this.Centres.Any(c => c.ID == id);
+        }
     }
 }

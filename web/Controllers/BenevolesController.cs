@@ -22,7 +22,7 @@ namespace web.Controllers
         // GET: Benevoles
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Benevoles.ToListAsync());
+            return View(await _context.Benevoles.Include(b => b.Centre).ToListAsync());
         }
 
         // GET: Benevoles/Details/5
@@ -33,7 +33,7 @@ namespace web.Controllers
                 return NotFound();
             }
 
-            var benevole = await _context.Benevoles
+            var benevole = await _context.Benevoles.Include(b => b.Centre)
                 .SingleOrDefaultAsync(m => m.ID == id);
             if (benevole == null)
             {
@@ -54,15 +54,17 @@ namespace web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Nom,Prenom,AdresseLigne1,AdresseLigne2,AdresseLigne3,CodePostal,Ville,Telephone")] Benevole benevole)
+        public async Task<IActionResult> Create([Bind("ID,Nom,Prenom,AdresseLigne1,AdresseLigne2,AdresseLigne3,CodePostal,Ville,Telephone,CentreID")] Benevole benevole)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(benevole);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(benevole);
+            if (!_context.ContainsCentre(benevole.CentreID))
+                ModelState.AddModelError("CentreID", "Le centre n'existe pas");
+
+            if (!ModelState.IsValid)
+                return View(benevole);
+
+            _context.Add(benevole);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Benevoles/Edit/5
@@ -86,34 +88,31 @@ namespace web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Nom,Prenom,AdresseLigne1,AdresseLigne2,AdresseLigne3,CodePostal,Ville,Telephone")] Benevole benevole)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Nom,Prenom,AdresseLigne1,AdresseLigne2,AdresseLigne3,CodePostal,Ville,Telephone,CentreID")] Benevole benevole)
         {
             if (id != benevole.ID)
-            {
                 return NotFound();
+
+            if (!_context.ContainsCentre(benevole.CentreID))
+                ModelState.AddModelError("CentreID", "Le centre n'existe pas");
+
+            if (!ModelState.IsValid)
+                return View(benevole);
+
+            try
+            {
+                _context.Update(benevole);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!BenevoleExists(benevole.ID))
+                    return NotFound();
+                else
+                    throw;
             }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(benevole);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BenevoleExists(benevole.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(benevole);
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Benevoles/Delete/5

@@ -23,34 +23,10 @@
             @Html.DisplayFor(model => model.Prenom)
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.AdresseLigne1)
+            Adresse complète
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.AdresseLigne1)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.AdresseLigne2)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.AdresseLigne2)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.AdresseLigne3)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.AdresseLigne3)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.CodePostal)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.CodePostal)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.Ville)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Ville)
+            @Html.Raw(Model.GetAdresseComplete(true))
         </dd>
         <dt>
             @Html.DisplayNameFor(model => model.Telephone)
