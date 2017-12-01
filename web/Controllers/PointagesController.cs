@@ -10,10 +10,8 @@ using dal.models;
 
 namespace web.Controllers
 {
-    public class PointagesController : Controller
+    public class PointagesController : RCBenevoleController
     {
-        private readonly RCBenevoleContext _context;
-
         public PointagesController(RCBenevoleContext context)
         {
             _context = context;

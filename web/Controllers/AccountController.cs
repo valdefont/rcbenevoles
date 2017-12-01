@@ -10,13 +10,11 @@ using Microsoft.AspNetCore.Authentication;
 
 namespace web.Controllers
 {
-    public class AccountController : Controller
+    public class AccountController : RCBenevoleController
     {
-        protected readonly dal.RCBenevoleContext _db;
-
         public AccountController(dal.RCBenevoleContext dbcontext)
         {
-            _db = dbcontext;
+            _context = dbcontext;
         }
 
         public IActionResult Index()
@@ -30,7 +28,7 @@ namespace web.Controllers
             if (!ModelState.IsValid)
                 return View();
 
-            var dbuser = _db.Utilisateurs.Where(u => u.Login == model.Login).SingleOrDefault();
+            var dbuser = _context.Utilisateurs.Where(u => u.Login == model.Login).SingleOrDefault();
 
             if(dbuser == null || !dbuser.TestPassword(model.Password))
             {

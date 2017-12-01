@@ -7,13 +7,14 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using dal;
 using dal.models;
+using web.Models;
+using web.Filters;
 
 namespace web.Controllers
 {
-    public class BenevolesController : Controller
+    [AtLeastOneCenterExists]
+    public class BenevolesController : RCBenevoleController
     {
-        private readonly RCBenevoleContext _context;
-
         public BenevolesController(RCBenevoleContext context)
         {
             _context = context;
@@ -29,16 +30,13 @@ namespace web.Controllers
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var benevole = await _context.Benevoles.Include(b => b.Centre)
                 .SingleOrDefaultAsync(m => m.ID == id);
+
             if (benevole == null)
-            {
                 return NotFound();
-            }
 
             return View(benevole);
         }
@@ -46,6 +44,12 @@ namespace web.Controllers
         // GET: Benevoles/Create
         public IActionResult Create()
         {
+            var centres = _context.Centres
+                .OrderBy(c => c.Nom)
+                .AsEnumerable();
+
+            ViewBag.Centres = centres;
+
             return View();
         }
 
@@ -71,15 +75,20 @@ namespace web.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
+
+            var centres = _context.Centres
+                .OrderBy(c => c.Nom)
+                .AsEnumerable();
+
+            ViewBag.Centres = centres;
 
             var benevole = await _context.Benevoles.SingleOrDefaultAsync(m => m.ID == id);
+
             if (benevole == null)
-            {
                 return NotFound();
-            }
+
+
             return View(benevole);
         }
 

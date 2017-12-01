@@ -8,7 +8,7 @@ using web.Models;
 
 namespace web.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : RCBenevoleController
     {
         public IActionResult Index()
         {

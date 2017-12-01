@@ -10,10 +10,8 @@ using dal.models;
 
 namespace web.Controllers
 {
-    public class CentresController : Controller
+    public class CentresController : RCBenevoleController
     {
-        private readonly RCBenevoleContext _context;
-
         public CentresController(RCBenevoleContext context)
         {
             _context = context;
