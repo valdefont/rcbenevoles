@@ -19,7 +19,10 @@ namespace dal.models
         public string Password { get; set; }
 
         [Display(Name = "Centre géré")]
-        public Centre CentreGere { get; set; }
+        public int? CentreID { get; set; }
+
+        [Display(Name = "Centre géré")]
+        public Centre Centre { get; set; }
 
         public bool TestPassword(string password)
         {

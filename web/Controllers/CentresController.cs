@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using dal;
 using dal.models;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace web.Controllers
 {
+    [Authorize]
     public class CentresController : RCBenevoleController
     {
         public CentresController(RCBenevoleContext context)
@@ -18,12 +21,22 @@ namespace web.Controllers
         }
 
         // GET: Centres
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> Index()
         {
             return View(await _context.Centres.ToListAsync());
         }
 
+        [Authorize(Roles = "BasicAdmin")]
+        public async Task<IActionResult> My()
+        {
+            var user = GetCurrentUser();
+
+            return await Details(user.Centre.ID);
+        }
+
         // GET: Centres/Details/5
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -42,6 +55,7 @@ namespace web.Controllers
         }
 
         // GET: Centres/Create
+        [Authorize(Roles = "SuperAdmin")]
         public IActionResult Create()
         {
             return View();
@@ -52,6 +66,7 @@ namespace web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> Create([Bind("ID,Nom,Adresse")] Centre centre)
         {
             if (ModelState.IsValid)
@@ -64,6 +79,7 @@ namespace web.Controllers
         }
 
         // GET: Centres/Edit/5
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -84,6 +100,7 @@ namespace web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Nom,Adresse")] Centre centre)
         {
             if (id != centre.ID)
@@ -115,6 +132,7 @@ namespace web.Controllers
         }
 
         // GET: Centres/Delete/5
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -124,10 +142,9 @@ namespace web.Controllers
 
             var centre = await _context.Centres
                 .SingleOrDefaultAsync(m => m.ID == id);
+
             if (centre == null)
-            {
                 return NotFound();
-            }
 
             return View(centre);
         }
@@ -135,6 +152,7 @@ namespace web.Controllers
         // POST: Centres/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var centre = await _context.Centres.SingleOrDefaultAsync(m => m.ID == id);

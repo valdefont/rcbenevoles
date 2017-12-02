@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -34,16 +36,15 @@
                 <ul class="nav navbar-nav">
                     <li><a asp-controller="Pointages" asp-action="Index">Pointages</a></li>
                     <li><a asp-controller="Benevoles" asp-action="Index">Bénévoles</a></li>
-                    @if (User.HasClaim(cl => cl.Type == "http://rcbenevole/claims/superadmin"))
+                    @if (User.HasClaim(cl => cl.Type == ClaimTypes.Role && cl.Value == "SuperAdmin"))
                     {
                     <li><a asp-controller="Centres" asp-action="Index">Centres</a></li>
                     <li><a asp-controller="Utilisateurs" asp-action="Index">Utilisateurs</a></li>
                     <li><a asp-controller="Parametres" asp-action="Index">Autres paramètres</a></li>
                     }
-                    else if (User.HasClaim(cl => cl.Type == "http://rcbenevole/claims/centeradmin"))
+                    else if (User.HasClaim(cl => cl.Type == ClaimTypes.Role && cl.Value == "BasicAdmin"))
                     {
                         <li><a asp-controller="Centres" asp-action="My">Mon centre</a></li>
-                        <li><a asp-controller="Utilisateurs" asp-action="Index">Utilisateurs</a></li>
                     }
                     <li><a asp-controller="Account" asp-action="Index">Mon compte</a></li>
                 </ul>

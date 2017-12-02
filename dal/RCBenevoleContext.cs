@@ -34,7 +34,7 @@ namespace dal
             {
                 var testadmin = new Utilisateur
                 {
-                    CentreGere = null,
+                    Centre = null,
                     Login = "testadmin",
                 };
 

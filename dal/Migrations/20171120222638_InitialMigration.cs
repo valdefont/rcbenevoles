@@ -70,7 +70,7 @@ namespace dal.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
-                    CentreGereID = table.Column<int>(nullable: true),
+                    CentreID = table.Column<int>(nullable: true),
                     Login = table.Column<string>(nullable: false),
                     Password = table.Column<string>(nullable: false)
                 },
@@ -79,7 +79,7 @@ namespace dal.Migrations
                     table.PrimaryKey("PK_Utilisateurs", x => x.ID);
                     table.ForeignKey(
                         name: "FK_Utilisateurs_Centres_CentreGereID",
-                        column: x => x.CentreGereID,
+                        column: x => x.CentreID,
                         principalTable: "Centres",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
@@ -125,7 +125,7 @@ namespace dal.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Utilisateurs_CentreGereID",
                 table: "Utilisateurs",
-                column: "CentreGereID");
+                column: "CentreID");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using web.Models;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace web.Controllers
 {
@@ -28,7 +30,7 @@ namespace web.Controllers
             if (!ModelState.IsValid)
                 return View();
 
-            var dbuser = _context.Utilisateurs.Where(u => u.Login == model.Login).SingleOrDefault();
+            var dbuser = _context.Utilisateurs.Include(u => u.Centre).Where(u => u.Login == model.Login).SingleOrDefault();
 
             if(dbuser == null || !dbuser.TestPassword(model.Password))
             {
@@ -42,15 +44,23 @@ namespace web.Controllers
                 new Claim(ClaimTypes.Authentication, "true"),
             };
 
-            if (dbuser.CentreGere != null)
-                claims.Add(new Claim("http://rcbenevole/claims/centeradmin", dbuser.CentreGere.ID.ToString()));
+            if (dbuser.Centre != null)
+                claims.Add(new Claim(ClaimTypes.Role, "BasicAdmin", ClaimValueTypes.String));
             else
-                claims.Add(new Claim("http://rcbenevole/claims/superadmin", "true"));
+                claims.Add(new Claim(ClaimTypes.Role, "SuperAdmin", ClaimValueTypes.String));
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
 
+            return RedirectToAction("Index", "Home");
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Logout(LoginPasswordModel model)
+        {
+            await HttpContext.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
     }

@@ -44,11 +44,9 @@ namespace web.Controllers
         // GET: Benevoles/Create
         public IActionResult Create()
         {
-            var centres = _context.Centres
+            ViewBag.Centres = _context.Centres
                 .OrderBy(c => c.Nom)
                 .AsEnumerable();
-
-            ViewBag.Centres = centres;
 
             return View();
         }
@@ -77,11 +75,9 @@ namespace web.Controllers
             if (id == null)
                 return NotFound();
 
-            var centres = _context.Centres
+            ViewBag.Centres = _context.Centres
                 .OrderBy(c => c.Nom)
                 .AsEnumerable();
-
-            ViewBag.Centres = centres;
 
             var benevole = await _context.Benevoles.SingleOrDefaultAsync(m => m.ID == id);
 
@@ -104,6 +100,14 @@ namespace web.Controllers
 
             if (!_context.ContainsCentre(benevole.CentreID))
                 ModelState.AddModelError("CentreID", "Le centre n'existe pas");
+
+            var user = GetCurrentUser();
+
+            if (user.Centre != null)
+            {
+                if (benevole.CentreID != user.Centre.ID)
+                    ModelState.AddModelError("CentreID", "Vous ne pouvez pas créer de bénévole sur un autre centre que celui qui vous est affecté");
+            }
 
             if (!ModelState.IsValid)
                 return View(benevole);
