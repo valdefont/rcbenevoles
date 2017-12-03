@@ -24,6 +24,12 @@
             <th>
                 @Html.DisplayNameFor(model => model.Telephone)
             </th>
+            @if(User.IsInRole("SuperAdmin"))
+            {
+            <th>
+                @Html.DisplayNameFor(model => model.CentreID)
+            </th>
+            }
             <th></th>
         </tr>
     </thead>
@@ -42,6 +48,12 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Telephone)
             </td>
+            @if (User.IsInRole("SuperAdmin"))
+            {
+            <td>
+                @Html.DisplayFor(modelItem => item.Centre.Nom)
+            </td>
+            }
             <td>
                 <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.ID">Details</a> |

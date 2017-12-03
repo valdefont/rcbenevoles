@@ -56,7 +56,10 @@
             <div class="form-group">
                 <label asp-for="CentreID" class="control-label"></label>
                 <select asp-for="CentreID" asp-items="@(new SelectList(ViewBag.Centres, "ID","Nom"))" class="form-control">
+                    @if (User.IsInRole("SuperAdmin"))
+                    {
                     <option value="">- Veuillez sélectionner un centre -</option>
+                    }
                 </select>
                 <span asp-validation-for="CentreID" class="text-danger"></span>
             </div>

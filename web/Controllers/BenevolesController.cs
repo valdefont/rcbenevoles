@@ -23,7 +23,12 @@ namespace web.Controllers
         // GET: Benevoles
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Benevoles.Include(b => b.Centre).ToListAsync());
+            var query = _context.Benevoles.Include(b => b.Centre).AsQueryable();
+
+            if (!User.IsInRole("SuperAdmin"))
+                query = query.Where(b => b.CentreID == GetCurrentUser().CentreID);
+
+            return View(await query.OrderBy(b => b.Nom).ToListAsync());
         }
 
         // GET: Benevoles/Details/5
@@ -38,15 +43,16 @@ namespace web.Controllers
             if (benevole == null)
                 return NotFound();
 
+            if (GetCurrentUser().CentreID != null && GetCurrentUser().CentreID != benevole.CentreID)
+                return Forbid();
+
             return View(benevole);
         }
 
         // GET: Benevoles/Create
         public IActionResult Create()
         {
-            ViewBag.Centres = _context.Centres
-                .OrderBy(c => c.Nom)
-                .AsEnumerable();
+            SetViewBagCentres();
 
             return View();
         }
@@ -75,15 +81,15 @@ namespace web.Controllers
             if (id == null)
                 return NotFound();
 
-            ViewBag.Centres = _context.Centres
-                .OrderBy(c => c.Nom)
-                .AsEnumerable();
-
             var benevole = await _context.Benevoles.SingleOrDefaultAsync(m => m.ID == id);
 
             if (benevole == null)
                 return NotFound();
 
+            if(GetCurrentUser().CentreID != null && GetCurrentUser().CentreID != benevole.CentreID)
+                return Forbid();
+
+            SetViewBagCentres();
 
             return View(benevole);
         }
@@ -160,6 +166,22 @@ namespace web.Controllers
         private bool BenevoleExists(int id)
         {
             return _context.Benevoles.Any(e => e.ID == id);
+        }
+
+        private void SetViewBagCentres()
+        {
+            if (User.IsInRole("SuperAdmin"))
+            {
+                ViewBag.Centres = _context.Centres
+                    .OrderBy(c => c.Nom)
+                    .AsEnumerable();
+            }
+            else
+            {
+                ViewBag.Centres = _context.Centres
+                    .Where(c => c.ID == GetCurrentUser().CentreID)
+                    .AsEnumerable();
+            }
         }
     }
 }
