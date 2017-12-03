@@ -60,10 +60,11 @@ namespace web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Login,Password")] Utilisateur utilisateur)
+        public async Task<IActionResult> Create([Bind("ID,Login,Password,CentreID")] Utilisateur utilisateur)
         {
             if (ModelState.IsValid)
             {
+                utilisateur.SetPassword(utilisateur.Password);
                 _context.Add(utilisateur);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
