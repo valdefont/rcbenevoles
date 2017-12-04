@@ -11,6 +11,9 @@ namespace dal.models
 
         [Required]
         [Display(Name = "Bénévole")]
+        public int BenevoleID { get; set; }
+
+        [Display(Name = "Bénévole")]
         public Benevole Benevole { get; set; }
 
         [Required]
@@ -19,7 +22,8 @@ namespace dal.models
         public DateTime Date { get; set; }
 
         [Required]
-        [Display(Name = "Nb demi-journées")]
+        [Display(Name = "Demi-journées")]
+        [Range(0, 2, ErrorMessage = "Le nombre de demi-journées doit être compris entre 0 et 2")]
         public int NbDemiJournees { get; set; }
 
         [Required]

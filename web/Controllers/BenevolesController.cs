@@ -31,6 +31,27 @@ namespace web.Controllers
             return View(await query.OrderBy(b => b.Nom).ToListAsync());
         }
 
+        [HttpPost]
+        public IActionResult List(string term)
+        {
+            var query = _context.Benevoles.AsQueryable();
+
+            if (!string.IsNullOrEmpty(term))
+                query = query.Where(b => b.Nom.ToLower().StartsWith(term));
+
+            if (!User.IsInRole("SuperAdmin"))
+                query = query.Where(b => b.CentreID == GetCurrentUser().CentreID);
+
+            var list = query.Select(b => new
+            {
+                ID = b.ID,
+                Nom = b.Nom,
+                Prenom = b.Prenom,
+            });
+
+            return Json(list);
+        }
+
         // GET: Benevoles/Details/5
         public async Task<IActionResult> Details(int? id)
         {

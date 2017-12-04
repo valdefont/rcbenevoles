@@ -13,6 +13,11 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
+                <label asp-for="BenevoleID" class="control-label"></label>
+                <input id="txtBenevoleID" type="text" asp-for="BenevoleID" class="form-control" />
+                <span asp-validation-for="BenevoleID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <label asp-for="Date" class="control-label"></label>
                 <input asp-for="Date" class="form-control" />
                 <span asp-validation-for="Date" class="text-danger"></span>
@@ -40,4 +45,28 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#txtBenevoleID").autocomplete({
+                source: function(request,response) {
+                    $.ajax({
+                        url: "/Benevoles/List",
+                        type: "POST",
+                        dataType: "json",
+                        data: { term: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.nom + " " + item.prenom, value: item.id };
+                            }))
+
+                        }
+                    })
+                },
+                messages: {
+                    noResults: "", results: function (resultsCount) { }
+                }
+            });
+        })
+    </script>
 }
