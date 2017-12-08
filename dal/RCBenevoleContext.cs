@@ -1,6 +1,7 @@
 ﻿using dal.models;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections;
 using System.Linq;
 
 namespace dal
@@ -48,6 +49,16 @@ namespace dal
         public bool ContainsCentre(int id)
         {
             return this.Centres.Any(c => c.ID == id);
+        }
+
+        public IQueryable<Benevole> ListAllowedBenevoles(Utilisateur utilisateur)
+        {
+            var query = this.Benevoles.Include(b => b.Centre).AsQueryable();
+
+            if (utilisateur.CentreID != null)
+                query = query.Where(b => b.CentreID == utilisateur.CentreID);
+
+            return query.OrderBy(b => b.Nom).ThenBy(b => b.Prenom);
         }
     }
 }

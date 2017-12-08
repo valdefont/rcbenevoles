@@ -1,4 +1,4 @@
-﻿@model IEnumerable<dal.models.Pointage>
+﻿@model PointageFilterModel
 
 @{
     ViewData["Title"] = "Index";
@@ -6,42 +6,72 @@
 
 <h2>Index</h2>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.Date)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.NbDemiJournees)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Distance)
-                </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Date)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NbDemiJournees)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Distance)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
-            </td>
-        </tr>
+<div class="row">
+    <div class="col-xs-12">
+        <p>Recherchez le bénévole sur lequel vous souhaiter effectuer un pointage</p>
+        @if (User.IsInRole("SuperAdmin"))
+        {
+            <div class="form-group">
+                <div class="col-xs-12">
+                    <div class="col-sm-4">
+                        <label class="control-label">Sélectionnez un centre :</label>
+                    </div>
+                    <div class="col-sm-5">
+                        <select asp-for="CentreID" asp-items="@(new SelectList(Model.Centres, "ID", "Nom"))" class="form-control"></select>
+                        <span asp-validation-for="CentreID" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="col-xs-12">
+                <input typeof="hidden" asp-for="CentreID" />
+            </div>
+        }
+        <div class="col-xs-12">
+            <div class="col-lg-6">
+                <div class="input-group">
+                    <input type="text" asp-for="Term" class="form-control" placeholder="Rechercher un bénévole par nom ...">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button" onclick="filter(); return false;">Rechercher</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xs-12">
+        <table>
+            <tbody id="updateBody">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts
+{
+<script type="text/javascript">
+
+    function filter() {
+        $.ajax({
+            url: '@Url.Action("Filter")',
+            data:
+            {
+                CentreID: $("#CentreID").val(),
+                Term: $("#Term").val(),
+            },
+            contentType: 'application/json',
+            dataType: 'html',
+            type: 'GET',
+            cache: false,
+            success: function (data) {
+                $('#updateBody').html(data);
+            },
+            error: function (data) {
+                alert('Error occurred');
+            }
+        });
+    }
+</script>  
 }
-    </tbody>
-</table>

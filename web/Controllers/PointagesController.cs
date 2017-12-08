@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using dal;
 using dal.models;
+using web.Models;
 
 namespace web.Controllers
 {
@@ -18,9 +19,40 @@ namespace web.Controllers
         }
 
         // GET: Pointages
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Pointages.ToListAsync());
+            PointageFilterModel model = new PointageFilterModel
+            {
+                Term = string.Empty
+            };
+
+            if (User.IsInRole("SuperAdmin"))
+                model.Centres = _context.Centres;
+            else
+                model.CentreID = GetCurrentUser().CentreID;
+
+            return View(model);
+        }
+
+        // AJAX : Pointages/Filter
+        public IActionResult Filter(PointageFilterModel filter)
+        {
+            if (filter.Term == null)
+                filter.Term = string.Empty;
+
+            var query = _context.Benevoles
+                .Where(b => b.CentreID == filter.CentreID)
+                .Where(b => b.Nom.ToLower().StartsWith(filter.Term.Trim().ToLower()));
+
+            var model = query.Select(b => new BenevolePointageModel
+                {
+                    BenevoleID = b.ID,
+                    BenevoleNom = b.Nom,
+                    BenevolePrenom = b.Prenom,
+                    LastPointage = null, //TODO
+                }).AsEnumerable();
+
+            return View(model);
         }
 
         // GET: Pointages/Details/5
