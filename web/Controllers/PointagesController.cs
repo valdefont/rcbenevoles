@@ -40,19 +40,168 @@ namespace web.Controllers
             if (filter.Term == null)
                 filter.Term = string.Empty;
 
+            if (!User.IsInRole("SuperAdmin"))
+                filter.CentreID = GetCurrentUser().CentreID;
+
             var query = _context.Benevoles
                 .Where(b => b.CentreID == filter.CentreID)
                 .Where(b => b.Nom.ToLower().StartsWith(filter.Term.Trim().ToLower()));
 
-            var model = query.Select(b => new BenevolePointageModel
-                {
-                    BenevoleID = b.ID,
-                    BenevoleNom = b.Nom,
-                    BenevolePrenom = b.Prenom,
-                    LastPointage = null, //TODO
-                }).AsEnumerable();
+            var model = query.Select(b => new BenevolePointageListItemModel
+            {
+                BenevoleID = b.ID,
+                BenevoleNom = b.Nom,
+                BenevolePrenom = b.Prenom,
+                LastPointage = null, //TODO
+            }).AsEnumerable();
 
             return View(model);
+        }
+
+        // GET: Pointages/Details/5
+        [HttpGet("Pointages/Benevole/{id}")]
+        public async Task<IActionResult> Benevole(int id, int? year, int? month)
+        {
+            const int CALENDAR_ROW_COUNT = 6;
+            const int CALENDAR_DAY_COUNT = 7;
+
+            var now = DateTime.Now;
+
+            if (year == null)
+                year = now.Year;
+
+            if (month == null)
+                month = now.Month;
+
+            var benevole = await _context.Benevoles.Include(b => b.Centre)
+                .SingleOrDefaultAsync(b => b.ID == id);
+
+            if(benevole == null)
+                return NotFound();
+
+            if (!IsBenevoleAllowed(benevole))
+                return Forbid();
+
+            var model = new PointagesBenevoleModel
+            {
+                Benevole = benevole,
+                MonthDate = new DateTime(year.Value, month.Value, 1)
+            };
+
+            var dateFrom = new DateTime(year.Value, month.Value, 1);
+
+            int dayOfWeekStartMonday = (int)dateFrom.DayOfWeek - 1;
+            if (dayOfWeekStartMonday == -1)
+                dayOfWeekStartMonday = 6; // dimanche
+
+            dateFrom = dateFrom.AddDays(0 - dayOfWeekStartMonday);
+
+            var dateTo = dateFrom.AddDays(CALENDAR_ROW_COUNT * CALENDAR_DAY_COUNT);
+
+            var pointages = _context.Pointages
+                .Where(p => p.BenevoleID == id)
+                .Where(p => p.Date >= dateFrom && p.Date < dateTo)
+                .OrderBy(p => p.Date)
+                .ToDictionary(p => p.Date);
+
+            var currentDate = dateFrom;
+
+            for (int r = 0; r < CALENDAR_ROW_COUNT; r++)
+            {
+                var row = new CalendarRow();
+
+                for (int i = 0; i < CALENDAR_DAY_COUNT; i++)
+                {
+                    var item = new CalendarItem
+                    {
+                        Date = currentDate,
+                        Pointage = pointages.GetValueOrDefault(currentDate),
+                        IsCurrentMonth = (currentDate.Month == month && currentDate.Year == year)
+                    };
+
+                    item.Date = currentDate;
+                    row.Items.Add(item);
+
+                    currentDate = currentDate.AddDays(1);
+                }
+
+                model.CalendarRows.Add(row);
+            }
+
+            return View(model);
+        }
+
+        [HttpGet("Pointages/Benevole/{id}/editcreate")]
+        public async Task<IActionResult> BenevoleEditOrCreate(int id, DateTime date)
+        {
+            var benevole = await _context.Benevoles.Include(b => b.Centre)
+                .SingleOrDefaultAsync(b => b.ID == id);
+
+            if (benevole == null)
+                return NotFound();
+
+            if (!IsBenevoleAllowed(benevole))
+                return Forbid();
+
+            var pointage = await _context.Pointages
+                .SingleOrDefaultAsync(p => p.BenevoleID == id && p.Date == date);
+
+            if (pointage == null)
+            {
+                pointage = new dal.models.Pointage
+                {
+                    BenevoleID = id,
+                    Date = date,
+                    NbDemiJournees = 0,
+                    Distance = 0,
+                };
+            }
+
+            return PartialView(pointage);
+        }
+
+        [HttpPost("Pointages/Benevole/{id}/editcreate")]
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> BenevoleEditOrCreate(int id, [FromBody] [Bind("BenevoleID,Date,NbDemiJournees,Distance")] Pointage pointage)
+        {
+            if (id != pointage.BenevoleID)
+                return BadRequest("id does not match BenevoleId");
+
+            int? existingId = _context.Pointages
+                .Where(p => p.BenevoleID == pointage.BenevoleID && p.Date == pointage.Date.Date)
+                .Select(p => (int?)p.ID)
+                .SingleOrDefault();
+
+            if (existingId != null)
+                pointage.ID = existingId.Value;
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    if (existingId != null)
+                        _context.Update(pointage);
+                    else
+                        _context.Pointages.Add(pointage);
+
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!PointageExists(pointage.ID))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                return Ok();
+            }
+
+            return View(pointage);
         }
 
         // GET: Pointages/Details/5

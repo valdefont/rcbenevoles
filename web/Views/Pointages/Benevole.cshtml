@@ -1,0 +1,139 @@
+﻿@model PointagesBenevoleModel
+
+@{
+    ViewData["Title"] = $"Pointages de {Model.Benevole.Prenom} {Model.Benevole.Nom} - {Model.MonthDate.ToString("MMMM yyyy")}";
+}
+
+
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+@functions{
+    public string GetAntiXsrfRequestToken()
+    {
+        return Xsrf.GetAndStoreTokens(Context).RequestToken;
+    }
+}
+
+<h2>Pointages de @Model.Benevole.Prenom @Model.Benevole.Nom - Mois de @Model.MonthDate.ToString("MMMM yyyy")</h2>
+
+<div class="row">
+    <div class="col-lg-6">
+        <table id="calendar" data-selected-date="">
+            <thead>
+                <tr>
+                    <th>Lun</th>
+                    <th>Mar</th>
+                    <th>Mer</th>
+                    <th>Jeu</th>
+                    <th>Ven</th>
+                    <th>Sam</th>
+                    <th>Dim</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach(var row in Model.CalendarRows)
+            {
+                <tr>
+                @foreach(var item in row.Items)
+                {
+                    <td data-date="@item.Date.ToString("yyyy-MM-dd")" class="pointage @item.GetPointageCssClass()" onclick="selectDate(this)">
+                        <span class="calendarday @item.GetDayTextCssClass()">@item.Date.Day</span>
+                    </td>
+                }
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    <div class="col-lg-6">
+        <div id="detailPanel">
+        </div>
+    </div>
+</div>
+
+@section scripts {
+
+@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+<script type="text/javascript">
+
+    var $selectedTd;
+
+    function selectDate(td) {
+
+        if ($selectedTd != null)
+            $selectedTd.removeClass("selected");
+
+        $selectedTd = $(td);
+        $selectedTd.addClass("selected")
+
+        var date = $selectedTd.attr("data-date");
+
+        $("#calendar").attr("selectedDate", date);
+
+        displayDetailPanel();
+    }
+
+    function displayDetailPanel() {
+        $.ajax({
+            url: '@Url.Action("BenevoleEditOrCreate")' + '?id=@Model.Benevole.ID&date=' + encodeURIComponent($("#calendar").attr("selectedDate")),
+            type: 'GET',
+            cache: false,
+            success: function (data) {
+                $('#detailPanel').replaceWith(data);
+            },
+            error: function (data) {
+                alert('Une erreur est apparue pendant le chargement');
+            }
+        });
+    }
+
+    function editOrCreate() {
+
+        var date = $("#calendar").attr("selectedDate");
+        var nbDemiJournees = $("#NbDemiJournees").val();
+
+        var dataRequest =
+            {
+                BenevoleID: @Model.Benevole.ID,
+                Date: date,
+                NbDemiJournees: nbDemiJournees,
+                Distance: $("#Distance").val().replace(',', '.')
+            };
+
+        $.ajax({
+            url: '@Url.Action("BenevoleEditOrCreate")',
+            data: JSON.stringify(dataRequest),
+            headers:
+            {
+                "RequestVerificationToken": '@GetAntiXsrfRequestToken()'
+            },
+            contentType: 'application/json; charset=utf-8',
+            type: 'POST',
+            cache: false,
+            success: function (data) {
+                refreshDate(date, nbDemiJournees);
+            },
+            error: function (data) {
+                alert('Une erreur est apparue pendant la mise à jour du pointage');
+            }
+        });
+    }
+
+    function refreshDate(date, nbDemiJournees) {
+        var $td = $("td[data-date='" + date + "']");
+
+        $td.removeClass("none");
+        $td.removeClass("half");
+        $td.removeClass("full");
+
+        if (nbDemiJournees == 0) {
+            $td.addClass("none");
+        } else if (nbDemiJournees == 1) {
+            $td.addClass("half");
+        } else if (nbDemiJournees == 2) {
+            $td.addClass("full");
+        }
+    }
+
+</script> 
+}

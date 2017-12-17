@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace web.Models
 {
-    public class BenevolePointageModel
+    public class BenevolePointageListItemModel
     {
         public int BenevoleID { get; set; }
 

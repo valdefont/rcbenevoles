@@ -1,0 +1,38 @@
+﻿@model dal.models.Pointage
+
+@{
+    Layout = null;
+}
+ 
+<div id="detailPanel">
+
+    <h3>Journée du @Model.Date.ToString("d")</h3>
+
+    <form asp-antiforgery="true" asp-action="EditOrCreate">
+        <div class="form-group">
+            <div class="col-xs-12">
+                <div class="col-sm-4">
+                    <label asp-for="NbDemiJournees" class="control-label">Nombre de demi-journées :</label>
+                </div>
+                <div class="col-sm-8">
+                    <input asp-for="NbDemiJournees" class="form-control"/>
+                    <span asp-validation-for="NbDemiJournees" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="col-sm-4">
+                    <label asp-for="Distance" class="control-label">Distance (km) :</label>
+                </div>
+                <div class="col-sm-8">
+                    <input asp-for="Distance" class="form-control" />
+                    <span asp-validation-for="Distance" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <button type="submit" class="btn btn-success" onclick="editOrCreate(); return false;">Pointer</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

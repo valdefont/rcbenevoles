@@ -1,25 +1,21 @@
-﻿@model IEnumerable<BenevolePointageModel>
+﻿@model IEnumerable<BenevolePointageListItemModel>
 
 @{
     Layout = null;
 }
 
-<tbody>
+<tbody id="updateBody">
 @foreach (var item in Model) {
     <tr>
         <td>
-            @Html.DisplayFor(modelItem => item.BenevoleNom)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.BenevolePrenom)
+            <span>@Html.DisplayFor(modelItem => item.BenevoleNom)</span>&nbsp;
+            <span>@Html.DisplayFor(modelItem => item.BenevolePrenom)</span>
         </td>
         <td>
             @Html.DisplayFor(modelItem => item.LastPointage)
         </td>
         <td>
-            <a asp-action="Edit" asp-route-id="@item.BenevoleID">Edit</a> |
-            <a asp-action="Details" asp-route-id="@item.BenevoleID">Details</a> |
-            <a asp-action="Delete" asp-route-id="@item.BenevoleID">Delete</a>
+            <a asp-action="Benevole" asp-route-id="@item.BenevoleID"><i class="glyphicon glyphicon-calendar"></i>Accéder aux pointages</a> |
         </td>
     </tr>
 }

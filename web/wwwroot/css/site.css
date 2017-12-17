@@ -33,3 +33,46 @@
         display: none;
     }
 }
+
+/**********************************************************************/
+
+/* Calendrier : Pointages */
+.pointage {
+    vertical-align: middle;
+    text-align: center;
+    border-width: 2px;
+    border-style: hidden;
+    cursor: pointer;
+}
+
+.pointage.none {
+    background: none;
+}
+
+.pointage.full {
+    background-color: #7cdc8e;
+}
+
+.pointage.half {
+    background-color: #dde5b0;
+}
+
+.pointage.selected {
+    border-style: solid;
+    border-color: red;
+}
+
+.calendarday {
+    vertical-align: middle;
+    text-align: center;
+    font-size: x-large;
+    padding: 4px;
+}
+
+.calendarday.current_month {
+    color: black;
+}
+
+.calendarday.other_month {
+    color: gray;
+}
