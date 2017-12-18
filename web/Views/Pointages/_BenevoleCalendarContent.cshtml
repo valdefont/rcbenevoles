@@ -4,7 +4,7 @@
     Layout = null;
 }
 
-<table id="calendar" data-selected-date="">
+<table id="calendar" data-selected-date="" data-selected-id="">
     <thead>
         <tr>
             <th colspan="7" class="month_selector">
@@ -33,7 +33,7 @@
         <tr>
         @foreach(var item in row.Items)
             {
-            <td data-date="@item.Date.ToString("yyyy-MM-dd")" class="pointage @item.GetPointageCssClass()" onclick="selectDate(this)">
+            <td data-date="@item.Date.ToString("yyyy-MM-dd")" data-id="@((item.Pointage != null) ? item.Pointage.ID.ToString() : "")" class="pointage @item.GetPointageCssClass()" onclick="selectDate(this)">
                 <div>
                     <span class="calendarday @item.GetDayTextCssClass()" title="@item.GetTitle()">@item.Date.Day</span>
                 </div>

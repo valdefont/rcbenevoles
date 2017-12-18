@@ -155,7 +155,7 @@ namespace web.Controllers
                 {
                     BenevoleID = id,
                     Date = date,
-                    NbDemiJournees = 0,
+                    NbDemiJournees = 1,
                     Distance = 0,
                 };
             }
@@ -201,7 +201,7 @@ namespace web.Controllers
                     }
                 }
 
-                return Ok();
+                return Json(new { id = pointage.ID });
             }
 
             return View(pointage);

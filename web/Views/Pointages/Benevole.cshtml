@@ -46,9 +46,11 @@
         $selectedTd.addClass("selected")
         $selectedTd.removeClass("unselected");
 
+        var id = $selectedTd.attr("data-id");
         var date = $selectedTd.attr("data-date");
 
-        $("#calendar").attr("selectedDate", date);
+        $("#calendar").attr("data-selected-date", date);
+        $("#calendar").attr("data-selected-id", id);
 
         displayDetailPanel();
     }
@@ -56,12 +58,13 @@
     function displayDetailPanel() {
 
         $.ajax({
-            url: '@Url.Action("BenevoleEditOrCreate")' + '?id=@Model.Benevole.ID&date=' + encodeURIComponent($("#calendar").attr("selectedDate")),
+            url: '@Url.Action("BenevoleEditOrCreate")' + '?id=@Model.Benevole.ID&date=' + encodeURIComponent($("#calendar").attr("data-selected-date")),
             type: 'GET',
             cache: false,
             success: function (data) {
                 $('#detailPanel').replaceWith(data);
                 $('#detailPanel').show();
+                $('input[name=RadioNbDemiJournees][value=' + $("#NbDemiJournees").val() + ']').prop('checked', true);
             },
             error: function (data) {
                 alert('Une erreur est apparue pendant le chargement');
@@ -74,8 +77,10 @@
         if (!validateDistance())
             return;
 
-        var date = $("#calendar").attr("selectedDate");
-        var nbDemiJournees = $("#NbDemiJournees").val();
+        var nbDemiJournees = $('input[name=RadioNbDemiJournees]:checked').val();
+
+        var date = $("#calendar").attr("data-selected-date");
+        $("#NbDemiJournees").val(nbDemiJournees);
 
         var dataRequest =
             {
@@ -96,7 +101,34 @@
             type: 'POST',
             cache: false,
             success: function (data) {
+                $selectedTd.attr("data-id", data.id);
+                $("#calendar").attr("data-selected-id", data.id);
                 refreshDate(date, nbDemiJournees);
+            },
+            error: function (data) {
+                alert('Une erreur est apparue pendant la mise à jour du pointage');
+            }
+        });
+    }
+
+    function remove() {
+
+        var id = $("#calendar").attr("data-selected-id");
+        var date = $("#calendar").attr("data-selected-date");
+
+        $.ajax({
+            url: '@Url.Action("Delete")?id=' + id,
+            headers:
+            {
+                "RequestVerificationToken": '@GetAntiXsrfRequestToken()'
+            },
+            type: 'POST',
+            cache: false,
+            success: function (data) {
+                $selectedTd.attr("data-id", null);
+                $("#calendar").attr("data-selected-id", null);
+                $("#btDelete").hide();
+                refreshDate(date, 1);
             },
             error: function (data) {
                 alert('Une erreur est apparue pendant la mise à jour du pointage');
@@ -126,12 +158,15 @@
         $td.removeClass("half");
         $td.removeClass("full");
 
-        if (nbDemiJournees == 0) {
+        if ($td.attr("data-id") == undefined) {
             $td.addClass("none");
+            $("#btDelete").hide();
         } else if (nbDemiJournees == 1) {
             $td.addClass("half");
+            $("#btDelete").show();
         } else if (nbDemiJournees == 2) {
             $td.addClass("full");
+            $("#btDelete").show();
         }
     }
 
