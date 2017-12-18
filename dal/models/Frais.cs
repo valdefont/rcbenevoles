@@ -12,6 +12,6 @@ namespace dal.models
         public int Annee { get; set; }
 
         [Required]
-        public string TauxKilometrique { get; set; }
+        public decimal TauxKilometrique { get; set; }
     }
 }
