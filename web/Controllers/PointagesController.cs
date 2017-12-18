@@ -327,6 +327,68 @@ namespace web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet("Pointages/Benevole/{id}/print")]
+        public async Task<IActionResult> Print(int id, int period, int year)
+        {
+            var benevole = await _context.Benevoles.Include(b => b.Centre)
+                .SingleOrDefaultAsync(b => b.ID == id);
+
+            if (benevole == null)
+                return NotFound("Bénévole non trouvé");
+
+            if (!IsBenevoleAllowed(benevole))
+                return Forbid();
+
+            DateTime periodStart;
+            DateTime periodEnd;
+
+            switch(period)
+            {
+                case 1:
+                    {
+                        periodStart = new DateTime(year, 1, 1);
+                        periodEnd = new DateTime(year, 5, 1);
+                    }
+                    break;
+                case 2:
+                    {
+                        periodStart = new DateTime(year, 5, 1);
+                        periodEnd = new DateTime(year, 9, 1);
+                    }
+                    break;
+                case 3:
+                    {
+                        periodStart = new DateTime(year, 9, 1);
+                        periodEnd = new DateTime(year + 1, 1, 1);
+                    }
+                    break;
+                default:
+                    return BadRequest("Période invalide");
+            }
+
+            var frais = _context.Frais.SingleOrDefault(f => f.Annee == year);
+
+            if(frais == null)
+                return NotFound("Frais non trouvé");
+
+            var totalDistance = _context.Pointages
+                .Where(p => p.BenevoleID == id)
+                .Where(p => p.Date >= periodStart && p.Date < periodEnd)
+                .Sum(p => p.Distance);
+
+            PrintModel model = new PrintModel
+            {
+                PeriodStart = periodStart,
+                PeriodEnd = periodEnd.AddDays(-1),
+                Benevole = benevole,
+                FraisKm = frais.TauxKilometrique,
+                MonthCount = 4, // valeur fixe
+                TotalDistance = totalDistance,
+            };
+
+            return View(model);
+        }
+
         private bool PointageExists(int id)
         {
             return _context.Pointages.Any(e => e.ID == id);

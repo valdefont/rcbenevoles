@@ -14,7 +14,9 @@
 }
 
 <h2>Pointages de @Model.Benevole.Prenom @Model.Benevole.Nom</h2>
-
+<p>
+    <a asp-action="Print" asp-route-period="3" asp-route-year="2017" target="_blank">Imprimer la fiche d'abandon [Fin 2017]</a>
+</p>
 <div class="row">
     <div class="col-lg-6">
         @{await Html.RenderPartialAsync("_BenevoleCalendarContent"); }

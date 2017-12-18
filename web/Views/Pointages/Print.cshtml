@@ -1,0 +1,308 @@
+﻿@model PrintModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <environment include="Development">
+        <link rel="stylesheet" href="~/css/print.css" />
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet" href="~/css/print.min.css" asp-append-version="true" />
+    </environment>
+</head>
+<body>
+    <div class="fullpage">
+        <div>
+            <div>
+                <span class="adresse_nom">Les Restaurants du C&oelig;ur</span>
+            </div>
+            <div>
+                <span class="adresse_rue">@Model.Benevole.Centre.Adresse</span>
+            </div>
+
+            <div class="right">
+                <span>Année <strong>@Model.PeriodEnd.Year</strong></span>
+                <br />
+                <span>@Model.MonthCount mois</span>
+            </div>
+
+            <div>
+                <div class="border_all" style="float:right;padding-left:4px;padding-right:4px">
+                    <span>Période concernée : </span>
+                    <span>@Model.PeriodStart.ToString("dd MMMM") au @Model.PeriodEnd.ToString("dd MMMM yyyy")</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 0.8cm">
+            <h1>
+                <span>Fiche d'abandon de remboursement de frais de déplacements</span>
+                <br/>
+                <span>Domicile / Lieu de bénévolat</span>
+            </h1>
+        </div>
+
+        <div style="margin-top: 0.3cm" >
+            <div class="border_double" style="padding:0.2cm">
+                <table style="width:100%">
+                    <thead>
+                        <tr>
+                            <th style="width:25%"></th>
+                            <th style="width:75%"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="formlabel">
+                                <span>NOM :</span>
+                            </td>
+                            <td class="formfield">
+                                <span>@Model.Benevole.Nom</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="formlabel">
+                                <span>Prénom :</span>
+                            </td>
+                            <td class="formfield">
+                                <span>@Model.Benevole.Prenom</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="formlabel">
+                                <span>Adresse :</span>
+                            </td>
+                            <td>
+                                <div class="formfield">
+                                    <span>@Model.Benevole.AdresseLigne1</span>
+                                </div>
+                                <div class="formfield">
+                                    <span>@Model.Benevole.AdresseLigne2</span>
+                                </div>
+                                <div class="formfield">
+                                    <span>@Model.Benevole.CodePostal</span>&nbsp;&nbsp;<span>@Model.Benevole.Ville</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="formlabel">
+                                <span>CENTRE :</span>
+                            </td>
+                            <td class="formfield">
+                                <span>@Model.Benevole.Centre.Nom</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div style="margin-top: 0.3cm">
+            <div style="text-align:center">
+                <span class="border_double btitle" style="padding-left:0.1cm;padding-top:0.1cm;padding-right:0.1cm">
+                    <strong>Détail des frais</strong>
+                </span>
+            </div>
+            <div class="border_double" style="padding:0.2cm">
+                <table style="width:100%">
+                    <thead>
+                        <tr>
+                            <th style="width:30%"></th>
+                            <th style="width:25%"></th>
+                            <th style="width:25%"></th>
+                            <th style="width:18%"></th>
+                            <th style="width:2%"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="frais_rubrique">
+                                <span>1. Véhicule personnel</span>
+                            </td>
+                            <td colspan="2" class="frais_label_right">
+                                <span>Kms parcourus pendant la période :</span>
+                            </td>
+                            <td class="frais_saisie">
+                                <span>@Model.TotalDistance</span>
+                            </td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="frais_label_right">
+                                <span>x @Model.FraisKm.ToString("0.000") € le km</span>
+                            </td>
+                            <td class="frais_saisie">
+                                <span>@((Model.TotalDistance * Model.FraisKm).ToString("0.00"))</span>
+                            </td>
+                            <td>
+                                €
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="5">
+                                <span class="frais_rubrique">2. Transport en commun</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <span>(joindre les originaux des justificatifs)</span>
+                            </td>
+                            <td class="frais_label_right">
+                                <span>Tickets journaliers</span>
+                            </td>
+                            <td class="frais_saisie">
+                                <span></span>
+                            </td>
+                            <td>€</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="frais_label_right">
+                                <span>Carte hebdomadaire</span>
+                            </td>
+                            <td class="frais_saisie">
+                                <span></span>
+                            </td>
+                            <td>€</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="frais_label_right">
+                                <span>Carte mensuelle</span>
+                            </td>
+                            <td class="frais_saisie">
+                                <span></span>
+                            </td>
+                            <td>€</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="frais_label_right">
+                                <span>Carte annuelle</span>
+                            </td>
+                            <td class="frais_saisie">
+                                <span></span>
+                            </td>
+                            <td>€</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="frais_label_right">
+                                <span>Total</span>
+                            </td>
+                            <td class="frais_saisie">
+                                <span></span>
+                            </td>
+                            <td>€</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div style="margin-top: 0.3cm" >
+            <div class="border_double" style="padding:0.2cm">
+                <table style="width:100%">
+                    <tr>
+                        <td>
+                            <span class="declaration_renonciation">Déclaration de Renonciation au remboursement des frais engagés (rédaction manuscrite par le Bénévole **)</span>
+                        </td>
+                    </tr>
+                    <tr style="height:18pt">
+                        <td class="formfield">
+                            <span></span>
+                        </td>
+                    </tr>
+                    <tr style="height:18pt">
+                        <td class="formfield">
+                            <span></span>
+                        </td>
+                    </tr>
+                    <tr style="height:18pt">
+                        <td class="formfield">
+                            <span></span>
+                        </td>
+                    </tr>
+                    <tr style="height:18pt">
+                        <td class="formfield">
+                            <span></span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div>
+            <div>
+                <table style="width:100%">
+                    <thead>
+                        <tr>
+                            <th style="width:33%"></th>
+                            <th style="width:33%"></th>
+                            <th style="width:33%"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border_double">
+                                <div class="signature" style="height:3cm">
+                                    <span>Signature du Bénévole</span>
+                                </div>
+                            </td>
+                            <td class="border_double">
+                                <div class="signature" style="height:3cm">
+                                    <span>Signature du Président</span>
+                                </div>
+                            </td>
+                            <td class="border_double">
+                                <div class="signature" style="height:3cm">
+                                    <span>Signature du Trésorier</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                            </td>
+                            <td>
+                            </td>
+                            <td class="border_all" style="border-width:2pt">
+                                <div class="signature" style="height:2cm">
+                                    <table style="width:100%">
+                                        <tr>
+                                            <td style="text-align:center">
+                                                <div class="border_bottom" style="border-width:2pt">
+                                                    <strong>Reçu fiscal</strong>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Numéro :</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Date :</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        ** Je soussigné .... (nom et prénom) demeurant à .... (adresse complète), certifie renoncer expressément au remboursement des frais ci-dessus et les laisser à l'Association en tant que don
+    </footer>
+
+    <div class="clearfix"></div>
+
+    <div class="fullpage">
+    </div>
+
+</body>
+</html>
