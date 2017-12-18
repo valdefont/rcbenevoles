@@ -61,9 +61,6 @@ namespace web.Controllers
         [HttpGet("Pointages/Benevole/{id}")]
         public async Task<IActionResult> Benevole(int id, int? year, int? month)
         {
-            const int CALENDAR_ROW_COUNT = 6;
-            const int CALENDAR_DAY_COUNT = 7;
-
             var now = DateTime.Now;
 
             if (year == null)
@@ -95,7 +92,7 @@ namespace web.Controllers
 
             dateFrom = dateFrom.AddDays(0 - dayOfWeekStartMonday);
 
-            var dateTo = dateFrom.AddDays(CALENDAR_ROW_COUNT * CALENDAR_DAY_COUNT);
+            var dateTo = dateFrom.AddDays(PointagesBenevoleModel.CALENDAR_ROW_COUNT * PointagesBenevoleModel.CALENDAR_DAY_COUNT);
 
             var pointages = _context.Pointages
                 .Where(p => p.BenevoleID == id)
@@ -105,17 +102,19 @@ namespace web.Controllers
 
             var currentDate = dateFrom;
 
-            for (int r = 0; r < CALENDAR_ROW_COUNT; r++)
+            for (int r = 0; r < PointagesBenevoleModel.CALENDAR_ROW_COUNT; r++)
             {
                 var row = new CalendarRow();
 
-                for (int i = 0; i < CALENDAR_DAY_COUNT; i++)
+                for (int i = 0; i < PointagesBenevoleModel.CALENDAR_DAY_COUNT; i++)
                 {
                     var item = new CalendarItem
                     {
                         Date = currentDate,
                         Pointage = pointages.GetValueOrDefault(currentDate),
-                        IsCurrentMonth = (currentDate.Month == month && currentDate.Year == year)
+                        IsCurrentMonth = (currentDate.Month == month && currentDate.Year == year),
+                        RowIndex = r,
+                        ColumnIndex = i,
                     };
 
                     item.Date = currentDate;

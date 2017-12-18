@@ -40,8 +40,6 @@
 .pointage {
     vertical-align: middle;
     text-align: center;
-    border-width: 2px;
-    border-style: hidden;
     cursor: pointer;
 }
 
@@ -57,7 +55,13 @@
     background-color: #dde5b0;
 }
 
+.pointage.unselected {
+    margin:4px;
+}
+
 .pointage.selected {
+    margin:0px;
+    border-width: 4px;
     border-style: solid;
     border-color: red;
 }

@@ -36,7 +36,7 @@
                 @foreach(var item in row.Items)
                 {
                     <td data-date="@item.Date.ToString("yyyy-MM-dd")" class="pointage @item.GetPointageCssClass()" onclick="selectDate(this)">
-                        <span class="calendarday @item.GetDayTextCssClass()">@item.Date.Day</span>
+                        <span class="calendarday @item.GetDayTextCssClass()" title="@item.GetTitle()">@item.Date.Day</span>
                     </td>
                 }
                 </tr>
@@ -60,11 +60,14 @@
 
     function selectDate(td) {
 
-        if ($selectedTd != null)
+        if ($selectedTd != null) {
             $selectedTd.removeClass("selected");
+            $selectedTd.addClass("unselected");
+        }
 
         $selectedTd = $(td);
         $selectedTd.addClass("selected")
+        $selectedTd.removeClass("unselected");
 
         var date = $selectedTd.attr("data-date");
 
