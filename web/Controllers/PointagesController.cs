@@ -52,7 +52,6 @@ namespace web.Controllers
                 BenevoleID = b.ID,
                 BenevoleNom = b.Nom,
                 BenevolePrenom = b.Prenom,
-                LastPointage = null, //TODO
             }).AsEnumerable();
 
             return View(model);
@@ -161,7 +160,7 @@ namespace web.Controllers
         }
 
         [HttpPost("Pointages/Benevole/{id}/editcreate")]
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> BenevoleEditOrCreate(int id, [FromBody] [Bind("BenevoleID,Date,NbDemiJournees,Distance")] Pointage pointage)
         {
             if (id != pointage.BenevoleID)

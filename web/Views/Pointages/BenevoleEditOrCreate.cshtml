@@ -24,8 +24,8 @@
                     <label asp-for="Distance" class="control-label">Distance (km) :</label>
                 </div>
                 <div class="col-sm-8">
-                    <input asp-for="Distance" class="form-control" />
-                    <span asp-validation-for="Distance" class="text-danger"></span>
+                    <input asp-for="Distance" class="form-control" onblur="validateDistance();" />
+                    <span id="validationDistance" class="text-danger" style="display:none"></span>
                 </div>
             </div>
             <div class="col-xs-12">

@@ -12,7 +12,5 @@ namespace web.Models
         public string BenevoleNom { get; set; }
 
         public string BenevolePrenom { get; set; }
-
-        public DateTime? LastPointage { get; set; }
     }
 }

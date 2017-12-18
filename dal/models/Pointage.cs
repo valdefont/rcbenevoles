@@ -23,7 +23,7 @@ namespace dal.models
 
         [Required]
         [Display(Name = "Demi-journées")]
-        [Range(0, 2, ErrorMessage = "Le nombre de demi-journées doit être compris entre 0 et 2")]
+        [Range(1, 2, ErrorMessage = "Le nombre de demi-journées doit être 1 ou 2")]
         public int NbDemiJournees { get; set; }
 
         [Required]
