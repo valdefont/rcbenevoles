@@ -36,12 +36,17 @@
 
 /**********************************************************************/
 
+#calendar {
+    background-color: #c9d3ea;
+}
+
 #calendar th {
     text-align: center;
     font-size: large;
 }
 
 #calendar th.month_selector {
+    background-color: #a4b2d2;
     text-align: center;
     font-size: x-large;
 }

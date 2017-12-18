@@ -14,7 +14,7 @@
             <div class="form-group">
                 <div class="col-xs-12">
                     <div class="col-sm-4">
-                        <label class="control-label">Sélectionnez un centre :</label>
+                        <label class="control-label">Centre :</label>
                     </div>
                     <div class="col-sm-5">
                         <select asp-for="CentreID" asp-items="@(new SelectList(Model.Centres, "ID", "Nom"))" class="form-control"></select>
@@ -31,7 +31,7 @@
         }
         <div class="col-xs-12" style="margin-top:8px">
             <div class="col-sm-4">
-                <label class="control-label">Sélectionnez un centre :</label>
+                <label class="control-label">Bénévole :</label>
             </div>
             <div class="col-lg-8">
                 <div class="input-group">
