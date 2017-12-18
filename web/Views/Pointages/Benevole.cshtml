@@ -13,36 +13,11 @@
     }
 }
 
-<h2>Pointages de @Model.Benevole.Prenom @Model.Benevole.Nom - Mois de @Model.MonthDate.ToString("MMMM yyyy")</h2>
+<h2>Pointages de @Model.Benevole.Prenom @Model.Benevole.Nom</h2>
 
 <div class="row">
     <div class="col-lg-6">
-        <table id="calendar" data-selected-date="">
-            <thead>
-                <tr>
-                    <th>Lun</th>
-                    <th>Mar</th>
-                    <th>Mer</th>
-                    <th>Jeu</th>
-                    <th>Ven</th>
-                    <th>Sam</th>
-                    <th>Dim</th>
-                </tr>
-            </thead>
-            <tbody>
-            @foreach(var row in Model.CalendarRows)
-            {
-                <tr>
-                @foreach(var item in row.Items)
-                {
-                    <td data-date="@item.Date.ToString("yyyy-MM-dd")" class="pointage @item.GetPointageCssClass()" onclick="selectDate(this)">
-                        <span class="calendarday @item.GetDayTextCssClass()" title="@item.GetTitle()">@item.Date.Day</span>
-                    </td>
-                }
-                </tr>
-            }
-            </tbody>
-        </table>
+        @{await Html.RenderPartialAsync("_BenevoleCalendarContent"); }
     </div>
     <div class="col-lg-6">
         <div id="detailPanel">
@@ -57,6 +32,8 @@
 <script type="text/javascript">
 
     var $selectedTd;
+    var _year = @Model.MonthDate.Year;
+    var _month = @Model.MonthDate.Month;
 
     function selectDate(td) {
 
@@ -77,12 +54,14 @@
     }
 
     function displayDetailPanel() {
+
         $.ajax({
             url: '@Url.Action("BenevoleEditOrCreate")' + '?id=@Model.Benevole.ID&date=' + encodeURIComponent($("#calendar").attr("selectedDate")),
             type: 'GET',
             cache: false,
             success: function (data) {
                 $('#detailPanel').replaceWith(data);
+                $('#detailPanel').show();
             },
             error: function (data) {
                 alert('Une erreur est apparue pendant le chargement');
@@ -154,6 +133,44 @@
         } else if (nbDemiJournees == 2) {
             $td.addClass("full");
         }
+    }
+
+    function previousMonth() {
+
+        _month--;
+        if (_month == 0) {
+            _month = 12;
+            _year--;
+        }
+
+        reloadCalendar();
+    }
+
+    function nextMonth() {
+        _month++;
+        if (_month == 13) {
+            _month = 1;
+            _year++;
+        }
+
+        reloadCalendar();
+    }
+
+    function reloadCalendar() {
+
+        $.ajax({
+            url: '@Url.Action("Benevole")?id=@Model.Benevole.ID&year=' + _year + '&month=' + _month + '&partial=true',
+            type: 'GET',
+            dataType: 'html',
+            cache: false,
+            success: function (data) {
+                $('#calendar').replaceWith(data);
+                $('#detailPanel').hide();
+            },
+            error: function (data) {
+                alert('Une erreur est apparue pendant le chargement des bénévoles');
+            }
+        });
     }
 
 </script> 

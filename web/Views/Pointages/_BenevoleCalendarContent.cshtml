@@ -1,0 +1,45 @@
+﻿@model PointagesBenevoleModel
+
+@{
+    Layout = null;
+}
+
+<table id="calendar" data-selected-date="">
+    <thead>
+        <tr>
+            <th colspan="7" class="month_selector">
+                <span>
+                    <a href="#" onclick="previousMonth(); return false;">&lt;</a>
+                </span>
+                <span>@Model.MonthDate.ToString("MMMM yyyy")</span>
+                <span>
+                    <a href="#" onclick="nextMonth(); return false;">&gt;</a>
+                </span>
+            </th>
+        </tr>
+        <tr>
+            <th>Lun</th>
+            <th>Mar</th>
+            <th>Mer</th>
+            <th>Jeu</th>
+            <th>Ven</th>
+            <th>Sam</th>
+            <th>Dim</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach(var row in Model.CalendarRows)
+    {
+        <tr>
+        @foreach(var item in row.Items)
+            {
+            <td data-date="@item.Date.ToString("yyyy-MM-dd")" class="pointage @item.GetPointageCssClass()" onclick="selectDate(this)">
+                <div>
+                    <span class="calendarday @item.GetDayTextCssClass()" title="@item.GetTitle()">@item.Date.Day</span>
+                </div>
+            </td>
+            }
+        </tr>
+    }
+    </tbody>
+</table>

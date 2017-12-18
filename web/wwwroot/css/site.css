@@ -36,6 +36,16 @@
 
 /**********************************************************************/
 
+#calendar th {
+    text-align: center;
+    font-size: large;
+}
+
+#calendar th.month_selector {
+    text-align: center;
+    font-size: x-large;
+}
+
 /* Calendrier : Pointages */
 .pointage {
     vertical-align: middle;
@@ -55,11 +65,11 @@
     background-color: #dde5b0;
 }
 
-.pointage.unselected {
+.pointage.unselected > div {
     margin:4px;
 }
 
-.pointage.selected {
+.pointage.selected > div {
     margin:0px;
     border-width: 4px;
     border-style: solid;

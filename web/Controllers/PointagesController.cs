@@ -59,7 +59,7 @@ namespace web.Controllers
 
         // GET: Pointages/Details/5
         [HttpGet("Pointages/Benevole/{id}")]
-        public async Task<IActionResult> Benevole(int id, int? year, int? month)
+        public async Task<IActionResult> Benevole(int id, int? year, int? month, bool partial = false)
         {
             var now = DateTime.Now;
 
@@ -126,7 +126,12 @@ namespace web.Controllers
                 model.CalendarRows.Add(row);
             }
 
-            return View(model);
+            string viewName = "Benevole";
+
+            if (partial)
+                viewName = "_BenevoleCalendarContent";
+
+            return View(viewName, model);
         }
 
         [HttpGet("Pointages/Benevole/{id}/editcreate")]
