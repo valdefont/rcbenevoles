@@ -11,8 +11,8 @@ using System;
 namespace dal.Migrations
 {
     [DbContext(typeof(RCBenevoleContext))]
-    [Migration("20171120222638_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20171219110740_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -52,6 +52,9 @@ namespace dal.Migrations
 
                     b.HasKey("ID");
 
+                    b.HasAlternateKey("Nom", "Prenom")
+                        .HasName("UQ_Benevole_NomPrenom");
+
                     b.HasIndex("CentreID");
 
                     b.HasIndex("Nom", "Prenom");
@@ -82,10 +85,12 @@ namespace dal.Migrations
 
                     b.Property<int>("Annee");
 
-                    b.Property<string>("TauxKilometrique")
-                        .IsRequired();
+                    b.Property<decimal>("TauxKilometrique");
 
                     b.HasKey("ID");
+
+                    b.HasAlternateKey("Annee")
+                        .HasName("UQ_Frais_Annee");
 
                     b.ToTable("Frais");
                 });
@@ -106,7 +111,8 @@ namespace dal.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("BenevoleID");
+                    b.HasAlternateKey("BenevoleID", "Date")
+                        .HasName("UQ_Pointage_Benevole");
 
                     b.ToTable("Pointages");
                 });
@@ -116,7 +122,7 @@ namespace dal.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int?>("CentreGereID");
+                    b.Property<int?>("CentreID");
 
                     b.Property<string>("Login")
                         .IsRequired();
@@ -126,7 +132,10 @@ namespace dal.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("CentreGereID");
+                    b.HasAlternateKey("Login")
+                        .HasName("UQ_Utilisateur_Login");
+
+                    b.HasIndex("CentreID");
 
                     b.ToTable("Utilisateurs");
                 });
@@ -149,9 +158,9 @@ namespace dal.Migrations
 
             modelBuilder.Entity("dal.models.Utilisateur", b =>
                 {
-                    b.HasOne("dal.models.Centre", "CentreGere")
+                    b.HasOne("dal.models.Centre", "Centre")
                         .WithMany()
-                        .HasForeignKey("CentreGereID");
+                        .HasForeignKey("CentreID");
                 });
 #pragma warning restore 612, 618
         }

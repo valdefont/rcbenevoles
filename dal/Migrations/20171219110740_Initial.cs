@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace dal.Migrations
 {
-    public partial class InitialMigration : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -30,11 +30,12 @@ namespace dal.Migrations
                     ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Annee = table.Column<int>(nullable: false),
-                    TauxKilometrique = table.Column<string>(nullable: false)
+                    TauxKilometrique = table.Column<decimal>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Frais", x => x.ID);
+                    table.UniqueConstraint("UQ_Frais_Annee", x => x.Annee);
                 });
 
             migrationBuilder.CreateTable(
@@ -56,6 +57,7 @@ namespace dal.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Benevoles", x => x.ID);
+                    table.UniqueConstraint("UQ_Benevole_NomPrenom", x => new { x.Nom, x.Prenom });
                     table.ForeignKey(
                         name: "FK_Benevoles_Centres_CentreID",
                         column: x => x.CentreID,
@@ -77,8 +79,9 @@ namespace dal.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Utilisateurs", x => x.ID);
+                    table.UniqueConstraint("UQ_Utilisateur_Login", x => x.Login);
                     table.ForeignKey(
-                        name: "FK_Utilisateurs_Centres_CentreGereID",
+                        name: "FK_Utilisateurs_Centres_CentreID",
                         column: x => x.CentreID,
                         principalTable: "Centres",
                         principalColumn: "ID",
@@ -99,6 +102,7 @@ namespace dal.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Pointages", x => x.ID);
+                    table.UniqueConstraint("UQ_Pointage_Benevole", x => new { x.BenevoleID, x.Date });
                     table.ForeignKey(
                         name: "FK_Pointages_Benevoles_BenevoleID",
                         column: x => x.BenevoleID,
@@ -118,12 +122,7 @@ namespace dal.Migrations
                 columns: new[] { "Nom", "Prenom" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Pointages_BenevoleID",
-                table: "Pointages",
-                column: "BenevoleID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Utilisateurs_CentreGereID",
+                name: "IX_Utilisateurs_CentreID",
                 table: "Utilisateurs",
                 column: "CentreID");
         }
