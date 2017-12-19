@@ -1,10 +1,13 @@
 ﻿
 @{
-    ViewData["Title"] = "Pas de centre";
+    ViewData["Title"] = "Aucun centre";
 }
 
-<h2>Pas de centre</h2>
+<h2>Gestion des bénévoles</h2>
 
-<p>Veuillez créer au moins un centre avant de créer des bénévoles</p>
+<h3>Aucun centre</h3>
 
-<p>Vous pouvez @Html.ActionLink("cliquer ici", "Create", "Centres") pour créer un centre</p>
+<div class="alert alert-danger">
+    <p>Veuillez définir au moins un centre avant de créer des bénévoles</p>
+    <p>Vous pouvez @Html.ActionLink("cliquer ici", "Create", "Centres") pour créer un centre</p>
+</div>

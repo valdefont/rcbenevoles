@@ -1,14 +1,20 @@
 ﻿@model dal.models.Centre
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Supprimer";
 }
 
-<h2>Delete</h2>
+<h2>Gestion des centres</h2>
 
-<h3>Are you sure you want to delete this?</h3>
+<h3>Confirmez-vous la suppression du centre suivant ?</h3>
+
+<div class="alert alert-danger">
+    <p>
+        Avant de supprimer un centre, vous devez déplacer les bénévoles sur un autre centre sinon vous risquez de supprimer les bénévoles associés à ce centre.
+    </p>
+</div>
+
 <div>
-    <h4>Centre</h4>
     <hr />
     <dl class="dl-horizontal">
         <dt>
@@ -27,7 +33,7 @@
     
     <form asp-action="Delete">
         <input type="hidden" asp-for="ID" />
-        <input type="submit" value="Delete" class="btn btn-default" /> |
-        <a asp-action="Index">Back to List</a>
+        <input type="submit" value="Supprimer" class="btn btn-danger" />
+        <a asp-action="Index" class="btn btn-link">Retourner à la liste</a>
     </form>
 </div>

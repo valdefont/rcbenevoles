@@ -1,16 +1,18 @@
 ﻿@model dal.models.Benevole
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Supprimer";
 }
 
 <h2>Gestion des bénévoles</h2>
 
 <h3>Confirmez-vous la suppression du bénévole suivant ?</h3>
 
-<p>
-    Tous les pointages effectués pour ce bénévole seront également supprimés.
-</p>
+<div class="alert alert-warning">
+    <p>
+        Note : Tous les pointages effectués pour ce bénévole seront également supprimés.
+    </p>
+</div>
 
 <div>
     <hr />
