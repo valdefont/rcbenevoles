@@ -4,12 +4,12 @@
     ViewData["Title"] = "Index";
 }
 
-<h2>Index</h2>
+<h2>Gestion des bénévoles</h2>
 
 <p>
     <a asp-action="Create">Créer un nouveau bénévole</a>
 </p>
-<table class="table">
+<table class="table table-bordered table-striped">
     <thead>
         <tr>
             <th>
@@ -55,9 +55,9 @@
             </td>
             }
             <td>
-                <a asp-action="Edit" asp-route-id="@item.ID">Modifier</a> |
                 <a asp-action="Details" asp-route-id="@item.ID">Détails</a> |
-                <a asp-action="Delete" asp-route-id="@item.ID">Supprimer</a>
+                <a asp-action="Edit" asp-route-id="@item.ID"><i class="glyphicon glyphicon-edit"></i> Modifier</a> |
+                <a asp-action="Delete" asp-route-id="@item.ID"><i class="glyphicon glyphicon-trash"></i> Supprimer</a>
             </td>
         </tr>
     }
