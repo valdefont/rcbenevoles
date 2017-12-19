@@ -23,6 +23,8 @@ services:
     # SERVICE appdb : notre base de données
     appdb:
         image: postgres
+        volumes:
+            - db_data:/var/lib/postgresql/data
         restart: always
         environment:
             POSTGRES_USER: rcbenevoles
@@ -47,3 +49,9 @@ services:
 
 networks:
     backnet:		# nom du réseau (backnet) sans parametre = reseau load-balancé par défaut
+
+
+# ****** VOLUMES
+
+volumes:
+    db_data: 
