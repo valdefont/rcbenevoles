@@ -60,8 +60,8 @@ namespace dal
 
                 var centre = new Centre
                 {
-                    Nom = "Strasbourg",
-                    Adresse = "5 rue de Strasbourg 67000 Strasbourg",
+                    Nom = "Lyon",
+                    Adresse = "5 rue de Lyon 69000 Lyon",
                 };
 
                 this.Centres.Add(centre);
@@ -88,12 +88,12 @@ namespace dal
                 // ****** Bénévoles
                 var benevole1 = new Benevole
                 {
-                    Prenom = "David",
+                    Prenom = "Bernard",
                     Nom = "TOTO",
                     Centre = centre,
                     AdresseLigne1 = "1 rue de david",
-                    CodePostal = "67000",
-                    Ville = "Strasbourg",
+                    CodePostal = "69000",
+                    Ville = "Lyon",
                     Telephone = "00000000",
                 };
 
@@ -101,12 +101,12 @@ namespace dal
 
                 this.Benevoles.Add(new Benevole
                 {
-                    Prenom = "Annelise",
+                    Prenom = "Anne",
                     Nom = "TUTU",
                     Centre = centre,
-                    AdresseLigne1 = "1 rue de lisou",
-                    CodePostal = "68100",
-                    Ville = "Mulhouse",
+                    AdresseLigne1 = "1 rue d'anne",
+                    CodePostal = "13000",
+                    Ville = "Marseille",
                     Telephone = "00000000",
                 });
 
