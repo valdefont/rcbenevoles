@@ -13,11 +13,6 @@ namespace web.Models
         public string Login { get; set; }
 
         [DataType(DataType.Password)]
-        [Display(Name = "Mot de passe actuel")]
-        [Required(ErrorMessage = "Le mot de passe actuel est requis")]
-        public string OldPassword { get; set; }
-
-        [DataType(DataType.Password)]
         [Display(Name = "Nouveau mot de passe")]
         [Required(ErrorMessage = "Le nouveau mot de passe est requis")]
         public string NewPassword { get; set; }

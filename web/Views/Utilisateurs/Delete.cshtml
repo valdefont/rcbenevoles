@@ -1,14 +1,20 @@
 ﻿@model dal.models.Utilisateur
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Supprimer";
 }
 
-<h2>Delete</h2>
+<h2>Gestion des utilisateurs</h2>
 
-<h3>Are you sure you want to delete this?</h3>
+<h3>Confirmez-vous la suppression de l'utilisateur suivant ?</h3>
+
+<div class="alert alert-warning">
+    <p>
+        Cet utilisateur ne pourra plus se connecter à l'application.
+    </p>
+</div>
+
 <div>
-    <h4>Utilisateur</h4>
     <hr />
     <dl class="dl-horizontal">
         <dt>
@@ -18,16 +24,23 @@
             @Html.DisplayFor(model => model.Login)
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.Password)
+            Centre géré
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.Password)
+            @if (Model.Centre == null)
+            {
+                <span>Tous les centres (Super Administrateur)</span>
+            }
+            else
+            {
+                @Html.DisplayFor(model => model.Centre.Nom)
+            }
         </dd>
     </dl>
     
     <form asp-action="Delete">
         <input type="hidden" asp-for="ID" />
-        <input type="submit" value="Delete" class="btn btn-default" /> |
-        <a asp-action="Index">Back to List</a>
+        <input type="submit" value="Supprimer" class="btn btn-danger" />
+        <a asp-action="Index" class="btn btn-link">Retourner à la liste</a>
     </form>
 </div>

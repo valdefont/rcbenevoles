@@ -29,7 +29,7 @@ namespace web.Controllers
         // GET: Account/ChangePassword
         public ActionResult ChangePassword()
         {
-            var model = new ChangePasswordModel { Login = GetCurrentUser().Login };
+            var model = new ChangeMyPasswordModel { Login = GetCurrentUser().Login };
                 
             return View(model);
         }
@@ -44,7 +44,7 @@ namespace web.Controllers
         // POST: Account/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult ChangePassword(ChangePasswordModel model)
+        public ActionResult ChangePassword(ChangeMyPasswordModel model)
         {
             var user = GetCurrentUser();
 
@@ -58,6 +58,7 @@ namespace web.Controllers
 
             if (model.NewPassword.Trim().Length == 0)
                 return BadRequest();
+
             try
             {
                 if (model.NewPassword != model.NewPasswordConfirm)
@@ -80,8 +81,7 @@ namespace web.Controllers
             }
             catch
             {
-                ModelState.AddModelError(string.Empty, "Une erreur est survenue pendant le changement de mot de passe. Veuillez retenter ultérieurement.");
-                return View(model);
+                throw;
             }
         }
     }

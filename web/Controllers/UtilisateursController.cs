@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using dal;
 using dal.models;
 using Microsoft.AspNetCore.Authorization;
+using web.Models;
 
 namespace web.Controllers
 {
@@ -24,7 +25,7 @@ namespace web.Controllers
         // GET: Utilisateurs
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Utilisateurs.ToListAsync());
+            return View(await _context.Utilisateurs.Include(u => u.Centre).ToListAsync());
         }
 
         // GET: Utilisateurs/Details/5
@@ -35,7 +36,7 @@ namespace web.Controllers
                 return NotFound();
             }
 
-            var utilisateur = await _context.Utilisateurs
+            var utilisateur = await _context.Utilisateurs.Include(u => u.Centre)
                 .SingleOrDefaultAsync(m => m.ID == id);
             if (utilisateur == null)
             {
@@ -60,16 +61,22 @@ namespace web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Login,Password,CentreID")] Utilisateur utilisateur)
+        public async Task<IActionResult> Create(UtilisateurModel model)
         {
             if (ModelState.IsValid)
             {
-                utilisateur.SetPassword(utilisateur.Password);
-                _context.Add(utilisateur);
+                if (model.Utilisateur.Password != model.PasswordConfirm)
+                {
+                    ModelState.AddModelError("PasswordConfirm", "Les mots de passe ne correspondent pas");
+                    return View(model);
+                }
+
+                model.Utilisateur.SetPassword(model.Utilisateur.Password);
+                _context.Add(model.Utilisateur);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(utilisateur);
+            return View(model);
         }
 
         // GET: Utilisateurs/Edit/5
@@ -136,12 +143,10 @@ namespace web.Controllers
 
             var utilisateur = await _context.Utilisateurs.SingleOrDefaultAsync(m => m.ID == id);
 
-            utilisateur.Password = null;
-
             if (utilisateur == null)
                 return NotFound();
 
-            return View(utilisateur);
+            return View(new ChangePasswordModel { Login = utilisateur.Login });
         }
 
         // POST: Utilisateurs/Edit/5
@@ -149,30 +154,38 @@ namespace web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ChangePassword(int id, [Bind("ID,Login,Password")] Utilisateur utilisateur)
+        public async Task<IActionResult> ChangePassword(int id, ChangePasswordModel model)
         {
+            var utilisateur = _context.Utilisateurs.SingleOrDefault(u => u.Login == model.Login);
+
+            if (utilisateur == null)
+                return NotFound();
+
             if (id != utilisateur.ID)
                 return NotFound();
 
-            var existing = _context.Utilisateurs.SingleOrDefault(u => u.ID == id);
+            if (!ModelState.IsValid)
+                return View(model);
+
+            if (model.NewPassword.Trim().Length == 0)
+                return BadRequest();
 
             try
             {
-                existing.SetPassword(utilisateur.Password);
+                if (model.NewPassword != model.NewPasswordConfirm)
+                {
+                    ModelState.AddModelError("NewPasswordConfirm", "Les mots de passe ne correspondent pas");
+                    return View(model);
+                }
 
-                _context.Update(existing);
+                utilisateur.SetPassword(utilisateur.Password);
+
+                _context.Update(utilisateur);
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UtilisateurExists(utilisateur.ID))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
 
             return RedirectToAction(nameof(Index));
@@ -186,7 +199,7 @@ namespace web.Controllers
                 return NotFound();
             }
 
-            var utilisateur = await _context.Utilisateurs
+            var utilisateur = await _context.Utilisateurs.Include(u => u.Centre)
                 .SingleOrDefaultAsync(m => m.ID == id);
             if (utilisateur == null)
             {
