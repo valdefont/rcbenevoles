@@ -2,7 +2,7 @@
 
 ## Construction de l'image
 
-`sudo docker build -t webapp .`
+`docker build -t rcbenevoles .`
 
 ## Execution
 
@@ -12,7 +12,7 @@
 
 - Exécution de notre container web
 
-`docker run -it -p 8080:80 -e APP_DB_SERVER=10.0.2.15 -e APP_DB_PASSWORD=rcbenevoles webapp`
+`docker run -it -p 8080:80 -e APP_DB_SERVER=10.0.2.15 -e APP_DB_PASSWORD=rcbenevoles rcbenevoles`
 
 option `-it` pour démarrer en interactif
 option `-d`pour démarrer en détaché

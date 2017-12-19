@@ -6,7 +6,7 @@ services:
     
     # SERVICE webapp : notre application web
     webapp:
-        image: webapp
+        image: rcbenevoles
         environment:
             APP_DB_SERVER: appdb        			# Variable d'environnement utilisée dans notre serveur web (serveur postgre)
             APP_DB_PASSWORD: rcbenevoles2017        # Variable d'environnement utilisée dans notre serveur web (serveur postgre)
