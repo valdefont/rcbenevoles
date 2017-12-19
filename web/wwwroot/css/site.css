@@ -37,16 +37,17 @@
 /**********************************************************************/
 
 #calendar {
-    background-color: #c9d3ea;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    color: #333;
 }
 
 #calendar th {
     text-align: center;
-    font-size: large;
 }
 
 #calendar th.month_selector {
-    background-color: #a4b2d2;
+    border-bottom: 2px solid #ddd;
     text-align: center;
     font-size: x-large;
 }
@@ -84,7 +85,7 @@
 .calendarday {
     vertical-align: middle;
     text-align: center;
-    font-size: x-large;
+    font-size: large;
     padding: 4px;
 }
 

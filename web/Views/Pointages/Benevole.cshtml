@@ -15,9 +15,15 @@
 
 <h2>Pointages de @Model.Benevole.Prenom @Model.Benevole.Nom</h2>
 <p>
-    <a asp-action="PrintIndex" asp-route-id="@Model.Benevole.ID"><i class="glyphicon glyphicon-print"></i> Editer une fiche d'abandon</a>
+    <a asp-action="PrintIndex" asp-route-id="@Model.Benevole.ID"><i class="glyphicon glyphicon-print"></i> Editer une fiche</a>
 </p>
 <div class="row">
+    <div class="col-lg-12">
+        <div class="alert alert-info">
+            <p>Ce calendrier permet de voir les pointages déjà présents</p>
+            <p>Pour ajouter, modifier ou supprimer un pointage, cliquez sur la date désirée. Vous pourrez alors voir le détail de la journée et modifier les informations de pointage.</p>
+        </div>
+    </div>
     <div class="col-lg-6">
         @{await Html.RenderPartialAsync("_BenevoleCalendarContent"); }
     </div>
