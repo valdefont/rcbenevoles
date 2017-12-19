@@ -1,0 +1,49 @@
+version: '3.1'
+
+# ****** SERVICES
+
+services:
+    
+    # SERVICE webapp : notre application web
+    webapp:
+        image: webapp
+        environment:
+            APP_DB_SERVER: appdb        			# Variable d'environnement utilisée dans notre serveur web (serveur postgre)
+            APP_DB_PASSWORD: rcbenevoles2017        # Variable d'environnement utilisée dans notre serveur web (serveur postgre)
+        deploy:
+            restart_policy:
+                condition: on-failure
+        ports:
+            - "80:80"
+        depends_on:
+            - appdb
+        networks:
+            - backnet
+
+    # SERVICE appdb : notre base de données
+    appdb:
+        image: postgres
+        restart: always
+        environment:
+            POSTGRES_USER: rcbenevoles
+            POSTGRES_PASSWORD: rcbenevoles2017
+        networks:
+            - backnet
+
+    # SERVICE visualizer : c'est un service qu'on peut intégrer pour accéder à une page web qui montre les instances de chaque service. Accéder par http://vm:8080
+    visualizer:
+        image: dockersamples/visualizer:stable
+        ports:
+            - "8080:8080"
+        volumes:
+            - "/var/run/docker.sock:/var/run/docker.sock"
+        deploy:
+            placement:
+                constraints: [node.role == manager]
+        networks:
+            - backnet
+
+# ****** NETWORKS
+
+networks:
+    backnet:		# nom du réseau (backnet) sans parametre = reseau load-balancé par défaut
