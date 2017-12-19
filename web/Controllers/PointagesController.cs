@@ -8,9 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using dal;
 using dal.models;
 using web.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace web.Controllers
 {
+    [Authorize]
     public class PointagesController : RCBenevoleController
     {
         public PointagesController(RCBenevoleContext context)

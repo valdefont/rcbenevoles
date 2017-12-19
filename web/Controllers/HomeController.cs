@@ -58,24 +58,9 @@ namespace web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [Authorize]
-        [HttpGet]
-        public async Task<IActionResult> Logout(LoginPasswordModel model)
-        {
-            await HttpContext.SignOutAsync();
-            return RedirectToAction("Index", "Home");
-        }
-
-        public IActionResult About()
-        {
-            ViewData["Message"] = "Your application description page.";
-
-            return View();
-        }
-
         public IActionResult Contact()
         {
-            ViewData["Message"] = "Your contact page.";
+            ViewData["Message"] = "TODO";
 
             return View();
         }

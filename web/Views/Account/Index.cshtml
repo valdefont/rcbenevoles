@@ -1,0 +1,26 @@
+﻿@model dal.models.Utilisateur
+
+@{
+    ViewData["Title"] = "Mon compte";
+}
+
+<h2>Mon compte</h2>
+<p>
+    <a asp-action="ChangePassword">Changer mon mot de passe</a>
+</p>
+<p>
+    Vous êtes connectés sous <strong>@Model.Login</strong>.
+    <br/>
+@if(Model.Centre == null)
+{ 
+    <text>
+    Vous pouvez gérer les bénévoles de <strong>tous les centres</strong>, leurs pointages, ainsi que les fonctions d'administration avancées.
+    </text>
+}
+else
+{
+    <text>
+    Vous pouvez gérer les bénévoles du centre de <strong>@Model.Centre.Nom</strong> ainsi que leurs pointages.
+    </text>
+}
+</p>

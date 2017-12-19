@@ -9,10 +9,12 @@ using dal;
 using dal.models;
 using web.Models;
 using web.Filters;
+using Microsoft.AspNetCore.Authorization;
 
 namespace web.Controllers
 {
     [AtLeastOneCenterExists]
+    [Authorize]
     public class BenevolesController : RCBenevoleController
     {
         public BenevolesController(RCBenevoleContext context)
