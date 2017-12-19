@@ -14,7 +14,8 @@
             <span>@Html.DisplayFor(modelItem => item.BenevolePrenom)</span>
         </td>
         <td>
-            <a asp-action="Benevole" asp-route-id="@item.BenevoleID"><i class="glyphicon glyphicon-calendar"></i>Accéder aux pointages</a>
+            <a asp-action="Benevole" asp-route-id="@item.BenevoleID"><i class="glyphicon glyphicon-calendar"></i> Gérer les pointages</a> | 
+            <a asp-action="PrintIndex" asp-route-id="@item.BenevoleID"><i class="glyphicon glyphicon-print"></i> Editer une fiche d'abandon</a>
         </td>
     </tr>
 }

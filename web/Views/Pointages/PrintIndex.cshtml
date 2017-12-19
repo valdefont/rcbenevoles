@@ -1,0 +1,27 @@
+﻿@{
+    ViewData["Title"] = "Détails";
+}
+
+<h2>Edition des fiches d'abandon</h2>
+
+<div class="alert alert-info">
+    <p>Sélectionnez la fiche que vous souhaitez éditer</p>
+</div>
+
+<div>
+    <hr />
+    <ul>
+        <li>
+            <a asp-action="Print" asp-route-period="1" asp-route-year="2017" target="_blank">Janvier à Avril 2017</a>
+        </li>
+        <li>
+            <a asp-action="Print" asp-route-period="2" asp-route-year="2017" target="_blank">Mai à Août 2017</a>
+        </li>
+        <li>
+            <a asp-action="Print" asp-route-period="3" asp-route-year="2017" target="_blank">Septembre à Décembre 2017</a>
+        </li>
+        <li>
+            <a asp-action="Print" asp-route-period="1" asp-route-year="2018" target="_blank">Janvier à Avril 2018</a>
+        </li>
+    </ul>
+</div>

@@ -329,6 +329,14 @@ namespace web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+
+        [HttpGet("Pointages/Benevole/{id}/printindex")]
+        public IActionResult PrintIndex(int id)
+        {
+            //TODO
+            return View();
+        }
+
         [HttpGet("Pointages/Benevole/{id}/print")]
         public async Task<IActionResult> Print(int id, int period, int year)
         {
