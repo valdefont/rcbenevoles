@@ -5,74 +5,87 @@
 }
 
 <div class="row">
-    <div class="col-xs-12 col-md-6 col-md-offset-3">
+    <div class="col-xs-12 text-center">
+        <h1>Gestion des pointages des bénévoles</h1>
+    </div>
 
-        @if (!User.Identity.IsAuthenticated)
-        {
-        <h2>Connexion</h2>
+    <div class="col-xs-12 col-md-3">
+        <div>
+            <img src="~/images/restos.png" title="Restaurants du coeur" style="width:100%" />
+        </div>
+    </div>
 
-        <p>Veuillez vous authentifier pour accéder à l'application</p>
+    <div class="col-xs-12 col-md-6">
 
-        <form method="post">
-            <div class="form-horizontal">
-                <div asp-validation-summary="All" class="text-danger"></div>
-                <div class="form-group">
-                    <label asp-for="Login" class="col-md-2 control-label"></label>
-                    <div class="col-md-10">
-                        <input asp-for="Login" class="form-control" />
-                        <span asp-validation-for="Login" class="text-danger"></span>
+        <div class="panel panel-default">
+            @if (!User.Identity.IsAuthenticated)
+            {
+                <div class="panel-heading">
+                    <h2 class="panel-title">Connexion</h2>
+                </div>
+                <div class="panel-body">
+
+                    <p>Bienvenue sur la Gestion des pointages des bénévoles. Veuillez vous identifier pour accéder à l'application.</p>
+
+                    <form method="post">
+                        <div class="form-horizontal">
+                            <div asp-validation-summary="All" class="text-danger"></div>
+                            <div class="form-group">
+                                <label asp-for="Login" class="col-md-2 control-label"></label>
+                                <div class="col-md-10">
+                                    <input asp-for="Login" class="form-control" />
+                                    <span asp-validation-for="Login" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Password" class="col-md-2 control-label"></label>
+                                <div class="col-md-10">
+                                    <input type="password" asp-for="Password" class="form-control" />
+                                    <span asp-validation-for="Password" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="form-group" style="float:right;margin-right:4px">
+                                <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-log-in"></i> Se connecter</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            }
+            else
+            {
+                <div class="panel-heading">
+                    <h2 class="panel-title">Accueil</h2>
+                </div>
+                <div class="panel-body">
+                    <p>Bienvenue <strong>@User.Identity.Name</strong></p>
+                    @if (User.IsInRole("SuperAdmin"))
+                    {
+                        <p>
+                            <span>En tant qu'administrateur général, vous avez la possibilité de :</span>
+                            <ul>
+                                <li><a asp-action="Index" asp-controller="Pointages">Effectuer des pointages</a> des bénévoles affiliés à tous les centres</li>
+                                <li><a asp-action="Index" asp-controller="Benevoles">Gérer des bénévoles</a> sur tous les centres</li>
+                                <li><a asp-action="Index" asp-controller="Centres">Gérer les centres</a></li>
+                                <li><a asp-action="Index" asp-controller="Utilisateurs">Gérer les comptes utilisateurs</a></li>
+                                <li><a asp-action="Index" asp-controller="Parametres">Gérer les paramètres annexes</a> (taux kilométrique ...)</li>
+                            </ul>
+                        </p>
+                    }
+                    else
+                    {
+                        <p>
+                            <span>Vous avez la possibilité de :</span>
+                            <ul>
+                                <li><a asp-action="Index" asp-controller="Pointages">Effectuer des pointages</a> des bénévoles affiliés à votre centre</li>
+                                <li><a asp-action="Index" asp-controller="Benevoles">Gérer des bénévoles</a> sur votre centre</li>
+                            </ul>
+                        </p>
+                    }
+                    <div class="form-group" style="float:right;margin-right:4px">
+                        <a class="btn btn-primary" asp-action="Logout" asp-controller="Account"><i class="glyphicon glyphicon-log-out"></i> Se déconnecter</a>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label asp-for="Password" class="col-md-2 control-label"></label>
-                    <div class="col-md-10">
-                        <input type="password" asp-for="Password" class="form-control" />
-                        <span asp-validation-for="Password" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-log-in"></i> Se connecter</button>
-                </div>
-            </div>
-        </form>
-        }
-        else
-        {
-            <h2>Accueil</h2>
-
-            <p>Bienvenue @User.Identity.Name</p>
-
-        }
-    </div>
-    <div class="col-md-3">
-        <h2>How to</h2>
-        <ul>
-            <li><a href="https://go.microsoft.com/fwlink/?LinkID=398600">Add a Controller and View</a></li>
-            <li><a href="https://go.microsoft.com/fwlink/?LinkId=699315">Manage User Secrets using Secret Manager.</a></li>
-            <li><a href="https://go.microsoft.com/fwlink/?LinkId=699316">Use logging to log a message.</a></li>
-            <li><a href="https://go.microsoft.com/fwlink/?LinkId=699317">Add packages using NuGet.</a></li>
-            <li><a href="https://go.microsoft.com/fwlink/?LinkId=699318">Add client packages using Bower.</a></li>
-            <li><a href="https://go.microsoft.com/fwlink/?LinkId=699319">Target development, staging or production environment.</a></li>
-        </ul>
-    </div>
-    <div class="col-md-3">
-        <h2>Overview</h2>
-        <ul>
-            <li><a href="https://go.microsoft.com/fwlink/?LinkId=518008">Conceptual overview of what is ASP.NET Core</a></li>
-            <li><a href="https://go.microsoft.com/fwlink/?LinkId=699320">Fundamentals of ASP.NET Core such as Startup and middleware.</a></li>
-            <li><a href="https://go.microsoft.com/fwlink/?LinkId=398602">Working with Data</a></li>
-            <li><a href="https://go.microsoft.com/fwlink/?LinkId=398603">Security</a></li>
-            <li><a href="https://go.microsoft.com/fwlink/?LinkID=699321">Client side development</a></li>
-            <li><a href="https://go.microsoft.com/fwlink/?LinkID=699322">Develop on different platforms</a></li>
-            <li><a href="https://go.microsoft.com/fwlink/?LinkID=699323">Read more on the documentation site</a></li>
-        </ul>
-    </div>
-    <div class="col-md-3">
-        <h2>Run &amp; Deploy</h2>
-        <ul>
-            <li><a href="https://go.microsoft.com/fwlink/?LinkID=517851">Run your app</a></li>
-            <li><a href="https://go.microsoft.com/fwlink/?LinkID=517853">Run tools such as EF migrations and more</a></li>
-            <li><a href="https://go.microsoft.com/fwlink/?LinkID=398609">Publish to Microsoft Azure Web Apps</a></li>
-        </ul>
+            }
+        </div>
     </div>
 </div>
