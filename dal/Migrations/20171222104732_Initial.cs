@@ -35,7 +35,6 @@ namespace dal.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Frais", x => x.ID);
-                    table.UniqueConstraint("UQ_Frais_Annee", x => x.Annee);
                 });
 
             migrationBuilder.CreateTable(
@@ -57,7 +56,6 @@ namespace dal.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Benevoles", x => x.ID);
-                    table.UniqueConstraint("UQ_Benevole_NomPrenom", x => new { x.Nom, x.Prenom });
                     table.ForeignKey(
                         name: "FK_Benevoles_Centres_CentreID",
                         column: x => x.CentreID,
@@ -79,7 +77,6 @@ namespace dal.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Utilisateurs", x => x.ID);
-                    table.UniqueConstraint("UQ_Utilisateur_Login", x => x.Login);
                     table.ForeignKey(
                         name: "FK_Utilisateurs_Centres_CentreID",
                         column: x => x.CentreID,
@@ -102,7 +99,6 @@ namespace dal.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Pointages", x => x.ID);
-                    table.UniqueConstraint("UQ_Pointage_Benevole", x => new { x.BenevoleID, x.Date });
                     table.ForeignKey(
                         name: "FK_Pointages_Benevoles_BenevoleID",
                         column: x => x.BenevoleID,
@@ -119,12 +115,37 @@ namespace dal.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Benevoles_Nom_Prenom",
                 table: "Benevoles",
-                columns: new[] { "Nom", "Prenom" });
+                columns: new[] { "Nom", "Prenom" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Centres_Nom",
+                table: "Centres",
+                column: "Nom",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Frais_Annee",
+                table: "Frais",
+                column: "Annee",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Pointages_BenevoleID_Date",
+                table: "Pointages",
+                columns: new[] { "BenevoleID", "Date" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Utilisateurs_CentreID",
                 table: "Utilisateurs",
                 column: "CentreID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Utilisateurs_Login",
+                table: "Utilisateurs",
+                column: "Login",
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

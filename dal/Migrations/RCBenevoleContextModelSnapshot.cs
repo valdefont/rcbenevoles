@@ -51,12 +51,10 @@ namespace dal.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasAlternateKey("Nom", "Prenom")
-                        .HasName("UQ_Benevole_NomPrenom");
-
                     b.HasIndex("CentreID");
 
-                    b.HasIndex("Nom", "Prenom");
+                    b.HasIndex("Nom", "Prenom")
+                        .IsUnique();
 
                     b.ToTable("Benevoles");
                 });
@@ -74,6 +72,9 @@ namespace dal.Migrations
 
                     b.HasKey("ID");
 
+                    b.HasIndex("Nom")
+                        .IsUnique();
+
                     b.ToTable("Centres");
                 });
 
@@ -88,8 +89,8 @@ namespace dal.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasAlternateKey("Annee")
-                        .HasName("UQ_Frais_Annee");
+                    b.HasIndex("Annee")
+                        .IsUnique();
 
                     b.ToTable("Frais");
                 });
@@ -110,8 +111,8 @@ namespace dal.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasAlternateKey("BenevoleID", "Date")
-                        .HasName("UQ_Pointage_Benevole");
+                    b.HasIndex("BenevoleID", "Date")
+                        .IsUnique();
 
                     b.ToTable("Pointages");
                 });
@@ -131,10 +132,10 @@ namespace dal.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasAlternateKey("Login")
-                        .HasName("UQ_Utilisateur_Login");
-
                     b.HasIndex("CentreID");
+
+                    b.HasIndex("Login")
+                        .IsUnique();
 
                     b.ToTable("Utilisateurs");
                 });

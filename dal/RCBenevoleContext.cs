@@ -15,26 +15,31 @@ namespace dal
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Benevole>()
-                .HasIndex(t => new { t.Nom, t.Prenom });
+                .HasIndex(t => new { t.Nom, t.Prenom })
+                .IsUnique(true);
 
             modelBuilder.Entity<Frais>()
-                .HasAlternateKey(f => f.Annee)
-                .HasName("UQ_Frais_Annee");
+                .HasIndex(f => f.Annee)
+                .IsUnique(true);
 
             modelBuilder.Entity<Benevole>()
-                .HasAlternateKey(b => new { b.Nom, b.Prenom })
-                .HasName("UQ_Benevole_NomPrenom");
+                .HasIndex(b => new { b.Nom, b.Prenom })
+                .IsUnique(true);
+
+            modelBuilder.Entity<Centre>()
+                .HasIndex(b => b.Nom)
+                .IsUnique(true);
 
             modelBuilder.Entity<Pointage>()
-                .HasAlternateKey(b => new { b.BenevoleID, b.Date })
-                .HasName("UQ_Pointage_Benevole");
+                .HasIndex(b => new { b.BenevoleID, b.Date })
+                .IsUnique(true);
 
             modelBuilder.Entity<Pointage>(pt => pt.Property(p => p.Date)
                 .HasColumnType("date"));
 
             modelBuilder.Entity<Utilisateur>()
-                .HasAlternateKey(b => b.Login)
-                .HasName("UQ_Utilisateur_Login");
+                .HasIndex(b => b.Login)
+                .IsUnique(true);
         }
 
         public DbSet<Utilisateur> Utilisateurs { get; set; }
