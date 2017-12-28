@@ -54,13 +54,13 @@ namespace web.Controllers
             if (id == null)
                 return NotFound();
 
-            var benevole = await _context.Benevoles.Include(b => b.Centre)
+            var benevole = await _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre)
                 .SingleOrDefaultAsync(m => m.ID == id);
 
             if (benevole == null)
                 return NotFound();
 
-            if (GetCurrentUser().CentreID != null && GetCurrentUser().CentreID != benevole.CentreID)
+            if (GetCurrentUser().CentreID != null && GetCurrentUser().CentreID != benevole.CurrentAdresse.CentreID)
                 return Forbid();
 
             return View(benevole);
@@ -71,7 +71,13 @@ namespace web.Controllers
         {
             SetViewBagCentres();
 
-            return View();
+            var benevole = new BenevoleWithAdresse
+            {
+                Benevole = new Benevole(),
+                Adresse = new Adresse(),
+            };
+
+            return View(benevole);
         }
 
         // POST: Benevoles/Create
@@ -79,15 +85,19 @@ namespace web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Nom,Prenom,AdresseLigne1,AdresseLigne2,AdresseLigne3,CodePostal,Ville,Telephone,CentreID")] Benevole benevole)
+        public async Task<IActionResult> Create(BenevoleWithAdresse benevoleWithAddress)
         {
-            if (!_context.ContainsCentre(benevole.CentreID))
+            if (!_context.ContainsCentre(benevoleWithAddress.Adresse.CentreID))
                 ModelState.AddModelError("CentreID", "Le centre n'existe pas");
 
             if (!ModelState.IsValid)
-                return View(benevole);
+                return View(benevoleWithAddress);
 
-            _context.Add(benevole);
+            benevoleWithAddress.Adresse.IsCurrent = true;
+            benevoleWithAddress.Adresse.Benevole = benevoleWithAddress.Benevole;
+
+            _context.Add(benevoleWithAddress.Adresse);
+            _context.Add(benevoleWithAddress.Benevole);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
@@ -98,12 +108,15 @@ namespace web.Controllers
             if (id == null)
                 return NotFound();
 
-            var benevole = await _context.Benevoles.SingleOrDefaultAsync(m => m.ID == id);
+            var benevole = await _context.Benevoles
+                .Include(b => b.Adresses)
+                .ThenInclude(a => a.Centre)
+                .SingleOrDefaultAsync(m => m.ID == id);
 
             if (benevole == null)
                 return NotFound();
 
-            if(GetCurrentUser().CentreID != null && GetCurrentUser().CentreID != benevole.CentreID)
+            if(GetCurrentUser().CentreID != null && GetCurrentUser().CentreID != benevole.CurrentAdresse.CentreID)
                 return Forbid();
 
             SetViewBagCentres();
@@ -121,14 +134,14 @@ namespace web.Controllers
             if (id != benevole.ID)
                 return NotFound();
 
-            if (!_context.ContainsCentre(benevole.CentreID))
+            if (!_context.ContainsCentre(benevole.CurrentAdresse.CentreID))
                 ModelState.AddModelError("CentreID", "Le centre n'existe pas");
 
             var user = GetCurrentUser();
 
             if (user.Centre != null)
             {
-                if (benevole.CentreID != user.Centre.ID)
+                if (benevole.CurrentAdresse.CentreID != user.Centre.ID)
                     ModelState.AddModelError("CentreID", "Vous ne pouvez pas créer de bénévole sur un autre centre que celui qui vous est affecté");
             }
 

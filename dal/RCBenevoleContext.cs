@@ -14,35 +14,73 @@ namespace dal
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Benevole>()
-                .HasIndex(t => new { t.Nom, t.Prenom })
+            // *** SIEGE
+            modelBuilder.Entity<Siege>()
+                .HasIndex(b => b.Nom)
                 .IsUnique(true);
 
-            modelBuilder.Entity<Frais>()
-                .HasIndex(f => f.Annee)
-                .IsUnique(true);
-
-            modelBuilder.Entity<Benevole>()
-                .HasIndex(b => new { b.Nom, b.Prenom })
-                .IsUnique(true);
-
+            // *** CENTRE
             modelBuilder.Entity<Centre>()
                 .HasIndex(b => b.Nom)
                 .IsUnique(true);
 
+            modelBuilder.Entity<Centre>()
+                .HasOne(s => s.Siege)
+                .WithMany(s => s.Centres)
+                .HasForeignKey(s => s.SiegeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // *** BENEVOLE
+            modelBuilder.Entity<Benevole>()
+                .HasIndex(t => new { t.Nom, t.Prenom })
+                .IsUnique(false);
+
+            modelBuilder.Entity<Benevole>()
+                .HasMany(b => b.Adresses)
+                .WithOne(a => a.Benevole)
+                .HasForeignKey(a => a.BenevoleID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Benevole>()
+                .HasMany(b => b.Pointages)
+                .WithOne(p => p.Benevole)
+                .HasForeignKey(p => p.BenevoleID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // *** ADRESSE
+            modelBuilder.Entity<Adresse>()
+                .HasOne(a => a.Centre)
+                .WithMany()
+                .HasForeignKey(c => c.CentreID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // *** FRAIS
+            modelBuilder.Entity<Frais>()
+                .HasIndex(f => f.Annee)
+                .IsUnique(true);
+
+            // *** POINTAGE
             modelBuilder.Entity<Pointage>()
-                .HasIndex(b => new { b.BenevoleID, b.Date })
+                .HasIndex(b => new { b.BenevoleID, b.CentreID, b.Date })
                 .IsUnique(true);
 
             modelBuilder.Entity<Pointage>(pt => pt.Property(p => p.Date)
                 .HasColumnType("date"));
 
+            // *** UTILISATEUR
             modelBuilder.Entity<Utilisateur>()
                 .HasIndex(b => b.Login)
                 .IsUnique(true);
+
+            modelBuilder.Entity<Utilisateur>()
+                .HasOne(u => u.Centre)
+                .WithMany()
+                .HasForeignKey(c => c.CentreID)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
         public DbSet<Utilisateur> Utilisateurs { get; set; }
+        public DbSet<Siege> Sieges { get; set; }
         public DbSet<Centre> Centres { get; set; }
         public DbSet<Benevole> Benevoles { get; set; }
         public DbSet<Pointage> Pointages { get; set; }
@@ -54,11 +92,21 @@ namespace dal
 
             if(this.Utilisateurs.Count() == 0)
             {
+                // ****** Sièges
+                var siege75 = new Siege
+                {
+                    Nom = "AD75",
+                    Adresse = "rue du siège 75000 PARIS",
+                };
+
+                this.Sieges.Add(siege75);
+
                 // ****** Centres
                 var centre_paris = new Centre
                 {
                     Nom = "Paris",
                     Adresse = "5 rue de Paris 75000 PARIS",
+                    Siege = siege75,
                 };
 
                 this.Centres.Add(centre_paris);
@@ -67,6 +115,7 @@ namespace dal
                 {
                     Nom = "Lyon",
                     Adresse = "5 rue de Lyon 69000 Lyon",
+                    Siege = siege75,
                 };
 
                 this.Centres.Add(centre);
@@ -95,11 +144,37 @@ namespace dal
                 {
                     Prenom = "Bernard",
                     Nom = "TOTO",
-                    Centre = centre,
-                    AdresseLigne1 = "1 rue de david",
-                    CodePostal = "69000",
-                    Ville = "Lyon",
                     Telephone = "00000000",
+                    Adresses = new Adresse[]
+                    {
+                        new Adresse
+                        {
+                            Centre = centre,
+                            AdresseLigne1 = "1 rue de david",
+                            CodePostal = "69000",
+                            Ville = "Lyon",
+                            DistanceCentre = 80,
+                        },
+                        new Adresse
+                        {
+                            DateChangement = new DateTime(2017, 2, 1),
+                            Centre = centre,
+                            AdresseLigne1 = "26 rue de david",
+                            CodePostal = "69000",
+                            Ville = "Lyon",
+                            DistanceCentre = 84,
+                        },
+                        new Adresse
+                        {
+                            DateChangement = new DateTime(2017, 3, 1),
+                            Centre = centre_paris,
+                            AdresseLigne1 = "1 rue de jules",
+                            CodePostal = "75005",
+                            Ville = "Paris",
+                            DistanceCentre = 65,
+                            IsCurrent = true,
+                        }
+                    },
                 };
 
                 this.Benevoles.Add(benevole1);
@@ -108,65 +183,89 @@ namespace dal
                 {
                     Prenom = "Anne",
                     Nom = "TUTU",
-                    Centre = centre,
-                    AdresseLigne1 = "1 rue d'anne",
-                    CodePostal = "13000",
-                    Ville = "Marseille",
                     Telephone = "00000000",
+                    Adresses = new Adresse[]
+                    {
+                        new Adresse
+                        {
+                            Centre = centre,
+                            AdresseLigne1 = "1 rue d'anne",
+                            CodePostal = "13000",
+                            Ville = "Marseille",
+                            DistanceCentre = 10,
+                            IsCurrent = true,
+                        }
+                    }
                 });
 
                 this.Benevoles.Add(new Benevole
                 {
                     Prenom = "Gérard",
                     Nom = "TITI",
-                    Centre = centre_paris,
-                    AdresseLigne1 = "1 rue de gérard",
-                    CodePostal = "75015",
-                    Ville = "Paris",
                     Telephone = "00000000",
+                    Adresses = new Adresse[]
+                    {
+                        new Adresse
+                        {
+                            Centre = centre_paris,
+                            AdresseLigne1 = "1 rue de gérard",
+                            CodePostal = "75015",
+                            Ville = "Paris",
+                            DistanceCentre = 65.5m,
+                            IsCurrent = true,
+                        }
+                    }
                 });
 
                 this.Benevoles.Add(new Benevole
                 {
                     Prenom = "Daniel",
                     Nom = "ROBERT",
-                    Centre = centre_paris,
-                    AdresseLigne1 = "1 rue de daniel",
-                    CodePostal = "78000",
-                    Ville = "Cergy",
                     Telephone = "00000000",
+                    Adresses = new Adresse[]
+                    {
+                        new Adresse
+                        {
+                            Centre = centre_paris,
+                            AdresseLigne1 = "1 rue de daniel",
+                            CodePostal = "78000",
+                            Ville = "Cergy",
+                            DistanceCentre = 80,
+                            IsCurrent = true,
+                        }
+                    }
                 });
 
                 // ****** Pointages
                 this.Pointages.Add(new Pointage
                 {
                     Benevole = benevole1,
-                    Date = new DateTime(2017, 12, 03),
-                    Distance = 150,
+                    Centre = centre,
+                    Date = new DateTime(2017, 1, 15),
                     NbDemiJournees = 2,
                 });
 
                 this.Pointages.Add(new Pointage
                 {
                     Benevole = benevole1,
-                    Date = new DateTime(2017, 12, 04),
-                    Distance = 120,
+                    Centre = centre,
+                    Date = new DateTime(2017, 2, 28),
                     NbDemiJournees = 2,
                 });
 
                 this.Pointages.Add(new Pointage
                 {
                     Benevole = benevole1,
-                    Date = new DateTime(2017, 12, 05),
-                    Distance = 180,
+                    Centre = centre_paris,
+                    Date = new DateTime(2017, 03, 03),
                     NbDemiJournees = 1,
                 });
 
                 this.Pointages.Add(new Pointage
                 {
                     Benevole = benevole1,
-                    Date = new DateTime(2017, 12, 06),
-                    Distance = 150,
+                    Centre = centre_paris,
+                    Date = new DateTime(2017, 03, 05),
                     NbDemiJournees = 1,
                 });
 
@@ -194,10 +293,10 @@ namespace dal
 
         public IQueryable<Benevole> ListAllowedBenevoles(Utilisateur utilisateur)
         {
-            var query = this.Benevoles.Include(b => b.Centre).AsQueryable();
+            var query = this.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre).AsQueryable();
 
             if (utilisateur.CentreID != null)
-                query = query.Where(b => b.CentreID == utilisateur.CentreID);
+                query = query.Where(b => b.CurrentAdresse.CentreID == utilisateur.CentreID);
 
             return query.OrderBy(b => b.Nom).ThenBy(b => b.Prenom);
         }

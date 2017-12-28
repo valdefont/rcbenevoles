@@ -20,7 +20,7 @@ namespace dal.Migrations
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
                 .HasAnnotation("ProductVersion", "2.0.1-rtm-125");
 
-            modelBuilder.Entity("dal.models.Benevole", b =>
+            modelBuilder.Entity("dal.models.Adresse", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
@@ -32,10 +32,35 @@ namespace dal.Migrations
 
                     b.Property<string>("AdresseLigne3");
 
+                    b.Property<int>("BenevoleID");
+
                     b.Property<int>("CentreID");
 
                     b.Property<string>("CodePostal")
                         .IsRequired();
+
+                    b.Property<DateTime>("DateChangement");
+
+                    b.Property<decimal>("DistanceCentre");
+
+                    b.Property<bool>("IsCurrent");
+
+                    b.Property<string>("Ville")
+                        .IsRequired();
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("BenevoleID");
+
+                    b.HasIndex("CentreID");
+
+                    b.ToTable("Adresse");
+                });
+
+            modelBuilder.Entity("dal.models.Benevole", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("Nom")
                         .IsRequired();
@@ -46,15 +71,9 @@ namespace dal.Migrations
                     b.Property<string>("Telephone")
                         .IsRequired();
 
-                    b.Property<string>("Ville")
-                        .IsRequired();
-
                     b.HasKey("ID");
 
-                    b.HasIndex("CentreID");
-
-                    b.HasIndex("Nom", "Prenom")
-                        .IsUnique();
+                    b.HasIndex("Nom", "Prenom");
 
                     b.ToTable("Benevoles");
                 });
@@ -70,10 +89,14 @@ namespace dal.Migrations
                     b.Property<string>("Nom")
                         .IsRequired();
 
+                    b.Property<int>("SiegeID");
+
                     b.HasKey("ID");
 
                     b.HasIndex("Nom")
                         .IsUnique();
+
+                    b.HasIndex("SiegeID");
 
                     b.ToTable("Centres");
                 });
@@ -102,19 +125,40 @@ namespace dal.Migrations
 
                     b.Property<int>("BenevoleID");
 
+                    b.Property<int>("CentreID");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("date");
-
-                    b.Property<decimal>("Distance");
 
                     b.Property<int>("NbDemiJournees");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("BenevoleID", "Date")
+                    b.HasIndex("CentreID");
+
+                    b.HasIndex("BenevoleID", "CentreID", "Date")
                         .IsUnique();
 
                     b.ToTable("Pointages");
+                });
+
+            modelBuilder.Entity("dal.models.Siege", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Adresse")
+                        .IsRequired();
+
+                    b.Property<string>("Nom")
+                        .IsRequired();
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("Nom")
+                        .IsUnique();
+
+                    b.ToTable("Sieges");
                 });
 
             modelBuilder.Entity("dal.models.Utilisateur", b =>
@@ -140,19 +184,37 @@ namespace dal.Migrations
                     b.ToTable("Utilisateurs");
                 });
 
-            modelBuilder.Entity("dal.models.Benevole", b =>
+            modelBuilder.Entity("dal.models.Adresse", b =>
                 {
+                    b.HasOne("dal.models.Benevole", "Benevole")
+                        .WithMany("Adresses")
+                        .HasForeignKey("BenevoleID")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("dal.models.Centre", "Centre")
                         .WithMany()
                         .HasForeignKey("CentreID")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("dal.models.Centre", b =>
+                {
+                    b.HasOne("dal.models.Siege", "Siege")
+                        .WithMany("Centres")
+                        .HasForeignKey("SiegeID")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("dal.models.Pointage", b =>
                 {
                     b.HasOne("dal.models.Benevole", "Benevole")
-                        .WithMany()
+                        .WithMany("Pointages")
                         .HasForeignKey("BenevoleID")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("dal.models.Centre", "Centre")
+                        .WithMany()
+                        .HasForeignKey("CentreID")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
@@ -160,7 +222,8 @@ namespace dal.Migrations
                 {
                     b.HasOne("dal.models.Centre", "Centre")
                         .WithMany()
-                        .HasForeignKey("CentreID");
+                        .HasForeignKey("CentreID")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 #pragma warning restore 612, 618
         }

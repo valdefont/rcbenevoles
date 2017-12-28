@@ -27,7 +27,7 @@
             @if(User.IsInRole("SuperAdmin"))
             {
             <th>
-                @Html.DisplayNameFor(model => model.CentreID)
+                @(Html.DisplayNameFor(model => model.CurrentAdresse.CentreID))
             </th>
             }
             <th></th>
@@ -43,7 +43,7 @@
                 @Html.DisplayFor(modelItem => item.Prenom)
             </td>
             <td>
-                @Html.Raw(item.GetAdresseComplete(true))
+                @Html.Raw(item.CurrentAdresse.GetAdresseComplete(true))
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Telephone)
@@ -51,7 +51,7 @@
             @if (User.IsInRole("SuperAdmin"))
             {
             <td>
-                @Html.DisplayFor(modelItem => item.Centre.Nom)
+                @Html.DisplayFor(modelItem => item.CurrentAdresse.Centre.Nom)
             </td>
             }
             <td>

@@ -1,4 +1,4 @@
-﻿@model dal.models.Benevole
+﻿@model BenevoleWithAdresse
 
 @{
     ViewData["Title"] = "Créer";
@@ -13,52 +13,54 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Nom" class="control-label"></label>
-                <input asp-for="Nom" class="form-control" />
-                <span asp-validation-for="Nom" class="text-danger"></span>
+                <label asp-for="Benevole.Nom" class="control-label"></label>
+                <input asp-for="Benevole.Nom" class="form-control" />
+                <span asp-validation-for="Benevole.Nom" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Prenom" class="control-label"></label>
-                <input asp-for="Prenom" class="form-control" />
-                <span asp-validation-for="Prenom" class="text-danger"></span>
+                <label asp-for="Benevole.Prenom" class="control-label"></label>
+                <input asp-for="Benevole.Prenom" class="form-control" />
+                <span asp-validation-for="Benevole.Prenom" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="AdresseLigne1" class="control-label"></label>
-                <input asp-for="AdresseLigne1" class="form-control" />
-                <span asp-validation-for="AdresseLigne1" class="text-danger"></span>
+                <label asp-for="Benevole.Telephone" class="control-label"></label>
+                <input asp-for="Benevole.Telephone" class="form-control" />
+                <span asp-validation-for="Benevole.Telephone" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="AdresseLigne2" class="control-label"></label>
-                <input asp-for="AdresseLigne2" class="form-control" />
-                <span asp-validation-for="AdresseLigne2" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="AdresseLigne3" class="control-label"></label>
-                <input asp-for="AdresseLigne3" class="form-control" />
-                <span asp-validation-for="AdresseLigne3" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CodePostal" class="control-label"></label>
-                <input asp-for="CodePostal" class="form-control" />
-                <span asp-validation-for="CodePostal" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Ville" class="control-label"></label>
-                <input asp-for="Ville" class="form-control" />
-                <span asp-validation-for="Ville" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Telephone" class="control-label"></label>
-                <input asp-for="Telephone" class="form-control" />
-                <span asp-validation-for="Telephone" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CentreID" class="control-label"></label>
-                <select asp-for="CentreID" asp-items="@(new SelectList(ViewBag.Centres, "ID","Nom"))" class="form-control">
-                    <option value="">- Veuillez sélectionner un centre -</option>
-                </select>
-                <span asp-validation-for="CentreID" class="text-danger"></span>
-            </div>
+            <fieldset>
+                <div class="form-group">
+                    <label asp-for="Adresse.AdresseLigne1" class="control-label"></label>
+                    <input asp-for="Adresse.AdresseLigne1" class="form-control" />
+                    <span asp-validation-for="Adresse.AdresseLigne1" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Adresse.AdresseLigne2" class="control-label"></label>
+                    <input asp-for="Adresse.AdresseLigne2" class="form-control" />
+                    <span asp-validation-for="Adresse.AdresseLigne2" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Adresse.AdresseLigne3" class="control-label"></label>
+                    <input asp-for="Adresse.AdresseLigne3" class="form-control" />
+                    <span asp-validation-for="Adresse.AdresseLigne3" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Adresse.CodePostal" class="control-label"></label>
+                    <input asp-for="Adresse.CodePostal" class="form-control" />
+                    <span asp-validation-for="Adresse.CodePostal" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Adresse.Ville" class="control-label"></label>
+                    <input asp-for="Adresse.Ville" class="form-control" />
+                    <span asp-validation-for="Adresse.Ville" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Adresse.CentreID" class="control-label"></label>
+                    <select asp-for="Adresse.CentreID" asp-items="@(new SelectList(ViewBag.Centres, "ID","Nom"))" class="form-control">
+                        <option value="">- Veuillez sélectionner un centre -</option>
+                    </select>
+                    <span asp-validation-for="Adresse.CentreID" class="text-danger"></span>
+                </div>
+            </fieldset>
             <div class="form-group">
                 <input type="submit" value="Créer" class="btn btn-success" />
                 <a asp-action="Index" class="btn btn-link">Retourner à la liste</a>

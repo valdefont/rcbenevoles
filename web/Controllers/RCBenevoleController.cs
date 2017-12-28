@@ -37,7 +37,7 @@ namespace web.Controllers
         {
             if (benevole == null) throw new ArgumentNullException(nameof(benevole));
 
-            return IsCentreIdAllowed(benevole.CentreID);
+            return IsCentreIdAllowed(benevole.CurrentAdresse.CentreID);
         }
     }
 }

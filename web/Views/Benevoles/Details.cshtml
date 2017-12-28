@@ -27,7 +27,7 @@
             Adresse complète
         </dt>
         <dd>
-            @Html.Raw(Model.GetAdresseComplete(true))
+            @Html.Raw(Model.CurrentAdresse.GetAdresseComplete(true))
         </dd>
         <dt>
             @Html.DisplayNameFor(model => model.Telephone)

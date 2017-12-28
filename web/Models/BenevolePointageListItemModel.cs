@@ -12,5 +12,7 @@ namespace web.Models
         public string BenevoleNom { get; set; }
 
         public string BenevolePrenom { get; set; }
+
+        public bool ShowAddressWarning { get; set; }
     }
 }

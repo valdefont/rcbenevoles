@@ -45,8 +45,8 @@ namespace web.Controllers
             if (!User.IsInRole("SuperAdmin"))
                 filter.CentreID = GetCurrentUser().CentreID;
 
-            var query = _context.Benevoles
-                .Where(b => b.CentreID == filter.CentreID)
+            var query = _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre)
+                .Where(b => b.Adresses.Any(a => a.CentreID == filter.CentreID))
                 .Where(b => b.Nom.ToLower().StartsWith(filter.Term.Trim().ToLower()));
 
             var model = query.Select(b => new BenevolePointageListItemModel
@@ -54,6 +54,7 @@ namespace web.Controllers
                 BenevoleID = b.ID,
                 BenevoleNom = b.Nom,
                 BenevolePrenom = b.Prenom,
+                ShowAddressWarning = b.Adresses.Any(a => a.CentreID == filter.CentreID && a.IsCurrent)
             }).AsEnumerable();
 
             return View(model);
@@ -71,7 +72,7 @@ namespace web.Controllers
             if (month == null)
                 month = now.Month;
 
-            var benevole = await _context.Benevoles.Include(b => b.Centre)
+            var benevole = await _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre)
                 .SingleOrDefaultAsync(b => b.ID == id);
 
             if(benevole == null)
@@ -139,7 +140,7 @@ namespace web.Controllers
         [HttpGet("Pointages/Benevole/{id}/editcreate")]
         public async Task<IActionResult> BenevoleEditOrCreate(int id, DateTime date)
         {
-            var benevole = await _context.Benevoles.Include(b => b.Centre)
+            var benevole = await _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre)
                 .SingleOrDefaultAsync(b => b.ID == id);
 
             if (benevole == null)
@@ -158,7 +159,6 @@ namespace web.Controllers
                     BenevoleID = id,
                     Date = date,
                     NbDemiJournees = 1,
-                    Distance = 0,
                 };
             }
 
@@ -338,15 +338,23 @@ namespace web.Controllers
         }
 
         [HttpGet("Pointages/Benevole/{id}/print")]
-        public async Task<IActionResult> Print(int id, int period, int year)
+        public async Task<IActionResult> Print(int id, int centreId, int period, int year)
         {
-            var benevole = await _context.Benevoles.Include(b => b.Centre)
+            var benevole = await _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre)
                 .SingleOrDefaultAsync(b => b.ID == id);
 
             if (benevole == null)
                 return NotFound("Bénévole non trouvé");
 
             if (!IsBenevoleAllowed(benevole))
+                return Forbid();
+
+            var centre = await _context.Centres.SingleOrDefaultAsync(c => c.ID == centreId);
+
+            if (centre == null)
+                return NotFound("Centre non trouvé");
+
+            if (!IsCentreAllowed(centre))
                 return Forbid();
 
             DateTime periodStart;
@@ -363,12 +371,6 @@ namespace web.Controllers
                 case 2:
                     {
                         periodStart = new DateTime(year, 5, 1);
-                        periodEnd = new DateTime(year, 9, 1);
-                    }
-                    break;
-                case 3:
-                    {
-                        periodStart = new DateTime(year, 9, 1);
                         periodEnd = new DateTime(year + 1, 1, 1);
                     }
                     break;
@@ -381,10 +383,36 @@ namespace web.Controllers
             if(frais == null)
                 return NotFound("Frais non trouvé");
 
-            var totalDistance = _context.Pointages
-                .Where(p => p.BenevoleID == id)
-                .Where(p => p.Date >= periodStart && p.Date < periodEnd)
-                .Sum(p => p.Distance);
+            var grandTotal = 0m;
+
+            /* Exemple 
+             * 
+             * ADDR1 -> C1
+             * ADDR2 (12/2/2017) -> C1
+             * ADDR3 (20/5/2017) -> C2
+             * 
+             * */
+            var end = periodEnd;
+
+            foreach (var adresse in benevole.Adresses
+                .OrderByDescending(a => a.DateChangement)
+                .Where(a => a.DateChangement == null || a.DateChangement < periodEnd)
+                .Where(a => a.CentreID == centreId))
+            {
+                var start = periodStart;
+
+                if (adresse.DateChangement > periodStart)
+                    start = adresse.DateChangement;
+
+                var totalDemiJournees = _context.Pointages
+                    .Where(p => p.BenevoleID == adresse.BenevoleID && p.CentreID == adresse.CentreID)
+                    .Where(p => p.Date >= periodStart && p.Date < periodEnd)
+                    .Sum(p => p.NbDemiJournees);
+
+                grandTotal += (totalDemiJournees * adresse.DistanceCentre);
+
+                end = adresse.DateChangement;
+            }
 
             PrintModel model = new PrintModel
             {
@@ -393,7 +421,7 @@ namespace web.Controllers
                 Benevole = benevole,
                 FraisKm = frais.TauxKilometrique,
                 MonthCount = 4, // valeur fixe
-                TotalDistance = totalDistance,
+                TotalDistance = grandTotal,
             };
 
             return View(model);

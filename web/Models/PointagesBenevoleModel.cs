@@ -86,7 +86,14 @@ namespace web.Models
         public string GetTitle()
         {
             if (this.Pointage != null)
-                return $"{this.Pointage.Distance} km";
+            {
+                var dist = this.Pointage.Benevole.CurrentAdresse.DistanceCentre;
+
+                if (this.Pointage.NbDemiJournees == 2)
+                    dist *= 2;
+
+                return $"{dist} km";
+            }
             else
                 return string.Empty;
         }
