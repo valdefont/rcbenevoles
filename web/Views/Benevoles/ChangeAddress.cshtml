@@ -1,0 +1,111 @@
+﻿@model BenevoleWithAdresse
+
+@{
+    ViewData["Title"] = "Créer";
+}
+
+<h2>Gestion des bénévoles</h2>
+
+<h3>Enregistrer une nouvelle adresse pour @Model.Benevole.Nom @Model.Benevole.Prenom</h3>
+<hr />
+<div class="row">
+    <form asp-action="ChangeAddress" asp-antiforgery="true" onsubmit="submit();">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">Adresse &amp; Centre</div>
+                <div class="panel-body">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label asp-for="Adresse.DateChangement" class="control-label"></label>
+                            <input asp-for="Adresse.DateChangement" class="form-control" />
+                            <span asp-validation-for="Adresse.DateChangement" class="text-danger"></span>
+                        </div>
+                        <hr />
+                        <fieldset>
+                            <div class="form-group">
+                                <label asp-for="Adresse.AdresseLigne1" class="control-label"></label>
+                                <input asp-for="Adresse.AdresseLigne1" class="form-control" />
+                                <span asp-validation-for="Adresse.AdresseLigne1" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Adresse.AdresseLigne2" class="control-label"></label>
+                                <input asp-for="Adresse.AdresseLigne2" class="form-control" />
+                                <span asp-validation-for="Adresse.AdresseLigne2" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Adresse.AdresseLigne3" class="control-label"></label>
+                                <input asp-for="Adresse.AdresseLigne3" class="form-control" />
+                                <span asp-validation-for="Adresse.AdresseLigne3" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Adresse.CodePostal" class="control-label"></label>
+                                <input asp-for="Adresse.CodePostal" class="form-control" />
+                                <span asp-validation-for="Adresse.CodePostal" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Adresse.Ville" class="control-label"></label>
+                                <input asp-for="Adresse.Ville" class="form-control" />
+                                <span asp-validation-for="Adresse.Ville" class="text-danger"></span>
+                            </div>
+                            <hr />
+                        </fieldset>
+                        <fieldset>
+                            <div class="form-group">
+                                <label asp-for="Adresse.CentreID" class="control-label"></label>
+                                <select asp-for="Adresse.CentreID" asp-items="@(new SelectList(ViewBag.Centres, "ID","Nom"))" class="form-control">
+                                    <option value="">- Veuillez sélectionner un centre -</option>
+                                </select>
+                                <span asp-validation-for="Adresse.CentreID" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Adresse.DistanceCentre" class="control-label"></label>
+                                <input id="DistanceCentre" asp-for="Adresse.DistanceCentre" class="form-control" onblur="validateDistance();" />
+                                <span id="validationDistance" class="text-danger" style="display:none"></span>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group" style="float:right">
+                <button type="submit" class="btn btn-success" onclick="submit(); return false;">Enregister la nouvelle adresse</button>
+                <a asp-action="Details" asp-route-id="@Model.Benevole.ID" class="btn btn-link">Retourner à la fiche du bénévole</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script type="text/javascript">
+
+        function validateDistance() {
+
+            var valDistance = $("#DistanceCentre").val();
+            var distance = parseFloat(valDistance.replace(",", ".").replace(".", "!"));
+
+            if (isNaN(distance)) {
+                $("#validationDistance").html("Veuillez renseigner un nombre valide");
+                $("#validationDistance").show();
+                return false;
+            } else if (distance < 0) {
+                $("#validationDistance").html("La distance doit être supérieure ou égale à zéro");
+                $("#validationDistance").show();
+                return false;
+            } else {
+                $("#validationDistance").hide();
+                return true;
+            }
+        }
+
+        function submit() {
+
+            if (!validateDistance())
+                return;
+
+            $("form").submit();
+        }
+
+    </script>
+}

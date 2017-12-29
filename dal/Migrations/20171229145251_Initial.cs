@@ -157,14 +157,15 @@ namespace dal.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Adresse_BenevoleID",
-                table: "Adresse",
-                column: "BenevoleID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Adresse_CentreID",
                 table: "Adresse",
                 column: "CentreID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Adresse_BenevoleID_DateChangement",
+                table: "Adresse",
+                columns: new[] { "BenevoleID", "DateChangement" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Benevoles_Nom_Prenom",

@@ -50,9 +50,10 @@ namespace dal.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("BenevoleID");
-
                     b.HasIndex("CentreID");
+
+                    b.HasIndex("BenevoleID", "DateChangement")
+                        .IsUnique();
 
                     b.ToTable("Adresse");
                 });

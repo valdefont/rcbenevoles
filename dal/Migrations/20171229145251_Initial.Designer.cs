@@ -11,7 +11,7 @@ using System;
 namespace dal.Migrations
 {
     [DbContext(typeof(RCBenevoleContext))]
-    [Migration("20171228153327_Initial")]
+    [Migration("20171229145251_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -51,9 +51,10 @@ namespace dal.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("BenevoleID");
-
                     b.HasIndex("CentreID");
+
+                    b.HasIndex("BenevoleID", "DateChangement")
+                        .IsUnique();
 
                     b.ToTable("Adresse");
                 });

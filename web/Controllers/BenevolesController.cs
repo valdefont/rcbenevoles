@@ -195,6 +195,73 @@ namespace web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // GET: Benevoles/ChangeAddress/5
+        public async Task<IActionResult> ChangeAddress(int id)
+        {
+            if (id == null)
+                return NotFound();
+
+            var benevole = await _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre)
+                .SingleOrDefaultAsync(m => m.ID == id);
+
+            if (benevole == null)
+                return NotFound();
+
+            if (GetCurrentUser().CentreID != null && GetCurrentUser().CentreID != benevole.CurrentAdresse.CentreID)
+                return Forbid();
+
+            SetViewBagCentres();
+
+            var benevoleWithAddress = new BenevoleWithAdresse
+            {
+                Benevole = benevole,
+                Adresse = new Adresse
+                {
+                    CentreID = benevole.CurrentAdresse.CentreID,
+                    Centre = benevole.CurrentAdresse.Centre,
+                    DateChangement = DateTime.Today,
+                }
+            };
+
+            return View(benevoleWithAddress);
+        }
+
+        // POST: Benevoles/ChangeAddress/5
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeAddress(int id, BenevoleWithAdresse benevoleWithAddress)
+        {
+            if (!_context.ContainsCentre(benevoleWithAddress.Adresse.CentreID))
+                ModelState.AddModelError("CentreID", "Le centre n'existe pas");
+
+            foreach (var ms in new List<string>(ModelState.Keys))
+            {
+                if(ms.StartsWith("Benevole."))
+                    ModelState.Remove(ms);
+            }
+
+            SetViewBagCentres();
+
+            if (!ModelState.IsValid)
+                return View(benevoleWithAddress);
+
+            var benevole = await _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre).SingleOrDefaultAsync(b => b.ID == id);
+
+            benevole.CurrentAdresse.IsCurrent = false;
+
+            benevoleWithAddress.Adresse.BenevoleID = benevole.ID;
+            benevole.Adresses.Add(benevoleWithAddress.Adresse);
+
+            benevole.Adresses.OrderByDescending(a => a.DateChangement).First().IsCurrent = true;
+
+            _context.Add(benevoleWithAddress.Adresse);
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Details), new { id = id });
+        }
+
         private bool BenevoleExists(int id)
         {
             return _context.Benevoles.Any(e => e.ID == id);

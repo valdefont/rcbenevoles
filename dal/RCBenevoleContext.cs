@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace dal
@@ -53,6 +54,10 @@ namespace dal
                 .WithMany()
                 .HasForeignKey(c => c.CentreID)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Adresse>()
+                .HasIndex(a => new { a.BenevoleID, a.DateChangement })
+                .IsUnique(true);
 
             // *** FRAIS
             modelBuilder.Entity<Frais>()
@@ -145,7 +150,7 @@ namespace dal
                     Prenom = "Bernard",
                     Nom = "TOTO",
                     Telephone = "00000000",
-                    Adresses = new Adresse[]
+                    Adresses = new List<Adresse>
                     {
                         new Adresse
                         {
@@ -184,7 +189,7 @@ namespace dal
                     Prenom = "Anne",
                     Nom = "TUTU",
                     Telephone = "00000000",
-                    Adresses = new Adresse[]
+                    Adresses = new List<Adresse>
                     {
                         new Adresse
                         {
@@ -203,7 +208,7 @@ namespace dal
                     Prenom = "Gérard",
                     Nom = "TITI",
                     Telephone = "00000000",
-                    Adresses = new Adresse[]
+                    Adresses = new List<Adresse>
                     {
                         new Adresse
                         {
@@ -222,7 +227,7 @@ namespace dal
                     Prenom = "Daniel",
                     Nom = "ROBERT",
                     Telephone = "00000000",
-                    Adresses = new Adresse[]
+                    Adresses = new List<Adresse>
                     {
                         new Adresse
                         {

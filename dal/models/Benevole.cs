@@ -24,9 +24,9 @@ namespace dal.models
         [Display(Name = "N° de téléphone")]
         public string Telephone { get; set; }
 
-        public IEnumerable<Adresse> Adresses { get; set; }
+        public List<Adresse> Adresses { get; set; }
 
-        public IEnumerable<Pointage> Pointages { get; set; }
+        public List<Pointage> Pointages { get; set; }
 
         [NotMapped]
         public Adresse CurrentAdresse => Adresses?.SingleOrDefault(a => a.IsCurrent);
