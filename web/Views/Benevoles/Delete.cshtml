@@ -30,36 +30,6 @@
             @Html.DisplayFor(model => model.Prenom)
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.AdresseLigne1)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.AdresseLigne1)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.AdresseLigne2)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.AdresseLigne2)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.AdresseLigne3)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.AdresseLigne3)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.CodePostal)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.CodePostal)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.Ville)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Ville)
-        </dd>
-        <dt>
             @Html.DisplayNameFor(model => model.Telephone)
         </dt>
         <dd>
@@ -70,6 +40,6 @@
     <form asp-action="Delete">
         <input type="hidden" asp-for="ID" />
         <input type="submit" value="Supprimer" class="btn btn-danger" />
-        <a asp-action="Index" class="btn btn-link">Retourner à la liste</a>
+        <a asp-action="Details" asp-route-id="@Model.ID" class="btn btn-link">Retourner à la fiche du bénévole</a>
     </form>
 </div>

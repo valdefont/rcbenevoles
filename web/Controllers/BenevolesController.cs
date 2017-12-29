@@ -90,6 +90,8 @@ namespace web.Controllers
             if (!_context.ContainsCentre(benevoleWithAddress.Adresse.CentreID))
                 ModelState.AddModelError("CentreID", "Le centre n'existe pas");
 
+            SetViewBagCentres();
+
             if (!ModelState.IsValid)
                 return View(benevoleWithAddress);
 

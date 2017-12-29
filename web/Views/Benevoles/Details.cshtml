@@ -10,34 +10,87 @@
 
 <div>
     <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Nom)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Nom)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.Prenom)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Prenom)
-        </dd>
-        <dt>
-            Adresse complète
-        </dt>
-        <dd>
-            @Html.Raw(Model.CurrentAdresse.GetAdresseComplete(true))
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.Telephone)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Telephone)
-        </dd>
-    </dl>
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">Identification</div>
+            <div class="panel-body">
+                <div>
+                    <dl class="dl-horizontal">
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Nom)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.Nom)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Prenom)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.Prenom)
+                        </dd>
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Telephone)
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.Telephone)
+                        </dd>
+                    </dl>
+                </div>
+                <div>
+                    <a asp-action="Edit" asp-route-id="@Model.ID" class="btn btn-primary"><i class="glyphicon glyphicon-edit"></i> Modifier</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">Adresse &amp; Centre</div>
+            <div class="panel-body">
+                <div class="alert alert-warning">
+                    <p>
+                        Si le bénévole change d'adresse, cliquez sur le bouton <strong>Enregistrer un changement d'adresse</strong>.
+                        <br/>
+                        Si l'adresse ou le centre saisi est erroné, veuillez <a asp-action="Edit" asp-controller="Adresse" asp-route-id="@Model.CurrentAdresse.ID">cliquer ici pour les corriger</a>
+                    </p>
+                </div>
+                <div>
+                    @if (Model.CurrentAdresse.DateChangement != DateTime.MinValue)
+                    {
+                        <em>Depuis le @Model.CurrentAdresse.DateChangement.ToString("d")</em>
+                        <br />
+                    }
+                    <dl class="dl-horizontal">
+                        <dt>
+                            Adresse complète
+                        </dt>
+                        <dd>
+                            @Html.Raw(Model.CurrentAdresse.GetAdresseComplete(true))
+                        </dd>
+                        <dt>
+                            Centre
+                        </dt>
+                        <dd>
+                            @Model.CurrentAdresse.Centre.Nom
+                        </dd>
+                        <dt>
+                            Distance A/R du centre
+                        </dt>
+                        <dd>
+                            @Model.CurrentAdresse.DistanceCentre km
+                        </dd>
+                    </dl>
+                </div>
+                <div>
+                    <a asp-action="ChangeAddress" asp-route-id="@Model.ID" class="btn btn-primary"><i class="glyphicon glyphicon-plane"></i> Enregistrer un changement d'adresse</a>
+                    @if (Model.CurrentAdresse.DateChangement != DateTime.MinValue)
+                    {
+                        <a asp-action="ListPreviousAddresses" asp-route-id="@Model.ID" class="btn btn-link"><i class="glyphicon glyphicon-zoom-in"></i> Voir les anciennes adresses</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.ID"><i class="glyphicon glyphicon-edit"></i> Modifier</a>
     <a asp-action="Index" class="btn btn-link">Retourner à la liste</a>
 </div>

@@ -9,66 +9,119 @@
 <h3>Créer un bénévole</h3>
 <hr />
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Benevole.Nom" class="control-label"></label>
-                <input asp-for="Benevole.Nom" class="form-control" />
-                <span asp-validation-for="Benevole.Nom" class="text-danger"></span>
+    <form asp-action="Create" asp-antiforgery="true" onsubmit="submit();">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">Identification</div>
+                <div class="panel-body">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label asp-for="Benevole.Nom" class="control-label"></label>
+                            <input asp-for="Benevole.Nom" class="form-control" />
+                            <span asp-validation-for="Benevole.Nom" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Benevole.Prenom" class="control-label"></label>
+                            <input asp-for="Benevole.Prenom" class="form-control" />
+                            <span asp-validation-for="Benevole.Prenom" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Benevole.Telephone" class="control-label"></label>
+                            <input asp-for="Benevole.Telephone" class="form-control" />
+                            <span asp-validation-for="Benevole.Telephone" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Benevole.Prenom" class="control-label"></label>
-                <input asp-for="Benevole.Prenom" class="form-control" />
-                <span asp-validation-for="Benevole.Prenom" class="text-danger"></span>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">Adresse &amp; Centre</div>
+                <div class="panel-body">
+                    <div class="col-md-8">
+                        <fieldset>
+                            <div class="form-group">
+                                <label asp-for="Adresse.AdresseLigne1" class="control-label"></label>
+                                <input asp-for="Adresse.AdresseLigne1" class="form-control" />
+                                <span asp-validation-for="Adresse.AdresseLigne1" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Adresse.AdresseLigne2" class="control-label"></label>
+                                <input asp-for="Adresse.AdresseLigne2" class="form-control" />
+                                <span asp-validation-for="Adresse.AdresseLigne2" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Adresse.AdresseLigne3" class="control-label"></label>
+                                <input asp-for="Adresse.AdresseLigne3" class="form-control" />
+                                <span asp-validation-for="Adresse.AdresseLigne3" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Adresse.CodePostal" class="control-label"></label>
+                                <input asp-for="Adresse.CodePostal" class="form-control" />
+                                <span asp-validation-for="Adresse.CodePostal" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Adresse.Ville" class="control-label"></label>
+                                <input asp-for="Adresse.Ville" class="form-control" />
+                                <span asp-validation-for="Adresse.Ville" class="text-danger"></span>
+                            </div>
+                            <hr/>
+                            <div class="form-group">
+                                <label asp-for="Adresse.CentreID" class="control-label"></label>
+                                <select asp-for="Adresse.CentreID" asp-items="@(new SelectList(ViewBag.Centres, "ID","Nom"))" class="form-control">
+                                    <option value="">- Veuillez sélectionner un centre -</option>
+                                </select>
+                                <span asp-validation-for="Adresse.CentreID" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Adresse.DistanceCentre" class="control-label"></label>
+                                <input id="DistanceCentre" asp-for="Adresse.DistanceCentre" class="form-control" onblur="validateDistance();" />
+                                <span id="validationDistance" class="text-danger" style="display:none"></span>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Benevole.Telephone" class="control-label"></label>
-                <input asp-for="Benevole.Telephone" class="form-control" />
-                <span asp-validation-for="Benevole.Telephone" class="text-danger"></span>
-            </div>
-            <fieldset>
-                <div class="form-group">
-                    <label asp-for="Adresse.AdresseLigne1" class="control-label"></label>
-                    <input asp-for="Adresse.AdresseLigne1" class="form-control" />
-                    <span asp-validation-for="Adresse.AdresseLigne1" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Adresse.AdresseLigne2" class="control-label"></label>
-                    <input asp-for="Adresse.AdresseLigne2" class="form-control" />
-                    <span asp-validation-for="Adresse.AdresseLigne2" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Adresse.AdresseLigne3" class="control-label"></label>
-                    <input asp-for="Adresse.AdresseLigne3" class="form-control" />
-                    <span asp-validation-for="Adresse.AdresseLigne3" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Adresse.CodePostal" class="control-label"></label>
-                    <input asp-for="Adresse.CodePostal" class="form-control" />
-                    <span asp-validation-for="Adresse.CodePostal" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Adresse.Ville" class="control-label"></label>
-                    <input asp-for="Adresse.Ville" class="form-control" />
-                    <span asp-validation-for="Adresse.Ville" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Adresse.CentreID" class="control-label"></label>
-                    <select asp-for="Adresse.CentreID" asp-items="@(new SelectList(ViewBag.Centres, "ID","Nom"))" class="form-control">
-                        <option value="">- Veuillez sélectionner un centre -</option>
-                    </select>
-                    <span asp-validation-for="Adresse.CentreID" class="text-danger"></span>
-                </div>
-            </fieldset>
-            <div class="form-group">
-                <input type="submit" value="Créer" class="btn btn-success" />
-                <a asp-action="Index" class="btn btn-link">Retourner à la liste</a>
-            </div>
-        </form>
-    </div>
+        </div>
+        <div class="form-group" style="float:right">
+            <button type="submit" class="btn btn-success" onclick="submit(); return false;">Créer</button>
+            <a asp-action="Index" class="btn btn-link">Retourner à la liste</a>
+        </div>
+    </form>
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+<script type="text/javascript">
+
+    function validateDistance() {
+
+        var valDistance = $("#DistanceCentre").val();
+        var distance = parseFloat(valDistance.replace(",", ".").replace(".", "!"));
+
+        if (isNaN(distance)) {
+            $("#validationDistance").html("Veuillez renseigner un nombre valide");
+            $("#validationDistance").show();
+            return false;
+        } else if (distance < 0) {
+            $("#validationDistance").html("La distance doit être supérieure ou égale à zéro");
+            $("#validationDistance").show();
+            return false;
+        } else {
+            $("#validationDistance").hide();
+            return true;
+        }
+    }
+
+    function submit() {
+
+        if (!validateDistance())
+            return;
+
+        $("form").submit();
+    }
+
+</script>
 }
