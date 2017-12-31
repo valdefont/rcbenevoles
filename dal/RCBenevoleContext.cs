@@ -301,7 +301,7 @@ namespace dal
             var query = this.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre).AsQueryable();
 
             if (utilisateur.CentreID != null)
-                query = query.Where(b => b.CurrentAdresse.CentreID == utilisateur.CentreID);
+                query = query.Where(b => b.Adresses.SingleOrDefault(a => a.IsCurrent).CentreID == utilisateur.CentreID);
 
             return query.OrderBy(b => b.Nom).ThenBy(b => b.Prenom);
         }
