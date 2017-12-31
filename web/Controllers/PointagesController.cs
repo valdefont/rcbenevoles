@@ -78,11 +78,15 @@ namespace web.Controllers
             if(benevole == null)
                 return NotFound();
 
-            if (!IsBenevoleAllowed(benevole))
+            var centreGere = GetCurrentUser().Centre;
+
+            if (centreGere != null && !benevole.Adresses.Any(a => a.CentreID == centreGere.ID))
                 return Forbid();
+
 
             var model = new PointagesBenevoleModel
             {
+                Centre = centreGere,
                 Benevole = benevole,
                 MonthDate = new DateTime(year.Value, month.Value, 1)
             };
@@ -105,12 +109,34 @@ namespace web.Controllers
 
             var currentDate = dateFrom;
 
+            var adresses = benevole.Adresses
+                .Where(a => a.DateChangement < dateTo)
+                .OrderBy(a => a.DateChangement)
+                .ToList();
+
+            int addressIndex = 0;
+
+            DateTime? nextChangeAddressDate = null;
+
+            if(addressIndex + 1 < adresses.Count)
+                nextChangeAddressDate = adresses[addressIndex + 1].DateChangement;
+
             for (int r = 0; r < PointagesBenevoleModel.CALENDAR_ROW_COUNT; r++)
             {
                 var row = new CalendarRow();
 
                 for (int i = 0; i < PointagesBenevoleModel.CALENDAR_DAY_COUNT; i++)
                 {
+                    while (nextChangeAddressDate != null && currentDate.Date >= nextChangeAddressDate)
+                    {
+                        addressIndex++;
+
+                        if (addressIndex + 1 < adresses.Count)
+                            nextChangeAddressDate = adresses[addressIndex + 1].DateChangement;
+                        else
+                            nextChangeAddressDate = null;
+                    }
+
                     var item = new CalendarItem
                     {
                         Date = currentDate,
@@ -120,7 +146,9 @@ namespace web.Controllers
                         ColumnIndex = i,
                     };
 
-                    item.Date = currentDate;
+                    if(centreGere != null && adresses[addressIndex].CentreID != centreGere.ID)
+                        item.DisabledByCenter = true;
+
                     row.Items.Add(item);
 
                     currentDate = currentDate.AddDays(1);
@@ -146,17 +174,20 @@ namespace web.Controllers
             if (benevole == null)
                 return NotFound();
 
-            if (!IsBenevoleAllowed(benevole))
-                return Forbid();
+            var centreId = benevole.GetAdresseFromDate(date).CentreID;
+            var userCentreId = GetCurrentUser().CentreID;
 
             var pointage = await _context.Pointages
                 .SingleOrDefaultAsync(p => p.BenevoleID == id && p.Date == date);
+
+            ViewBag.DisabledForCenter = (userCentreId != null && centreId != userCentreId);
 
             if (pointage == null)
             {
                 pointage = new dal.models.Pointage
                 {
                     BenevoleID = id,
+                    CentreID = centreId,
                     Date = date,
                     NbDemiJournees = 1,
                 };
@@ -179,6 +210,15 @@ namespace web.Controllers
 
             if (existingId != null)
                 pointage.ID = existingId.Value;
+
+            var centreId = pointage.Benevole.GetAdresseFromDate(pointage.Date).CentreID;
+
+            if (pointage.CentreID != centreId)
+                return Forbid();
+
+            var userCentreId = GetCurrentUser().CentreID;
+            if (userCentreId != null && centreId != userCentreId)
+                return Forbid();
 
             if (ModelState.IsValid)
             {

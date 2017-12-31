@@ -198,9 +198,6 @@ namespace web.Controllers
         // GET: Benevoles/ChangeAddress/5
         public async Task<IActionResult> ChangeAddress(int id)
         {
-            if (id == null)
-                return NotFound();
-
             var benevole = await _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre)
                 .SingleOrDefaultAsync(m => m.ID == id);
 

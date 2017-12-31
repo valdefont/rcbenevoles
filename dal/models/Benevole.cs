@@ -30,5 +30,14 @@ namespace dal.models
 
         [NotMapped]
         public Adresse CurrentAdresse => Adresses?.SingleOrDefault(a => a.IsCurrent);
+
+        public Adresse GetAdresseFromDate(DateTime date)
+        {
+            var addresses = this.Adresses
+                .Where(a => a.DateChangement <= date)
+                .OrderByDescending(a => a.DateChangement);
+
+            return addresses.FirstOrDefault();
+        }
     }
 }
