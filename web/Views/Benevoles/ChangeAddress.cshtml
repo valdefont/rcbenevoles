@@ -9,8 +9,18 @@
 <h3>Enregistrer une nouvelle adresse pour @Model.Benevole.Nom @Model.Benevole.Prenom</h3>
 <hr />
 <div class="row">
-    <form asp-action="ChangeAddress" asp-antiforgery="true" onsubmit="submit();">
+    @if (ViewBag.Force)
+    {
+    <div class="col-md-12">
+        <div class="alert alert-danger">
+            <p>Attention, des pointages ont été effectués sur un autre centre que celui que vous avez demandé après la date. Cliquez sur <strong>Enregistrer la nouvelle adresse</strong> pour confirmer votre choix</p>
+        </div>
+    </div>
+    }
+
+    <form asp-action="ChangeAddress" asp-route-force="@ViewBag.Force" asp-antiforgery="true" onsubmit="submit();">
         <div asp-validation-summary="All" class="text-danger"></div>
+        <input asp-for="Adresse.BenevoleID" type="hidden" />
         <div class="col-md-6">
             <div class="panel panel-default">
                 <div class="panel-heading">Adresse &amp; Centre</div>

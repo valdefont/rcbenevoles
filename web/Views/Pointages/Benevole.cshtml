@@ -82,9 +82,6 @@
 
     function editOrCreate() {
 
-        if (!validateDistance())
-            return;
-
         var nbDemiJournees = $('input[name=RadioNbDemiJournees]:checked').val();
 
         var date = $("#calendar").attr("data-selected-date");
@@ -95,7 +92,6 @@
                 BenevoleID: @Model.Benevole.ID,
                 Date: date,
                 NbDemiJournees: nbDemiJournees,
-                Distance: $("#Distance").val().replace(',', '.')
             };
 
         $.ajax({
@@ -142,21 +138,6 @@
                 alert('Une erreur est apparue pendant la mise à jour du pointage');
             }
         });
-    }
-
-    function validateDistance() {
-
-        var valDistance = $("#Distance").val();
-        var distance = parseFloat(valDistance.replace(",", "."));
-
-        if (isNaN(distance)) {
-            $("#validationDistance").html("Veuillez renseigner un nombre valide");
-            $("#validationDistance").show();
-            return false;
-        } else {
-            $("#validationDistance").hide();
-            return true;
-        }
     }
 
     function refreshDate(date, nbDemiJournees) {

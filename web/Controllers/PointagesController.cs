@@ -83,7 +83,6 @@ namespace web.Controllers
             if (centreGere != null && !benevole.Adresses.Any(a => a.CentreID == centreGere.ID))
                 return Forbid();
 
-
             var model = new PointagesBenevoleModel
             {
                 Centre = centreGere,
@@ -198,23 +197,25 @@ namespace web.Controllers
 
         [HttpPost("Pointages/Benevole/{id}/editcreate")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> BenevoleEditOrCreate(int id, [FromBody] [Bind("BenevoleID,Date,NbDemiJournees,Distance")] Pointage pointage)
+        public async Task<IActionResult> BenevoleEditOrCreate(int id, [FromBody] [Bind("BenevoleID,Date,NbDemiJournees")] Pointage pointage)
         {
             if (id != pointage.BenevoleID)
                 return BadRequest("id does not match BenevoleId");
 
-            int? existingId = _context.Pointages
+            var existing = _context.Pointages
                 .Where(p => p.BenevoleID == pointage.BenevoleID && p.Date == pointage.Date.Date)
-                .Select(p => (int?)p.ID)
                 .SingleOrDefault();
 
-            if (existingId != null)
-                pointage.ID = existingId.Value;
+            if (existing != null)
+                pointage.ID = existing.ID;
 
-            var centreId = pointage.Benevole.GetAdresseFromDate(pointage.Date).CentreID;
+            var benevole = _context.Benevoles.Include(b => b.Adresses).SingleOrDefault(b => b.ID == pointage.BenevoleID);
+            var centreId = benevole.GetAdresseFromDate(pointage.Date).CentreID;
 
-            if (pointage.CentreID != centreId)
-                return Forbid();
+            pointage.CentreID = centreId;
+
+            if (existing != null && existing.CentreID != pointage.CentreID)
+                return BadRequest("centre id does not match with existing pointage");
 
             var userCentreId = GetCurrentUser().CentreID;
             if (userCentreId != null && centreId != userCentreId)
@@ -224,7 +225,7 @@ namespace web.Controllers
             {
                 try
                 {
-                    if (existingId != null)
+                    if (existing != null)
                         _context.Update(pointage);
                     else
                         _context.Pointages.Add(pointage);
