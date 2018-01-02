@@ -233,6 +233,7 @@ namespace web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangeAddress(int id, BenevoleWithAdresse benevoleWithAddress, bool force = false)
         {
+            ViewBag.Force = force;
             if (!_context.ContainsCentre(benevoleWithAddress.Adresse.CentreID))
                 ModelState.AddModelError("Adresse.CentreID", "Le centre n'existe pas");
 
@@ -243,6 +244,8 @@ namespace web.Controllers
             }
 
             SetViewBagCentres();
+
+            benevoleWithAddress.Benevole = _context.Benevoles.SingleOrDefault(b => b.ID == benevoleWithAddress.Adresse.BenevoleID);
 
             if (!ModelState.IsValid)
                 return View(benevoleWithAddress);
@@ -270,7 +273,6 @@ namespace web.Controllers
                 if (!force)
                 {
                     ViewBag.Force = true;
-                    benevoleWithAddress.Benevole = _context.Benevoles.SingleOrDefault(b => b.ID == benevoleWithAddress.Adresse.BenevoleID);
                     return View(benevoleWithAddress);
                 }
                 else
