@@ -34,7 +34,6 @@
             {
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li><a asp-controller="Pointages" asp-action="Index">Pointages</a></li>
                     <li><a asp-controller="Benevoles" asp-action="Index">Bénévoles</a></li>
                     @if (User.HasClaim(cl => cl.Type == ClaimTypes.Role && cl.Value == "SuperAdmin"))
                     {

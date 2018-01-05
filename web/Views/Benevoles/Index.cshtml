@@ -1,63 +1,102 @@
-﻿@model IEnumerable<dal.models.Benevole>
+﻿@model BenevoleFilterModel
 
 @{
-    ViewData["Title"] = "Liste";
+    ViewData["Title"] = "Index";
 }
 
-<h2>Gestion des bénévoles</h2>
+<h2>Bénévoles</h2>
 
-<p>
-    <a asp-action="Create">Créer un nouveau bénévole</a>
-</p>
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Nom)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Prenom)
-            </th>
-            <th>
-                Adresse
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Telephone)
-            </th>
-            @if(User.IsInRole("SuperAdmin"))
+<div class="row">
+    <div class="col-xs-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Rechercher un bénévole</h3>
+            </div>
+            <div class="panel-body">
+                @if (User.IsInRole("SuperAdmin"))
+                {
+                    <div class="form-group">
+                        <div class="col-xs-12">
+                            <div class="col-sm-4">
+                                <label class="control-label">Centre :</label>
+                            </div>
+                            <div class="col-sm-5">
+                                <select asp-for="CentreID" asp-items="@(new SelectList(Model.Centres, "ID", "Nom"))" class="form-control"></select>
+                                <span asp-validation-for="CentreID" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-xs-12">
+                        <input type="hidden" asp-for="CentreID" />
+                    </div>
+                }
+                <div class="col-xs-12" style="margin-top:8px">
+                    <div class="col-sm-4">
+                        <label class="control-label">Nom du bénévole :</label>
+                    </div>
+                    <div class="col-sm-5">
+                        <input type="text" asp-for="Term" class="form-control" placeholder="Filtrer un bénévole par nom ...">
+                    </div>
+                    <div class="col-sm-3">
+                        <button class="btn btn-primary" type="button" onclick="filter(); return false;">Filtrer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xs-12" style="margin-top:32px">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="updateBody">
+                <tr>
+                    <td colspan="3">
+                        <em>Recherche en cours veuillez patienter ...</em>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts
+{
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        filter();
+
+    });
+
+    function filter() {
+        $.ajax({
+            url: '@Url.Action("Filter")',
+            data:
             {
-            <th>
-                @(Html.DisplayNameFor(model => model.CurrentAdresse.CentreID))
-            </th>
+                CentreID: $("#CentreID").val(),
+                Term: $("#Term").val(),
+            },
+            contentType: 'application/json',
+            dataType: 'html',
+            type: 'GET',
+            cache: false,
+            success: function (data) {
+                $('#updateBody').replaceWith(data);
+            },
+            error: function (data) {
+                alert('Une erreur est apparue pendant le chargement des bénévoles');
             }
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nom)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Prenom)
-            </td>
-            <td>
-                @Html.Raw(item.CurrentAdresse.GetAdresseComplete(true))
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Telephone)
-            </td>
-            @if (User.IsInRole("SuperAdmin"))
-            {
-            <td>
-                @Html.DisplayFor(modelItem => item.CurrentAdresse.Centre.Nom)
-            </td>
-            }
-            <td>
-                <a asp-action="Details" asp-route-id="@item.ID">Détails</a>
-            </td>
-        </tr>
+        });
     }
-    </tbody>
-</table>
+</script>  
+}

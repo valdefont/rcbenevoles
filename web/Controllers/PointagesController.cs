@@ -20,46 +20,6 @@ namespace web.Controllers
             _context = context;
         }
 
-        // GET: Pointages
-        public IActionResult Index()
-        {
-            PointageFilterModel model = new PointageFilterModel
-            {
-                Term = string.Empty
-            };
-
-            if (User.IsInRole("SuperAdmin"))
-                model.Centres = _context.Centres;
-            else
-                model.CentreID = GetCurrentUser().CentreID;
-
-            return View(model);
-        }
-
-        // AJAX : Pointages/Filter
-        public IActionResult Filter(PointageFilterModel filter)
-        {
-            if (filter.Term == null)
-                filter.Term = string.Empty;
-
-            if (!User.IsInRole("SuperAdmin"))
-                filter.CentreID = GetCurrentUser().CentreID;
-
-            var query = _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre)
-                .Where(b => b.Adresses.Any(a => a.CentreID == filter.CentreID))
-                .Where(b => b.Nom.ToLower().StartsWith(filter.Term.Trim().ToLower()));
-
-            var model = query.Select(b => new BenevolePointageListItemModel
-            {
-                BenevoleID = b.ID,
-                BenevoleNom = b.Nom,
-                BenevolePrenom = b.Prenom,
-                ShowAddressWarning = b.Adresses.Any(a => a.CentreID == filter.CentreID && a.IsCurrent)
-            }).AsEnumerable();
-
-            return View(model);
-        }
-
         // GET: Pointages/Details/5
         [HttpGet("Pointages/Benevole/{id}")]
         public async Task<IActionResult> Benevole(int id, int? year, int? month, bool partial = false)
@@ -143,6 +103,7 @@ namespace web.Controllers
                         IsCurrentMonth = (currentDate.Month == month && currentDate.Year == year),
                         RowIndex = r,
                         ColumnIndex = i,
+                        Distance = adresses[addressIndex].DistanceCentre,
                     };
 
                     if(centreGere != null && adresses[addressIndex].CentreID != centreGere.ID)
@@ -173,23 +134,26 @@ namespace web.Controllers
             if (benevole == null)
                 return NotFound();
 
-            var centreId = benevole.GetAdresseFromDate(date).CentreID;
+            var centre = benevole.GetAdresseFromDate(date).Centre;
             var userCentreId = GetCurrentUser().CentreID;
 
             var pointage = await _context.Pointages
                 .SingleOrDefaultAsync(p => p.BenevoleID == id && p.Date == date);
 
-            ViewBag.DisabledForCenter = (userCentreId != null && centreId != userCentreId);
+            ViewBag.DisabledForCenter = (userCentreId != null && centre.ID != userCentreId);
 
             if (pointage == null)
             {
                 pointage = new dal.models.Pointage
                 {
                     BenevoleID = id,
-                    CentreID = centreId,
+                    CentreID = centre.ID,
                     Date = date,
                     NbDemiJournees = 1,
                 };
+
+                pointage.Benevole = benevole;
+                pointage.Centre = centre;
             }
 
             return PartialView(pointage);
@@ -285,7 +249,7 @@ namespace web.Controllers
             {
                 _context.Add(pointage);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", "Benevole");
             }
             return View(pointage);
         }
@@ -336,7 +300,7 @@ namespace web.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", "Benevole");
             }
             return View(pointage);
         }
@@ -367,7 +331,7 @@ namespace web.Controllers
             var pointage = await _context.Pointages.SingleOrDefaultAsync(m => m.ID == id);
             _context.Pointages.Remove(pointage);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "Benevole");
         }
 
 

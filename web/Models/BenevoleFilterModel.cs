@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace web.Models
 {
-    public class PointageFilterModel
+    public class BenevoleFilterModel
     {
         public IEnumerable<dal.models.Centre> Centres { get; set; }
 

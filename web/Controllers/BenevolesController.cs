@@ -23,11 +23,43 @@ namespace web.Controllers
         }
 
         // GET: Benevoles
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var query = _context.ListAllowedBenevoles(GetCurrentUser());
+            var model = new BenevoleFilterModel
+            {
+                Term = string.Empty
+            };
 
-            return View(await query.ToListAsync());
+            if (User.IsInRole("SuperAdmin"))
+                model.Centres = _context.Centres;
+            else
+                model.CentreID = GetCurrentUser().CentreID;
+
+            return View(model);
+        }
+
+        // AJAX : Benevoles/Filter
+        public IActionResult Filter(BenevoleFilterModel filter)
+        {
+            if (filter.Term == null)
+                filter.Term = string.Empty;
+
+            if (!User.IsInRole("SuperAdmin"))
+                filter.CentreID = GetCurrentUser().CentreID;
+
+            var query = _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre)
+                .Where(b => b.Adresses.Any(a => a.CentreID == filter.CentreID))
+                .Where(b => b.Nom.ToLower().StartsWith(filter.Term.Trim().ToLower()));
+
+            var model = query.Select(b => new BenevolePointageListItemModel
+            {
+                BenevoleID = b.ID,
+                BenevoleNom = b.Nom,
+                BenevolePrenom = b.Prenom,
+                ShowAddressWarning = b.Adresses.Any(a => a.CentreID == filter.CentreID && a.IsCurrent)
+            }).AsEnumerable();
+
+            return View(model);
         }
 
         [HttpPost]

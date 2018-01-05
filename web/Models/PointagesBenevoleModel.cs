@@ -48,6 +48,8 @@ namespace web.Models
 
         public bool DisabledByCenter { get; set; }
 
+        public decimal Distance { get; set; }
+
         public string GetPointageCssClass()
         {
             string css = "pointage unselected";
@@ -103,7 +105,7 @@ namespace web.Models
 
             if (this.Pointage != null)
             {
-                var dist = this.Pointage.Benevole.CurrentAdresse.DistanceCentre;
+                var dist = this.Distance;
 
                 if (this.Pointage.NbDemiJournees == 2)
                     dist *= 2;
