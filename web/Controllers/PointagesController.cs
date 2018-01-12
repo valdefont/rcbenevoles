@@ -351,9 +351,21 @@ namespace web.Controllers
                 Benevole = benevole,
             };
 
+            var userCentreId = GetCurrentUser().CentreID;
+
             // début : début de période à partir du premier pointage du bénévole
             int startPeriodId;
-            var start = benevole.Pointages.OrderBy(p => p.Date).Select(p => p.Date).FirstOrDefault(); 
+
+            IQueryable<Pointage> ptgs = benevole.Pointages.AsQueryable();
+
+            if (userCentreId != null)
+                ptgs = ptgs.Where(p => p.CentreID == userCentreId);
+
+            var dates = ptgs
+                .OrderBy(p => p.Date)
+                .Select(p => p.Date);
+
+            var start = dates.FirstOrDefault(); 
 
             if(start == DateTime.MinValue)
                 return View(model);
@@ -372,19 +384,21 @@ namespace web.Controllers
             }
 
             // fin : fin de période à partir du dernier pointage du bénévole
-            var end = benevole.Pointages.OrderByDescending(p => p.Date).Select(p => p.Date).FirstOrDefault();
+            ptgs = benevole.Pointages.AsQueryable();
 
-            if(end.Month >= 5)
+            if (userCentreId != null)
+                ptgs = ptgs.Where(p => p.CentreID == userCentreId);
+
+            var end = dates.LastOrDefault();
+
+            if (end.Month >= 5)
                 end = new DateTime(end.Year + 1, 1, 1);
             else
                 end = new DateTime(end.Year, 5, 1);
 
-
             // calcul des périodes
             DateTime periodStart;
             DateTime periodEnd;
-
-            PrintIndexPeriod latestPeriod = null;
 
             for(int year = start.Year; year <= end.AddDays(-1).Year; year++)
             {
@@ -422,10 +436,15 @@ namespace web.Controllers
 
                     foreach (var adrDate in adressesWithDates.Keys.OrderBy(k => k))
                     {
-                        period.Adresses.Add(adressesWithDates[adrDate]);
+                        var adr = adressesWithDates[adrDate];
+
+                        if(GetCurrentUser().CentreID == null || adr.CentreID == GetCurrentUser().CentreID)
+                            period.Adresses.Add(adr);
+
                     }
 
-                    model.Periods.Add(period);
+                    if(period.Adresses.Count() > 0)
+                        model.Periods.Add(period);
                 }
 
                 startPeriodId = 1;
@@ -445,9 +464,6 @@ namespace web.Controllers
 
             if (benevole == null)
                 return NotFound("Bénévole non trouvé");
-
-            if (!IsBenevoleAllowed(benevole))
-                return Forbid();
 
             var adresse = benevole.Adresses
                 .SingleOrDefault(a => a.ID == addressId);
