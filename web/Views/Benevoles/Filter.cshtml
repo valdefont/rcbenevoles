@@ -8,11 +8,11 @@
 @foreach (var item in Model) {
     <tr>
         <td>
-            <span>@Html.DisplayFor(modelItem => item.BenevoleNom)</span>&nbsp;
             @if (!item.ShowAddressWarning && !User.IsInRole("SuperAdmin"))
             {
-            <i class="glyphicon glyphicon-warning-sign yellow" title="Le bénévole a changé de centre. Vous ne pourrez qu'effectuer les pointages sur les périodes où le bénévole était lié à votre centre"></i>
+                <i class="glyphicon glyphicon-warning-sign yellow" title="Le bénévole n'est plus lié à votre centre. Vous ne pourrez qu'effectuer les pointages et éditer des fiches sur les périodes où le bénévole était lié à votre centre"></i>
             }
+            <span>@Html.DisplayFor(modelItem => item.BenevoleNom)</span>&nbsp;
         </td>
         <td>
             <span>@Html.DisplayFor(modelItem => item.BenevolePrenom)</span>

@@ -104,3 +104,7 @@
 .calendarday.day_disabled {
     color: gray;
 }
+
+.yellow {
+    color: #d1b951;
+}
