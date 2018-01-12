@@ -11,7 +11,9 @@
 <div class="alert alert-warning">
     <p>Aucune fiche n'est disponible pour l'édition. Il est possible qu'aucun pointage du bénévole n'ait été effectué sur cette période</p>
 </div>
-} else {
+}
+else
+{
 <div class="alert alert-info">
     <p>Sélectionnez la fiche que vous souhaitez éditer</p>
 </div>
@@ -19,12 +21,29 @@
 <div>
     <hr />
     <ul>
-    @foreach(var period in Model.Periods)
-    {
-        <li>
-            <a asp-action="Print" asp-route-addressId="@period.Adresse.ID" asp-route-period="1" asp-route-year="@period.Start.Year" target="_blank">@period.Start.ToString("MMM") à @period.End.ToString("MMM yyyy") pour l'adresse @period.Adresse.GetAdresseComplete(false)</a>
-        </li>
+        @foreach (var period in Model.Periods)
+        {
+            if (period.Adresses.Count == 1)
+            {
+                <li>
+                    <a asp-action="Print" asp-route-addressId="@period.Adresses.First().ID" asp-route-period="@period.PeriodId" asp-route-year="@period.Start.Year" target="_blank">Du @period.Start.ToString("dddd dd MMM") au @period.End.ToString("dd MMM yyyy") </a>
+                </li>
+            }
+            else
+            {
+            <li>
+                <span>Du @period.Start.ToString("dddd dd MMM") au @period.End.ToString("dddd dd MMM yyyy")</span>
+                <ul>
+                @foreach (var adresse in period.Adresses)
+                {
+                    <li>
+                        <a asp-action="Print" asp-route-addressId="@adresse.ID" asp-route-period="@period.PeriodId" asp-route-year="@period.Start.Year" target="_blank">pour l'adresse @adresse.GetAdresseComplete(false)</a>
+                    </li>
+                }
+                </ul>
+            </li>
+            }
+        }
     </ul>
-    }
 </div>
 }

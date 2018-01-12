@@ -352,7 +352,7 @@ namespace web.Controllers
             };
 
             // début : début de période à partir du premier pointage du bénévole
-            int periodId;
+            int startPeriodId;
             var start = benevole.Pointages.OrderBy(p => p.Date).Select(p => p.Date).FirstOrDefault(); 
 
             if(start == DateTime.MinValue)
@@ -361,13 +361,13 @@ namespace web.Controllers
             {
                 if(start.Month >= 5)
                 {
-                    start = new DateTime(start.Year, 5, start.Day);
-                    periodId = 2;
+                    start = new DateTime(start.Year, 5, 1);
+                    startPeriodId = 2;
                 }
                 else
                 {
-                    start = new DateTime(start.Year, 1, start.Day);
-                    periodId = 1;
+                    start = new DateTime(start.Year, 1, 1);
+                    startPeriodId = 1;
                 }
             }
 
@@ -388,7 +388,7 @@ namespace web.Controllers
 
             for(int year = start.Year; year <= end.AddDays(-1).Year; year++)
             {
-                for(int p = periodId; p <= 2; p++)
+                for(int periodId = startPeriodId; periodId <= 2; periodId++)
                 {
                     switch(periodId)
                     {
@@ -413,29 +413,23 @@ namespace web.Controllers
 
                     var adressesWithDates = benevole.GetAdressesInPeriod(periodStart, periodEnd);
 
-                    foreach(var adrDate in adressesWithDates.Keys.OrderBy(k => k))
+                    var period = new PrintIndexPeriod
                     {
-                        if(latestPeriod != null)
-                            latestPeriod.End = adrDate.AddDays(-1);
+                        PeriodId = periodId,
+                        Start = periodStart,
+                        End = periodEnd,
+                    };
 
-                        var period = new PrintIndexPeriod
-                        {
-                            Start = adrDate,
-                            End = periodEnd,
-                            Adresse = adressesWithDates[adrDate],
-                        };
-
-                        model.Periods.Add(period);
-
-                        latestPeriod = period;
+                    foreach (var adrDate in adressesWithDates.Keys.OrderBy(k => k))
+                    {
+                        period.Adresses.Add(adressesWithDates[adrDate]);
                     }
+
+                    model.Periods.Add(period);
                 }
 
-                periodId = 1;
+                startPeriodId = 1;
             }
-
-            if(latestPeriod != null)
-                latestPeriod.End = end.AddDays(-1);
 
             return View(model);
         }
@@ -443,7 +437,10 @@ namespace web.Controllers
         [HttpGet("Pointages/Benevole/{id}/print")]
         public async Task<IActionResult> Print(int id, int addressId, int period, int year)
         {
-            var benevole = await _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre)
+            var benevole = await _context.Benevoles
+                .Include(b => b.Adresses)
+                .ThenInclude(a => a.Centre)
+                .ThenInclude(c => c.Siege)
                 .SingleOrDefaultAsync(b => b.ID == id);
 
             if (benevole == null)
@@ -487,12 +484,27 @@ namespace web.Controllers
             if(frais == null)
                 return NotFound("Frais non trouvé");
 
+            // ***** Recherches des dates des pointages à calculer
             var start = periodStart;
             var end = periodEnd;
 
             if(adresse.DateChangement > start)
                 start = adresse.DateChangement;
 
+            var adressesByPeriod = benevole.GetAdressesInPeriod(start, end)
+                .OrderBy(x => x.Key);
+
+            var allAdresses = adressesByPeriod.Select(x => x.Value).ToList();
+
+            int index = allAdresses.IndexOf(adresse);
+
+            if (index < adressesByPeriod.Count() - 1)
+            {
+                var nextAdr = allAdresses[index + 1];
+                end = adressesByPeriod.Where(a => a.Value == nextAdr).Single().Key;
+            }
+
+            // ***** Calcul du nombre de demi-journées pointées sur l'adresse
             var totalDemiJournees = _context.Pointages
                 .Where(p => p.BenevoleID == adresse.BenevoleID && p.CentreID == adresse.CentreID)
                 .Where(p => p.Date >= start && p.Date < end)
@@ -510,9 +522,10 @@ namespace web.Controllers
                 PeriodStart = periodStart,
                 PeriodEnd = periodEnd.AddDays(-1),
                 Benevole = benevole,
+                Adresse = adresse,
                 FraisKm = frais.TauxKilometrique,
                 MonthCount = monthCount,
-                TotalDistance = totalDemiJournees,
+                TotalDemiJournees = totalDemiJournees,
             };
 
             return View(model);

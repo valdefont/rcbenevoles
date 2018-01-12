@@ -20,9 +20,16 @@ namespace web.Models
 
     public class PrintIndexPeriod
     {
+        public int PeriodId { get; set; }
+
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
 
-        public dal.models.Adresse Adresse { get; set; }
+        public List<dal.models.Adresse> Adresses { get; set; }
+
+        public PrintIndexPeriod()
+        {
+            this.Adresses = new List<dal.models.Adresse>();
+        }
     }
 }

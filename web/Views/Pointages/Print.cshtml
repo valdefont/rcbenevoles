@@ -24,11 +24,11 @@
                 <span class="adresse_nom">Les Restaurants du C&oelig;ur</span>
             </div>
             <div>
-                <span class="adresse_rue">@Model.Benevole.Centre.Adresse</span>
+                <span class="adresse_rue">@Model.Adresse.Centre.Siege.Adresse</span>
             </div>
 
             <div class="right">
-                <span>Année <strong>@Model.PeriodEnd.Year</strong></span>
+                <span>Année <strong>@Model.PeriodStart.Year</strong></span>
                 <br />
                 <span>@Model.MonthCount mois</span>
             </div>
@@ -81,13 +81,13 @@
                             </td>
                             <td>
                                 <div class="formfield">
-                                    <span>@Model.Benevole.AdresseLigne1</span>
+                                    <span>@Model.Adresse.AdresseLigne1</span>
                                 </div>
                                 <div class="formfield">
-                                    <span>@Model.Benevole.AdresseLigne2</span>
+                                    <span>@Model.Adresse.AdresseLigne2</span>
                                 </div>
                                 <div class="formfield">
-                                    <span>@Model.Benevole.CodePostal</span>&nbsp;&nbsp;<span>@Model.Benevole.Ville</span>
+                                    <span>@Model.Adresse.CodePostal</span>&nbsp;&nbsp;<span>@Model.Adresse.Ville</span>
                                 </div>
                             </td>
                         </tr>
@@ -96,7 +96,7 @@
                                 <span>CENTRE :</span>
                             </td>
                             <td class="formfield">
-                                <span>@Model.Benevole.Centre.Nom</span>
+                                <span>@Model.Adresse.Centre.Nom</span>
                             </td>
                         </tr>
                     </tbody>
@@ -130,7 +130,7 @@
                                 <span>Kms parcourus pendant la période :</span>
                             </td>
                             <td class="frais_saisie">
-                                <span>@Model.TotalDistance</span>
+                                <span>@(Model.TotalDemiJournees * Model.Adresse.DistanceCentre)</span>
                             </td>
                             <td></td>
                             <td></td>
@@ -140,7 +140,7 @@
                                 <span>x @Model.FraisKm.ToString("0.000") € le km</span>
                             </td>
                             <td class="frais_saisie">
-                                <span>@((Model.TotalDistance * Model.FraisKm).ToString("0.00"))</span>
+                                <span>@((Model.TotalDemiJournees * Model.Adresse.DistanceCentre * Model.FraisKm).ToString("0.00"))</span>
                             </td>
                             <td>
                                 €
