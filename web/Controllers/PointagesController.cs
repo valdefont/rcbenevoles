@@ -384,11 +384,6 @@ namespace web.Controllers
             }
 
             // fin : fin de période à partir du dernier pointage du bénévole
-            ptgs = benevole.Pointages.AsQueryable();
-
-            if (userCentreId != null)
-                ptgs = ptgs.Where(p => p.CentreID == userCentreId);
-
             var end = dates.LastOrDefault();
 
             if (end.Month >= 5)
@@ -422,7 +417,7 @@ namespace web.Controllers
                             return BadRequest("Période invalide");
                     }
 
-                    if(periodStart > end)
+                    if(periodStart >= end)
                         break;
 
                     var adressesWithDates = benevole.GetAdressesInPeriod(periodStart, periodEnd);
