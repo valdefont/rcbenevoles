@@ -130,7 +130,7 @@
                                 <span>Kms parcourus pendant la période :</span>
                             </td>
                             <td class="frais_saisie">
-                                <span>@(Model.TotalDemiJournees * Model.Adresse.DistanceCentre)</span>
+                                <span>@((Model.TotalDemiJournees * Model.Adresse.DistanceCentre).ToString("0.0"))</span>
                             </td>
                             <td></td>
                             <td></td>
@@ -266,7 +266,7 @@
                         </tr>
                         <tr>
                             <td colspan="2">
-                                <span>Distance A/R Domicile / Lieu de bénévolat : @Model.Adresse.DistanceCentre km</span>
+                                <span>Distance A/R Domicile / Lieu de bénévolat : @(Model.Adresse.DistanceCentre.ToString("0.0")) km</span>
                             </td>
                             <td class="border_all" style="border-width:2pt">
                                 <div class="signature" style="height:2cm">
