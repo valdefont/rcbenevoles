@@ -97,182 +97,206 @@ namespace dal
 
             if(this.Utilisateurs.Count() == 0)
             {
-                // ****** Sièges
-                var siege75 = new Siege
-                {
-                    Nom = "AD75",
-                    Adresse = "rue du siège 75000 PARIS",
-                };
+            	var seedDevData = Environment.GetEnvironmentVariable("APP_GENERATE_DEV_DATA");
+				var adminPassword = Environment.GetEnvironmentVariable("APP_ADMIN_PASSWORD");
 
-                this.Sieges.Add(siege75);
+            	if (seedDevData == "1" || seedDevData.ToLower() == "true")
+				{
+		            // ****** Sièges
+		            var siege75 = new Siege
+		            {
+		                Nom = "AD75",
+		                Adresse = "rue du siège 75000 PARIS",
+		            };
 
-                // ****** Centres
-                var centre_paris = new Centre
-                {
-                    Nom = "Paris",
-                    Adresse = "5 rue de Paris 75000 PARIS",
-                    Siege = siege75,
-                };
+		            this.Sieges.Add(siege75);
 
-                this.Centres.Add(centre_paris);
+		            // ****** Centres
+		            var centre_paris = new Centre
+		            {
+		                Nom = "Paris",
+		                Adresse = "5 rue de Paris 75000 PARIS",
+		                Siege = siege75,
+		            };
 
-                var centre = new Centre
-                {
-                    Nom = "Lyon",
-                    Adresse = "5 rue de Lyon 69000 Lyon",
-                    Siege = siege75,
-                };
+		            this.Centres.Add(centre_paris);
 
-                this.Centres.Add(centre);
+		            var centre = new Centre
+		            {
+		                Nom = "Lyon",
+		                Adresse = "5 rue de Lyon 69000 Lyon",
+		                Siege = siege75,
+		            };
 
-                // ****** Utilisateurs
-                var testadmin = new Utilisateur
-                {
-                    Centre = null,
-                    Login = "testadmin",
-                };
+		            this.Centres.Add(centre);
 
-                testadmin.SetPassword("testadmin");
-                this.Utilisateurs.Add(testadmin);
+		            // ****** Utilisateurs
+		            var testadmin = new Utilisateur
+		            {
+		                Centre = null,
+		                Login = "testadmin",
+		            };
 
-                var adminparis = new Utilisateur
-                {
-                    Centre = centre_paris,
-                    Login = "adminparis",
-                };
+					if(string.IsNullOrEmpty(adminPassword))
+						adminPassword = "testadmin";
 
-                adminparis.SetPassword("adminparis");
-                this.Utilisateurs.Add(adminparis);
+		            testadmin.SetPassword(adminPassword);
+		            this.Utilisateurs.Add(testadmin);
 
-                // ****** Bénévoles
-                var benevole1 = new Benevole
-                {
-                    Prenom = "Bernard",
-                    Nom = "TOTO",
-                    Telephone = "00000000",
-                    Adresses = new List<Adresse>
-                    {
-                        new Adresse
-                        {
-                            Centre = centre,
-                            AdresseLigne1 = "1 rue de david",
-                            CodePostal = "69000",
-                            Ville = "Lyon",
-                            DistanceCentre = 80,
-                        },
-                        new Adresse
-                        {
-                            DateChangement = new DateTime(2017, 2, 1),
-                            Centre = centre,
-                            AdresseLigne1 = "26 rue de david",
-                            CodePostal = "69000",
-                            Ville = "Lyon",
-                            DistanceCentre = 84,
-                        },
-                        new Adresse
-                        {
-                            DateChangement = new DateTime(2017, 3, 1),
-                            Centre = centre_paris,
-                            AdresseLigne1 = "1 rue de jules",
-                            CodePostal = "75005",
-                            Ville = "Paris",
-                            DistanceCentre = 65,
-                            IsCurrent = true,
-                        }
-                    },
-                };
+		            var adminparis = new Utilisateur
+		            {
+		                Centre = centre_paris,
+		                Login = "adminparis",
+		            };
 
-                this.Benevoles.Add(benevole1);
+		            adminparis.SetPassword("adminparis");
+		            this.Utilisateurs.Add(adminparis);
 
-                this.Benevoles.Add(new Benevole
-                {
-                    Prenom = "Anne",
-                    Nom = "TUTU",
-                    Telephone = "00000000",
-                    Adresses = new List<Adresse>
-                    {
-                        new Adresse
-                        {
-                            Centre = centre,
-                            AdresseLigne1 = "1 rue d'anne",
-                            CodePostal = "13000",
-                            Ville = "Marseille",
-                            DistanceCentre = 10,
-                            IsCurrent = true,
-                        }
-                    }
-                });
+		            // ****** Bénévoles
+		            var benevole1 = new Benevole
+		            {
+		                Prenom = "Bernard",
+		                Nom = "TOTO",
+		                Telephone = "00000000",
+		                Adresses = new List<Adresse>
+		                {
+		                    new Adresse
+		                    {
+		                        Centre = centre,
+		                        AdresseLigne1 = "1 rue de david",
+		                        CodePostal = "69000",
+		                        Ville = "Lyon",
+		                        DistanceCentre = 80,
+		                    },
+		                    new Adresse
+		                    {
+		                        DateChangement = new DateTime(2017, 2, 1),
+		                        Centre = centre,
+		                        AdresseLigne1 = "26 rue de david",
+		                        CodePostal = "69000",
+		                        Ville = "Lyon",
+		                        DistanceCentre = 84,
+		                    },
+		                    new Adresse
+		                    {
+		                        DateChangement = new DateTime(2017, 3, 1),
+		                        Centre = centre_paris,
+		                        AdresseLigne1 = "1 rue de jules",
+		                        CodePostal = "75005",
+		                        Ville = "Paris",
+		                        DistanceCentre = 65,
+		                        IsCurrent = true,
+		                    }
+		                },
+		            };
 
-                this.Benevoles.Add(new Benevole
-                {
-                    Prenom = "Gérard",
-                    Nom = "TITI",
-                    Telephone = "00000000",
-                    Adresses = new List<Adresse>
-                    {
-                        new Adresse
-                        {
-                            Centre = centre_paris,
-                            AdresseLigne1 = "1 rue de gérard",
-                            CodePostal = "75015",
-                            Ville = "Paris",
-                            DistanceCentre = 65.5m,
-                            IsCurrent = true,
-                        }
-                    }
-                });
+		            this.Benevoles.Add(benevole1);
 
-                this.Benevoles.Add(new Benevole
-                {
-                    Prenom = "Daniel",
-                    Nom = "ROBERT",
-                    Telephone = "00000000",
-                    Adresses = new List<Adresse>
-                    {
-                        new Adresse
-                        {
-                            Centre = centre_paris,
-                            AdresseLigne1 = "1 rue de daniel",
-                            CodePostal = "78000",
-                            Ville = "Cergy",
-                            DistanceCentre = 80,
-                            IsCurrent = true,
-                        }
-                    }
-                });
+		            this.Benevoles.Add(new Benevole
+		            {
+		                Prenom = "Anne",
+		                Nom = "TUTU",
+		                Telephone = "00000000",
+		                Adresses = new List<Adresse>
+		                {
+		                    new Adresse
+		                    {
+		                        Centre = centre,
+		                        AdresseLigne1 = "1 rue d'anne",
+		                        CodePostal = "13000",
+		                        Ville = "Marseille",
+		                        DistanceCentre = 10,
+		                        IsCurrent = true,
+		                    }
+		                }
+		            });
 
-                // ****** Pointages
-                this.Pointages.Add(new Pointage
-                {
-                    Benevole = benevole1,
-                    Centre = centre,
-                    Date = new DateTime(2017, 1, 15),
-                    NbDemiJournees = 2,
-                });
+		            this.Benevoles.Add(new Benevole
+		            {
+		                Prenom = "Gérard",
+		                Nom = "TITI",
+		                Telephone = "00000000",
+		                Adresses = new List<Adresse>
+		                {
+		                    new Adresse
+		                    {
+		                        Centre = centre_paris,
+		                        AdresseLigne1 = "1 rue de gérard",
+		                        CodePostal = "75015",
+		                        Ville = "Paris",
+		                        DistanceCentre = 65.5m,
+		                        IsCurrent = true,
+		                    }
+		                }
+		            });
 
-                this.Pointages.Add(new Pointage
-                {
-                    Benevole = benevole1,
-                    Centre = centre,
-                    Date = new DateTime(2017, 2, 28),
-                    NbDemiJournees = 2,
-                });
+		            this.Benevoles.Add(new Benevole
+		            {
+		                Prenom = "Daniel",
+		                Nom = "ROBERT",
+		                Telephone = "00000000",
+		                Adresses = new List<Adresse>
+		                {
+		                    new Adresse
+		                    {
+		                        Centre = centre_paris,
+		                        AdresseLigne1 = "1 rue de daniel",
+		                        CodePostal = "78000",
+		                        Ville = "Cergy",
+		                        DistanceCentre = 80,
+		                        IsCurrent = true,
+		                    }
+		                }
+		            });
 
-                this.Pointages.Add(new Pointage
-                {
-                    Benevole = benevole1,
-                    Centre = centre_paris,
-                    Date = new DateTime(2017, 03, 03),
-                    NbDemiJournees = 1,
-                });
+		            // ****** Pointages
+		            this.Pointages.Add(new Pointage
+		            {
+		                Benevole = benevole1,
+		                Centre = centre,
+		                Date = new DateTime(2017, 1, 15),
+		                NbDemiJournees = 2,
+		            });
 
-                this.Pointages.Add(new Pointage
-                {
-                    Benevole = benevole1,
-                    Centre = centre_paris,
-                    Date = new DateTime(2017, 03, 05),
-                    NbDemiJournees = 1,
-                });
+		            this.Pointages.Add(new Pointage
+		            {
+		                Benevole = benevole1,
+		                Centre = centre,
+		                Date = new DateTime(2017, 2, 28),
+		                NbDemiJournees = 2,
+		            });
+
+		            this.Pointages.Add(new Pointage
+		            {
+		                Benevole = benevole1,
+		                Centre = centre_paris,
+		                Date = new DateTime(2017, 03, 03),
+		                NbDemiJournees = 1,
+		            });
+
+		            this.Pointages.Add(new Pointage
+		            {
+		                Benevole = benevole1,
+		                Centre = centre_paris,
+		                Date = new DateTime(2017, 03, 05),
+		                NbDemiJournees = 1,
+		            });
+				}
+				else
+				{
+		            // ****** Utilisateurs
+		            var admin = new Utilisateur
+		            {
+		                Centre = null,
+		                Login = "admin",
+		            };
+
+					if(string.IsNullOrEmpty(adminPassword))
+						adminPassword = "admin!2018";
+
+		            admin.SetPassword(adminPassword);
+		            this.Utilisateurs.Add(admin);
+				}
 
                 // ****** Frais
                 this.Frais.Add(new Frais
