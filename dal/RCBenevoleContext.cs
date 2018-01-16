@@ -284,6 +284,15 @@ namespace dal
 				}
 				else
 				{
+					// ****** Siège
+		            var siege = new Siege
+		            {
+		                Nom = "AD68",
+		                Adresse = "9 avenue d’Italie 68110 ILLZACH",
+		            };
+
+		            this.Sieges.Add(siege);
+
 		            // ****** Utilisateurs
 		            var admin = new Utilisateur
 		            {

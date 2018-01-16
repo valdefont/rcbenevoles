@@ -67,7 +67,7 @@ namespace web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin")]
-        public async Task<IActionResult> Create([Bind("ID,Nom,Adresse")] Centre centre)
+        public async Task<IActionResult> Create([Bind("ID,Nom,Adresse,SiegeID")] Centre centre)
         {
             if (ModelState.IsValid)
             {
@@ -101,7 +101,7 @@ namespace web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin")]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Nom,Adresse")] Centre centre)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Nom,Adresse,SiegeID")] Centre centre)
         {
             if (id != centre.ID)
             {
