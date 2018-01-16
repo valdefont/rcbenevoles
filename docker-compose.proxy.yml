@@ -4,37 +4,39 @@ version: '3.1'
 
 services:
     
-    # SERVICE rcb : notre application web
-    rcb:
-        image: rcbenevoles
+    # SERVICE app : notre application web
+    app:
+        image: rcbenevoles:dev
         environment:
-            APP_DB_SERVER: appdb        			# Serveur de la base de données
+            APP_DB_SERVER: db                       # Serveur de la base de données
             APP_DB_PASSWORD: rcbenevoles2017        # Mot de passe de la base de données
-            APP_PATH_BASE: /rcb						# Chemin racine de l'application (reverse-proxy)
+            APP_PATH_BASE: /rcb			    		# Chemin racine de l'application (reverse-proxy)
+            APP_GENERATE_DEV_DATA: 0				# Indique si des données de test sont générées	
+            APP_ADMIN_PASSWORD: testadmin
         deploy:
             restart_policy:
                 condition: on-failure
         depends_on:
-            - appdb
+            - db
         networks:
             - backnet
 
     # SERVICE reverseproxy
     rproxy:
-        image: rproxy
+        image: rproxy:latest
         deploy:
             restart_policy:
                 condition: on-failure
         ports:
             - "80:80"
         links:
-            - rcb
+            - app
         networks:
             - backnet
 
-    # SERVICE appdb : notre base de données
-    appdb:
-        image: postgres
+    # SERVICE db : notre base de données
+    db:
+        image: postgres:latest
         volumes:
             - db_data:/var/lib/postgresql/data
         restart: always
