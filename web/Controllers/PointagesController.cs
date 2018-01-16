@@ -425,5 +425,16 @@ namespace web.Controllers
         {
             return _context.Pointages.Any(e => e.ID == id);
         }
+
+        // POST: Pointages/Delete/5 
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var pointage = await _context.Pointages.SingleOrDefaultAsync(m => m.ID == id);
+            _context.Pointages.Remove(pointage);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
     }
 }
