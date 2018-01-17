@@ -56,7 +56,12 @@
         @RenderBody()
         <hr />
         <footer>
-            <p>&copy; 2017 - David D.</p>
+            <div style="float:left">
+                <p>&copy; 2017 - David D.</p>
+            </div>
+            <div style="float:right">
+                version @(System.Reflection.Assembly.GetAssembly(typeof(web.Program)).GetName().Version.ToString())
+            </div>
         </footer>
     </div>
 
