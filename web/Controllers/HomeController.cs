@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using dal;
-using Serilog;
 
 namespace web.Controllers
 {
@@ -31,11 +30,11 @@ namespace web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(LoginPasswordModel model)
         {
-            Log.Information("[LOGIN] Tentative de connexion de {UserLogin}", model.Login);
+            LogInfo("[LOGIN] Tentative de connexion de {UserLogin}", model.Login);
 
             if (!ModelState.IsValid)
             {
-                Log.Warning("[LOGIN] Echec de connexion de {UserLogin} : ModelState invalide ({@ModelState})", model.Login, ModelState);
+                LogWarning("[LOGIN] Echec de connexion de {UserLogin} : ModelState invalide ({@ModelState})", model.Login, ModelState);
                 return View();
             }
 
@@ -43,14 +42,14 @@ namespace web.Controllers
 
             if (dbuser == null)
             {
-                Log.Warning("[LOGIN] Echec de connexion de {UserLogin} : Utilisateur inconnu", model.Login);
+                LogWarning("[LOGIN] Echec de connexion de {UserLogin} : Utilisateur inconnu", model.Login);
                 ModelState.AddModelError("", "Echec de la connexion. Vérifier votre login et votre mot de passe");
                 return View();
             }
 
             if(!dbuser.TestPassword(model.Password))
             {
-                Log.Warning("[LOGIN] Echec de connexion de {UserLogin} : Mot de passe invalide", model.Login);
+                LogWarning("[LOGIN] Echec de connexion de {UserLogin} : Mot de passe invalide", model.Login);
                 ModelState.AddModelError("", "Echec de la connexion. Vérifier votre login et votre mot de passe");
                 return View();
             }
@@ -69,6 +68,8 @@ namespace web.Controllers
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+
+            LogInfo("[LOGIN] Succès de la connexion de {UserLogin}", model.Login);
 
             return RedirectToAction(nameof(Index));
         }

@@ -73,6 +73,7 @@ namespace web.Controllers
             {
                 _context.Add(centre);
                 await _context.SaveChangesAsync();
+                LogInfo("Centre #{CentreID} ({Centre}) créé", centre.ID, centre.Nom);
                 return RedirectToAction(nameof(Index));
             }
             return View(centre);
@@ -114,6 +115,7 @@ namespace web.Controllers
                 {
                     _context.Update(centre);
                     await _context.SaveChangesAsync();
+                    LogInfo("Centre #{CentreID} ({Centre}) modifié", centre.ID, centre.Nom);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -158,6 +160,9 @@ namespace web.Controllers
             var centre = await _context.Centres.SingleOrDefaultAsync(m => m.ID == id);
             _context.Centres.Remove(centre);
             await _context.SaveChangesAsync();
+
+            LogInfo("Centre #{CentreID} ({Centre}) supprimé", centre.ID, centre.Nom);
+
             return RedirectToAction(nameof(Index));
         }
 
