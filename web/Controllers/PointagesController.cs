@@ -189,15 +189,25 @@ namespace web.Controllers
             {
                 try
                 {
+                    bool created = false;
+
                     if (existing != null)
                     {
                         existing.NbDemiJournees = pointage.NbDemiJournees;
                         _context.Update(existing);
                     }
                     else
+                    {
+                        created = true;
                         _context.Pointages.Add(pointage);
+                    }
 
                     await _context.SaveChangesAsync();
+
+                    if(created)
+                        LogInfo("Pointage créé au {DatePointage:dd/MM/yyyy} pour le benevole #{BenevoleID} sur le centre {CentreID}", pointage.Date, pointage.BenevoleID, pointage.CentreID);
+                    else
+                        LogInfo("Pointage modifié au {DatePointage:dd/MM/yyyy} pour le benevole #{BenevoleID} sur le centre {CentreID}", pointage.Date, pointage.BenevoleID, pointage.CentreID);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -437,6 +447,9 @@ namespace web.Controllers
             var pointage = await _context.Pointages.SingleOrDefaultAsync(m => m.ID == id);
             _context.Pointages.Remove(pointage);
             await _context.SaveChangesAsync();
+
+            LogInfo("Pointage supprimé au {DatePointage:dd/MM/yyyy} pour le benevole #{BenevoleID} sur le centre {CentreID}", pointage.Date, pointage.BenevoleID, pointage.CentreID);
+            
             return Ok();
         }
     }

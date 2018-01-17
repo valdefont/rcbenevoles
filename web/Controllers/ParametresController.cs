@@ -68,7 +68,10 @@ namespace web.Controllers
             if (haserror)
                 ViewBag.ErrorMessage = "Un des taux n'est pas correct. Veuillez le corriger pour sauvegarder l'ensemble des données";
             else
+            {
+                LogInfo("Taux kilométriques modifié");
                 _context.SaveChanges();
+            }
 
             return View(ListFraisWithNewYear());
         }

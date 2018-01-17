@@ -133,6 +133,9 @@ namespace web.Controllers
             _context.Add(benevoleWithAddress.Adresse);
             _context.Add(benevoleWithAddress.Benevole);
             await _context.SaveChangesAsync();
+
+            LogInfo("Benevole #{BenevoleID} ({BenevolePrenom} {BenevoleNom}) créé", benevoleWithAddress.Benevole.ID, benevoleWithAddress.Benevole.Prenom, benevoleWithAddress.Benevole.Nom);
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -185,6 +188,9 @@ namespace web.Controllers
             try
             {
                 _context.Update(benevole);
+                            
+                LogInfo("Benevole #{BenevoleID} ({BenevolePrenom} {BenevoleNom}) modifié", benevole.ID, benevole.Prenom, benevole.Nom);
+
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
@@ -224,6 +230,9 @@ namespace web.Controllers
             var benevole = await _context.Benevoles.SingleOrDefaultAsync(m => m.ID == id);
             _context.Benevoles.Remove(benevole);
             await _context.SaveChangesAsync();
+
+            LogInfo("Benevole #{BenevoleID} ({BenevolePrenom} {BenevoleNom}) supprimé", benevole.ID, benevole.Prenom, benevole.Nom);
+            
             return RedirectToAction(nameof(Index));
         }
 
@@ -311,6 +320,7 @@ namespace web.Controllers
                 {
                     // suppression des pointages précédents
                     _context.Pointages.RemoveRange(pointagesFromDate);
+
                 }
             }
 
@@ -324,6 +334,12 @@ namespace web.Controllers
             _context.Add(benevoleWithAddress.Adresse);
 
             await _context.SaveChangesAsync();
+
+            if (pointagesFromDate.Count() > 0)
+                LogInfo("Suppression de {NombrePointages} pointages du benevole #{BenevoleID} ({BenevolePrenom} {BenevoleNom}) après le {DateChangement:dd/MM/yyyy}", pointagesFromDate.Count(), benevole.ID, benevole.Prenom, benevole.Nom, benevoleWithAddress.Adresse.DateChangement);
+
+            LogInfo("Adresse {AdresseID} créée pour le benevole #{BenevoleID} ({BenevolePrenom} {BenevoleNom})", benevoleWithAddress.Adresse.ID, benevole.ID, benevole.Prenom, benevole.Nom);
+
             return RedirectToAction(nameof(Details), new { id = id });
         }
 
