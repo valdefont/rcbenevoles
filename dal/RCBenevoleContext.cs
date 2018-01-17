@@ -100,7 +100,7 @@ namespace dal
             	var seedDevData = Environment.GetEnvironmentVariable("APP_GENERATE_DEV_DATA");
 				var adminPassword = Environment.GetEnvironmentVariable("APP_ADMIN_PASSWORD");
 
-            	if (seedDevData == "1" || seedDevData.ToLower() == "true")
+            	if (!string.IsNullOrEmpty(seedDevData) && (seedDevData == "1" || seedDevData.ToLower() == "true"))
 				{
 		            // ****** Sièges
 		            var siege75 = new Siege
