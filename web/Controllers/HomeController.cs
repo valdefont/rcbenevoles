@@ -27,15 +27,29 @@ namespace web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(LoginPasswordModel model)
         {
+            LogInfo("[LOGIN] Tentative de connexion de {UserLogin}", model.Login);
+
             if (!ModelState.IsValid)
+            {
+                LogWarning("[LOGIN] Echec de connexion de {UserLogin} : ModelState invalide ({@ModelState})", model.Login, ModelState);
                 return View();
+            }
 
             var dbuser = _context.Utilisateurs.Include(u => u.Centre).Where(u => u.Login == model.Login).SingleOrDefault();
 
-            if (dbuser == null || !dbuser.TestPassword(model.Password))
+            if (dbuser == null)
             {
+                LogWarning("[LOGIN] Echec de connexion de {UserLogin} : Utilisateur inconnu", model.Login);
+                ModelState.AddModelError("", "Echec de la connexion. Vérifier votre login et votre mot de passe");
+                return View();
+            }
+
+            if(!dbuser.TestPassword(model.Password))
+            {
+                LogWarning("[LOGIN] Echec de connexion de {UserLogin} : Mot de passe invalide", model.Login);
                 ModelState.AddModelError("", "Echec de la connexion. Vérifier votre login et votre mot de passe");
                 return View();
             }
@@ -54,6 +68,8 @@ namespace web.Controllers
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+
+            LogInfo("[LOGIN] Succès de la connexion de {UserLogin}", model.Login);
 
             return RedirectToAction(nameof(Index));
         }

@@ -11,6 +11,8 @@ namespace web.Controllers
 {
     public abstract class RCBenevoleController : Controller
     {
+        private const string LOG_PREFIX = "({COMMON_UserLogin}) ";
+
         protected RCBenevoleContext _context;
 
         public RCBenevoleContext GetDbContext() => _context;
@@ -38,6 +40,39 @@ namespace web.Controllers
             if (benevole == null) throw new ArgumentNullException(nameof(benevole));
 
             return IsCentreIdAllowed(benevole.CurrentAdresse.CentreID);
+        }
+
+
+        protected void LogDebug(string templateMessage, params object[] propertyValues)
+        {
+            Serilog.Log.Debug(LOG_PREFIX + templateMessage, GenerateFullPropertyValues(propertyValues));
+        }
+
+        protected void LogInfo(string templateMessage, params object[] propertyValues)
+        {
+            Serilog.Log.Information(LOG_PREFIX + templateMessage, GenerateFullPropertyValues(propertyValues));
+        }
+                
+        protected void LogWarning(string templateMessage, params object[] propertyValues)
+        {
+            Serilog.Log.Warning(LOG_PREFIX + templateMessage, GenerateFullPropertyValues(propertyValues));
+        }
+
+        protected void LogError(string templateMessage, params object[] propertyValues)
+        {
+            Serilog.Log.Error(LOG_PREFIX + templateMessage, GenerateFullPropertyValues(propertyValues));
+        }
+
+        private object[] GenerateFullPropertyValues(params object[] propertyValues)
+        {
+            var realProps = new object[propertyValues.Length + 1];
+            if(!User.Identity.IsAuthenticated)
+                realProps[0] = "<anonymous>";
+            else
+                realProps[0] = User.Identity.Name;
+            propertyValues.CopyTo(realProps, 1);
+
+            return realProps;
         }
     }
 }
