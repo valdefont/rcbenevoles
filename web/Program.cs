@@ -21,10 +21,8 @@ namespace web
         public static int Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
-            .ReadFrom.Configuration(CurrentConfiguration)
-            .Enrich.FromLogContext()
-            .WriteTo.Console()
-            .CreateLogger();
+                .ReadFrom.Configuration(CurrentConfiguration)
+                .CreateLogger();
 
             try
             {
