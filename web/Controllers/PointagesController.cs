@@ -190,7 +190,10 @@ namespace web.Controllers
                 try
                 {
                     if (existing != null)
-                        _context.Update(pointage);
+                    {
+                        existing.NbDemiJournees = pointage.NbDemiJournees;
+                        _context.Update(existing);
+                    }
                     else
                         _context.Pointages.Add(pointage);
 
