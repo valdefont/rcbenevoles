@@ -6,19 +6,22 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Serilog;
-using Serilog.Events;
 
 namespace web
 {
     public class Program
     {
+        public static IConfiguration CurrentConfiguration { get; } = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
+            .Build();
+
         public static int Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+            .ReadFrom.Configuration(CurrentConfiguration)
             .Enrich.FromLogContext()
             .WriteTo.Console()
             .CreateLogger();
