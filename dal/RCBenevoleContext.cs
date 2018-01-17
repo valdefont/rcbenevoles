@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace dal
@@ -14,35 +15,77 @@ namespace dal
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Benevole>()
-                .HasIndex(t => new { t.Nom, t.Prenom })
+            // *** SIEGE
+            modelBuilder.Entity<Siege>()
+                .HasIndex(b => b.Nom)
                 .IsUnique(true);
 
-            modelBuilder.Entity<Frais>()
-                .HasIndex(f => f.Annee)
-                .IsUnique(true);
-
-            modelBuilder.Entity<Benevole>()
-                .HasIndex(b => new { b.Nom, b.Prenom })
-                .IsUnique(true);
-
+            // *** CENTRE
             modelBuilder.Entity<Centre>()
                 .HasIndex(b => b.Nom)
                 .IsUnique(true);
 
+            modelBuilder.Entity<Centre>()
+                .HasOne(s => s.Siege)
+                .WithMany(s => s.Centres)
+                .HasForeignKey(s => s.SiegeID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // *** BENEVOLE
+            modelBuilder.Entity<Benevole>()
+                .HasIndex(t => new { t.Nom, t.Prenom })
+                .IsUnique(false);
+
+            modelBuilder.Entity<Benevole>()
+                .HasMany(b => b.Adresses)
+                .WithOne(a => a.Benevole)
+                .HasForeignKey(a => a.BenevoleID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Benevole>()
+                .HasMany(b => b.Pointages)
+                .WithOne(p => p.Benevole)
+                .HasForeignKey(p => p.BenevoleID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // *** ADRESSE
+            modelBuilder.Entity<Adresse>()
+                .HasOne(a => a.Centre)
+                .WithMany()
+                .HasForeignKey(c => c.CentreID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Adresse>()
+                .HasIndex(a => new { a.BenevoleID, a.DateChangement })
+                .IsUnique(true);
+
+            // *** FRAIS
+            modelBuilder.Entity<Frais>()
+                .HasIndex(f => f.Annee)
+                .IsUnique(true);
+
+            // *** POINTAGE
             modelBuilder.Entity<Pointage>()
-                .HasIndex(b => new { b.BenevoleID, b.Date })
+                .HasIndex(b => new { b.BenevoleID, b.CentreID, b.Date })
                 .IsUnique(true);
 
             modelBuilder.Entity<Pointage>(pt => pt.Property(p => p.Date)
                 .HasColumnType("date"));
 
+            // *** UTILISATEUR
             modelBuilder.Entity<Utilisateur>()
                 .HasIndex(b => b.Login)
                 .IsUnique(true);
+
+            modelBuilder.Entity<Utilisateur>()
+                .HasOne(u => u.Centre)
+                .WithMany()
+                .HasForeignKey(c => c.CentreID)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
         public DbSet<Utilisateur> Utilisateurs { get; set; }
+        public DbSet<Siege> Sieges { get; set; }
         public DbSet<Centre> Centres { get; set; }
         public DbSet<Benevole> Benevoles { get; set; }
         public DbSet<Pointage> Pointages { get; set; }
@@ -54,121 +97,215 @@ namespace dal
 
             if(this.Utilisateurs.Count() == 0)
             {
-                // ****** Centres
-                var centre_paris = new Centre
-                {
-                    Nom = "Paris",
-                    Adresse = "5 rue de Paris 75000 PARIS",
-                };
+            	var seedDevData = Environment.GetEnvironmentVariable("APP_GENERATE_DEV_DATA");
+				var adminPassword = Environment.GetEnvironmentVariable("APP_ADMIN_PASSWORD");
 
-                this.Centres.Add(centre_paris);
+            	if (!string.IsNullOrEmpty(seedDevData) && (seedDevData == "1" || seedDevData.ToLower() == "true"))
+				{
+		            // ****** Sièges
+		            var siege75 = new Siege
+		            {
+		                Nom = "AD75",
+		                Adresse = "rue du siège 75000 PARIS",
+		            };
 
-                var centre = new Centre
-                {
-                    Nom = "Lyon",
-                    Adresse = "5 rue de Lyon 69000 Lyon",
-                };
+		            this.Sieges.Add(siege75);
 
-                this.Centres.Add(centre);
+		            // ****** Centres
+		            var centre_paris = new Centre
+		            {
+		                Nom = "Paris",
+		                Adresse = "5 rue de Paris 75000 PARIS",
+		                Siege = siege75,
+		            };
 
-                // ****** Utilisateurs
-                var testadmin = new Utilisateur
-                {
-                    Centre = null,
-                    Login = "testadmin",
-                };
+		            this.Centres.Add(centre_paris);
 
-                testadmin.SetPassword("testadmin");
-                this.Utilisateurs.Add(testadmin);
+		            var centre = new Centre
+		            {
+		                Nom = "Lyon",
+		                Adresse = "5 rue de Lyon 69000 Lyon",
+		                Siege = siege75,
+		            };
 
-                var adminparis = new Utilisateur
-                {
-                    Centre = centre_paris,
-                    Login = "adminparis",
-                };
+		            this.Centres.Add(centre);
 
-                adminparis.SetPassword("adminparis");
-                this.Utilisateurs.Add(adminparis);
+		            // ****** Utilisateurs
+		            var testadmin = new Utilisateur
+		            {
+		                Centre = null,
+		                Login = "testadmin",
+		            };
 
-                // ****** Bénévoles
-                var benevole1 = new Benevole
-                {
-                    Prenom = "Bernard",
-                    Nom = "TOTO",
-                    Centre = centre,
-                    AdresseLigne1 = "1 rue de david",
-                    CodePostal = "69000",
-                    Ville = "Lyon",
-                    Telephone = "00000000",
-                };
+					if(string.IsNullOrEmpty(adminPassword))
+						adminPassword = "testadmin";
 
-                this.Benevoles.Add(benevole1);
+		            testadmin.SetPassword(adminPassword);
+		            this.Utilisateurs.Add(testadmin);
 
-                this.Benevoles.Add(new Benevole
-                {
-                    Prenom = "Anne",
-                    Nom = "TUTU",
-                    Centre = centre,
-                    AdresseLigne1 = "1 rue d'anne",
-                    CodePostal = "13000",
-                    Ville = "Marseille",
-                    Telephone = "00000000",
-                });
+		            var adminparis = new Utilisateur
+		            {
+		                Centre = centre_paris,
+		                Login = "adminparis",
+		            };
 
-                this.Benevoles.Add(new Benevole
-                {
-                    Prenom = "Gérard",
-                    Nom = "TITI",
-                    Centre = centre_paris,
-                    AdresseLigne1 = "1 rue de gérard",
-                    CodePostal = "75015",
-                    Ville = "Paris",
-                    Telephone = "00000000",
-                });
+		            adminparis.SetPassword("adminparis");
+		            this.Utilisateurs.Add(adminparis);
 
-                this.Benevoles.Add(new Benevole
-                {
-                    Prenom = "Daniel",
-                    Nom = "ROBERT",
-                    Centre = centre_paris,
-                    AdresseLigne1 = "1 rue de daniel",
-                    CodePostal = "78000",
-                    Ville = "Cergy",
-                    Telephone = "00000000",
-                });
+		            // ****** Bénévoles
+		            var benevole1 = new Benevole
+		            {
+		                Prenom = "Bernard",
+		                Nom = "TOTO",
+		                Telephone = "00000000",
+		                Adresses = new List<Adresse>
+		                {
+		                    new Adresse
+		                    {
+		                        Centre = centre,
+		                        AdresseLigne1 = "1 rue de david",
+		                        CodePostal = "69000",
+		                        Ville = "Lyon",
+		                        DistanceCentre = 80,
+		                    },
+		                    new Adresse
+		                    {
+		                        DateChangement = new DateTime(2017, 2, 1),
+		                        Centre = centre,
+		                        AdresseLigne1 = "26 rue de david",
+		                        CodePostal = "69000",
+		                        Ville = "Lyon",
+		                        DistanceCentre = 84,
+		                    },
+		                    new Adresse
+		                    {
+		                        DateChangement = new DateTime(2017, 3, 1),
+		                        Centre = centre_paris,
+		                        AdresseLigne1 = "1 rue de jules",
+		                        CodePostal = "75005",
+		                        Ville = "Paris",
+		                        DistanceCentre = 65,
+		                        IsCurrent = true,
+		                    }
+		                },
+		            };
 
-                // ****** Pointages
-                this.Pointages.Add(new Pointage
-                {
-                    Benevole = benevole1,
-                    Date = new DateTime(2017, 12, 03),
-                    Distance = 150,
-                    NbDemiJournees = 2,
-                });
+		            this.Benevoles.Add(benevole1);
 
-                this.Pointages.Add(new Pointage
-                {
-                    Benevole = benevole1,
-                    Date = new DateTime(2017, 12, 04),
-                    Distance = 120,
-                    NbDemiJournees = 2,
-                });
+		            this.Benevoles.Add(new Benevole
+		            {
+		                Prenom = "Anne",
+		                Nom = "TUTU",
+		                Telephone = "00000000",
+		                Adresses = new List<Adresse>
+		                {
+		                    new Adresse
+		                    {
+		                        Centre = centre,
+		                        AdresseLigne1 = "1 rue d'anne",
+		                        CodePostal = "13000",
+		                        Ville = "Marseille",
+		                        DistanceCentre = 10,
+		                        IsCurrent = true,
+		                    }
+		                }
+		            });
 
-                this.Pointages.Add(new Pointage
-                {
-                    Benevole = benevole1,
-                    Date = new DateTime(2017, 12, 05),
-                    Distance = 180,
-                    NbDemiJournees = 1,
-                });
+		            this.Benevoles.Add(new Benevole
+		            {
+		                Prenom = "Gérard",
+		                Nom = "TITI",
+		                Telephone = "00000000",
+		                Adresses = new List<Adresse>
+		                {
+		                    new Adresse
+		                    {
+		                        Centre = centre_paris,
+		                        AdresseLigne1 = "1 rue de gérard",
+		                        CodePostal = "75015",
+		                        Ville = "Paris",
+		                        DistanceCentre = 65.5m,
+		                        IsCurrent = true,
+		                    }
+		                }
+		            });
 
-                this.Pointages.Add(new Pointage
-                {
-                    Benevole = benevole1,
-                    Date = new DateTime(2017, 12, 06),
-                    Distance = 150,
-                    NbDemiJournees = 1,
-                });
+		            this.Benevoles.Add(new Benevole
+		            {
+		                Prenom = "Daniel",
+		                Nom = "ROBERT",
+		                Telephone = "00000000",
+		                Adresses = new List<Adresse>
+		                {
+		                    new Adresse
+		                    {
+		                        Centre = centre_paris,
+		                        AdresseLigne1 = "1 rue de daniel",
+		                        CodePostal = "78000",
+		                        Ville = "Cergy",
+		                        DistanceCentre = 80,
+		                        IsCurrent = true,
+		                    }
+		                }
+		            });
+
+		            // ****** Pointages
+		            this.Pointages.Add(new Pointage
+		            {
+		                Benevole = benevole1,
+		                Centre = centre,
+		                Date = new DateTime(2017, 1, 15),
+		                NbDemiJournees = 2,
+		            });
+
+		            this.Pointages.Add(new Pointage
+		            {
+		                Benevole = benevole1,
+		                Centre = centre,
+		                Date = new DateTime(2017, 2, 28),
+		                NbDemiJournees = 2,
+		            });
+
+		            this.Pointages.Add(new Pointage
+		            {
+		                Benevole = benevole1,
+		                Centre = centre_paris,
+		                Date = new DateTime(2017, 03, 03),
+		                NbDemiJournees = 1,
+		            });
+
+		            this.Pointages.Add(new Pointage
+		            {
+		                Benevole = benevole1,
+		                Centre = centre_paris,
+		                Date = new DateTime(2017, 03, 05),
+		                NbDemiJournees = 1,
+		            });
+				}
+				else
+				{
+					// ****** Siège
+		            var siege = new Siege
+		            {
+		                Nom = "AD68",
+		                Adresse = "9 avenue d’Italie 68110 ILLZACH",
+		            };
+
+		            this.Sieges.Add(siege);
+
+		            // ****** Utilisateurs
+		            var admin = new Utilisateur
+		            {
+		                Centre = null,
+		                Login = "admin",
+		            };
+
+					if(string.IsNullOrEmpty(adminPassword))
+						adminPassword = "admin!2018";
+
+		            admin.SetPassword(adminPassword);
+		            this.Utilisateurs.Add(admin);
+				}
 
                 // ****** Frais
                 this.Frais.Add(new Frais
@@ -194,10 +331,10 @@ namespace dal
 
         public IQueryable<Benevole> ListAllowedBenevoles(Utilisateur utilisateur)
         {
-            var query = this.Benevoles.Include(b => b.Centre).AsQueryable();
+            var query = this.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre).AsQueryable();
 
             if (utilisateur.CentreID != null)
-                query = query.Where(b => b.CentreID == utilisateur.CentreID);
+                query = query.Where(b => b.Adresses.SingleOrDefault(a => a.IsCurrent).CentreID == utilisateur.CentreID);
 
             return query.OrderBy(b => b.Nom).ThenBy(b => b.Prenom);
         }

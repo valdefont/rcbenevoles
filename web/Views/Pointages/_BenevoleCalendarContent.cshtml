@@ -8,13 +8,21 @@
     <thead>
         <tr>
             <th colspan="7" class="month_selector">
-                <span>
-                    <a href="#" onclick="previousMonth(); return false;">&lt;</a>
-                </span>
-                <span>@Model.MonthDate.ToString("MMMM yyyy")</span>
-                <span>
-                    <a href="#" onclick="nextMonth(); return false;">&gt;</a>
-                </span>
+                <div>
+                    <div style="float:left;display:inline-block">
+                        <span>
+                            <a href="#" onclick="previousMonth(); return false;">&lt;</a>
+                        </span>
+                    </div>
+                    <div style="display:inline-block">
+                        <span>@Model.MonthDate.ToString("MMMM yyyy")</span>
+                    </div>
+                    <div style="float:right;display:inline-block">
+                        <span>
+                            <a href="#" onclick="nextMonth(); return false;">&gt;</a>
+                        </span>
+                    </div>
+                </div>
             </th>
         </tr>
         <tr>
@@ -31,14 +39,14 @@
     @foreach(var row in Model.CalendarRows)
     {
         <tr>
-        @foreach(var item in row.Items)
-            {
+        @foreach (var item in row.Items)
+        {
             <td data-date="@item.Date.ToString("yyyy-MM-dd")" data-id="@((item.Pointage != null) ? item.Pointage.ID.ToString() : "")" class="pointage @item.GetPointageCssClass()" onclick="selectDate(this)">
                 <div>
                     <span class="calendarday @item.GetDayTextCssClass()" title="@item.GetTitle()">@item.Date.Day</span>
                 </div>
             </td>
-            }
+        }
         </tr>
     }
     </tbody>

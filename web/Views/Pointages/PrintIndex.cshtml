@@ -1,9 +1,19 @@
-﻿@{
+﻿@model PrintIndexModel
+
+@{
     ViewData["Title"] = "Détails";
 }
 
 <h2>Edition des fiches d'abandon</h2>
 
+@if(Model.Periods.Count == 0) 
+{
+<div class="alert alert-warning">
+    <p>Aucune fiche n'est disponible pour l'édition. Il est possible qu'aucun pointage du bénévole n'ait été effectué sur cette période</p>
+</div>
+}
+else
+{
 <div class="alert alert-info">
     <p>Sélectionnez la fiche que vous souhaitez éditer</p>
 </div>
@@ -11,17 +21,29 @@
 <div>
     <hr />
     <ul>
-        <li>
-            <a asp-action="Print" asp-route-period="1" asp-route-year="2017" target="_blank">Janvier à Avril 2017</a>
-        </li>
-        <li>
-            <a asp-action="Print" asp-route-period="2" asp-route-year="2017" target="_blank">Mai à Août 2017</a>
-        </li>
-        <li>
-            <a asp-action="Print" asp-route-period="3" asp-route-year="2017" target="_blank">Septembre à Décembre 2017</a>
-        </li>
-        <li>
-            <a asp-action="Print" asp-route-period="1" asp-route-year="2018" target="_blank">Janvier à Avril 2018</a>
-        </li>
+        @foreach (var period in Model.Periods)
+        {
+            if (period.Adresses.Count == 1)
+            {
+                <li>
+                    <a asp-action="Print" asp-route-addressId="@period.Adresses.First().ID" asp-route-period="@period.PeriodId" asp-route-year="@period.Start.Year" target="_blank">Du @period.Start.ToString("dddd dd MMM") au @period.End.ToString("dd MMM yyyy") </a>
+                </li>
+            }
+            else
+            {
+            <li>
+                <span>Du @period.Start.ToString("dddd dd MMM") au @period.End.ToString("dddd dd MMM yyyy")</span>
+                <ul>
+                @foreach (var adresse in period.Adresses)
+                {
+                    <li>
+                        <a asp-action="Print" asp-route-addressId="@adresse.ID" asp-route-period="@period.PeriodId" asp-route-year="@period.Start.Year" target="_blank">pour l'adresse @adresse.GetAdresseComplete(false)</a>
+                    </li>
+                }
+                </ul>
+            </li>
+            }
+        }
     </ul>
 </div>
+}

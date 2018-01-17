@@ -2,41 +2,35 @@
 
 @{
     Layout = null;
+
+    var adresse = Model.Benevole.GetAdresseFromDate(Model.Date);
 }
- 
+
+
 <div id="detailPanel">
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h3 class="panel-title">Journée du @Model.Date.ToString("d")</h3>
+            <h3 class="panel-title">Journée du <strong>@Model.Date.ToString("d")</strong> - Centre de @Model.Centre.Nom (@adresse.DistanceCentre km A/R)</h3>
         </div>
         <div class="panel-body">
+            @if (!ViewBag.DisabledForCenter)
+            {
             <form asp-antiforgery="true" asp-action="EditOrCreate">
                 <div class="form-group">
                     <div class="col-xs-12">
                         <fieldset>
-                            <div class="col-sm-4">
-                                <label class="control-label">Type de journée :</label>
+                            <div class="col-sm-6">
+                                <label class="control-label">Nombre d'allers-retours :</label>
                             </div>
-                            <div class="col-sm-8" style="margin-top:-10px">
+                            <div class="col-sm-6" style="margin-top:-10px">
                                 <input asp-for="NbDemiJournees" type="hidden" />
                                 <div class="radio">
-                                    <label><input id="NbDemiJournees1" name="RadioNbDemiJournees" type="radio" value="1" /> Demi-journée</label>
+                                    <label><input id="NbDemiJournees1" name="RadioNbDemiJournees" type="radio" value="1" /> 1 (@(adresse.DistanceCentre) km)</label>
                                 </div>
                                 <div class="radio">
-                                    <label><input id="NbDemiJournees2" name="RadioNbDemiJournees" type="radio" value="2" /> Journée complète</label>
+                                    <label><input id="NbDemiJournees2" name="RadioNbDemiJournees" type="radio" value="2" /> 2 (@(adresse.DistanceCentre * 2) km)</label>
                                 </div>
                                 <span asp-validation-for="NbDemiJournees" class="text-danger"></span>
-                            </div>
-                        </fieldset>
-                    </div>
-                    <div class="col-xs-12">
-                        <fieldset>
-                            <div class="col-sm-4">
-                                <label asp-for="Distance" class="control-label">Distance (km) :</label>
-                            </div>
-                            <div class="col-sm-8">
-                                <input asp-for="Distance" class="form-control" onblur="validateDistance();" />
-                                <span id="validationDistance" class="text-danger" style="display:none"></span>
                             </div>
                         </fieldset>
                     </div>
@@ -50,6 +44,13 @@
                     </div>
                 </div>
             </form>
+            }
+            else
+            {
+                <div class="alert alert-warning">
+                    <p>Le bénévole n'est pas relié à votre centre pour cette date</p>
+                </div>
+            }
         </div>
     </div>
 </div>

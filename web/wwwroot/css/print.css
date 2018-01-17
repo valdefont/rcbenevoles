@@ -117,6 +117,11 @@ div .clearfix {
     border-bottom-style: dotted;
 }
 
+
+.formfield > span {
+    font-weight: bold;
+}
+
 .frais_rubrique {
     text-decoration: underline;
 }
@@ -133,6 +138,10 @@ div .clearfix {
     border-bottom-color: gray;
     border-bottom-style: solid;
     text-align:right;
+}
+
+.frais_saisie > span {
+    font-weight: bold;
 }
 
 .frais_saisie.top {

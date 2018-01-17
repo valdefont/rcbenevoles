@@ -16,8 +16,10 @@ namespace web.Models
 
         public dal.models.Benevole Benevole { get; set; }
 
+        public dal.models.Adresse Adresse { get; set; }
+
         public decimal FraisKm { get; set; }
 
-        public decimal TotalDistance { get; set; }
+        public decimal TotalDemiJournees { get; set; }
     }
 }

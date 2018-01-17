@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace dal.models
@@ -17,67 +20,57 @@ namespace dal.models
         [Display(Name = "Prénom")]
         public string Prenom { get; set; }
 
-        [Required(ErrorMessage = "Veuillez renseigner l'adresse du bénévole")]
-        [Display(Name = "Adresse")]
-        public string AdresseLigne1 { get; set; }
-
-        [Display(Name = "Adresse (ligne 2)")]
-        public string AdresseLigne2 { get; set; }
-
-        [Display(Name = "Adresse (ligne 3)")]
-        public string AdresseLigne3 { get; set; }
-
-        [Required(ErrorMessage = "Veuillez renseigner le code postal du bénévole")]
-        [Display(Name = "Code postal")]
-        public string CodePostal { get; set; }
-
-        [Required(ErrorMessage = "Veuillez renseigner la ville de domiciliation du bénévole")]
-        [Display(Name = "Ville")]
-        public string Ville { get; set; }
-
         [Required(ErrorMessage = "Veuillez renseigner un numéro de téléphone du bénévole")]
         [Display(Name = "N° de téléphone")]
         public string Telephone { get; set; }
 
-        [Required(ErrorMessage = "Veuillez sélectionner le centre de rattachement du bénévole")]
-        [Display(Name = "Centre")]
-        public int CentreID { get; set; }
+        public List<Adresse> Adresses { get; set; }
 
-        [Display(Name = "Centre")]
-        public Centre Centre { get; set; }
+        public List<Pointage> Pointages { get; set; }
 
-        public string GetAdresseComplete(bool forHtml)
+        [NotMapped]
+        public Adresse CurrentAdresse => Adresses?.SingleOrDefault(a => a.IsCurrent);
+
+        public Adresse GetAdresseFromDate(DateTime date)
         {
-            const string HTML_NEWLINE = "</br>";
+            var addresses = this.Adresses
+                .Where(a => a.DateChangement <= date)
+                .OrderByDescending(a => a.DateChangement);
 
-            string newline;
+            return addresses.FirstOrDefault();
+        }
 
-            if (forHtml)
-                newline = HTML_NEWLINE;
-            else
-                newline = Environment.NewLine;
 
-            var builder = new StringBuilder();
-            builder.Append(this.AdresseLigne1);
+        public IDictionary<DateTime, Adresse> GetAdressesInPeriod(DateTime periodStart, DateTime periodEnd)
+        {
+            var result = this.Adresses
+                .Where(a => a.DateChangement < periodEnd)
+                .ToDictionary(a => a.DateChangement);
+            
+            // on ajoute un element pour le debut de periode sauf si une adresse a été placée exactement sur la date de debut de periode
+            result.TryAdd(periodStart, null);
 
-            if (!string.IsNullOrWhiteSpace(this.AdresseLigne2))
+            bool periodStartSet = false;
+            Adresse currentAddress = null;
+
+            foreach(var date in result.Keys.OrderBy(d => d))
             {
-                builder.Append(newline);
-                builder.Append(this.AdresseLigne2);
+                var addr = result[date];
+
+                if(addr == null)     // period start
+                {
+                    periodStartSet = true;
+                    addr = currentAddress;
+                    result[date] = currentAddress;
+                }
+
+                currentAddress = addr;
+
+                if(!periodStartSet)
+                    result.Remove(date);
             }
 
-            if (!string.IsNullOrWhiteSpace(this.AdresseLigne3))
-            {
-                builder.Append(newline);
-                builder.Append(this.AdresseLigne3);
-            }
-
-            builder.Append(newline);
-            builder.Append(this.CodePostal);
-            builder.Append(" ");
-            builder.Append(this.Ville);
-
-            return builder.ToString();
+            return result;
         }
     }
 }

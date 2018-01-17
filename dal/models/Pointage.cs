@@ -17,6 +17,13 @@ namespace dal.models
         public Benevole Benevole { get; set; }
 
         [Required]
+        [Display(Name = "Centre")]
+        public int CentreID { get; set; }
+
+        [Display(Name = "Centre")]
+        public Centre Centre { get; set; }
+
+        [Required]
         [Display(Name = "Date")]
         [DataType(DataType.Date)]
         public DateTime Date { get; set; }
@@ -25,9 +32,5 @@ namespace dal.models
         [Display(Name = "Demi-journées")]
         [Range(1, 2, ErrorMessage = "Le nombre de demi-journées doit être 1 ou 2")]
         public int NbDemiJournees { get; set; }
-
-        [Required]
-        [Display(Name = "Distance A/R")]
-        public decimal Distance { get; set; }
     }
 }

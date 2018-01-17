@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
 
 namespace dal.models
 {
-    public class Centre
+    public class Siege
     {
         [Key]
         public int ID { get; set; }
@@ -15,8 +16,6 @@ namespace dal.models
         [Required]
         public string Adresse { get; set; }
 
-        public int SiegeID { get; set; }
-
-        public Siege Siege { get; set; }
+        public IEnumerable<Centre> Centres { get; set; }
     }
 }

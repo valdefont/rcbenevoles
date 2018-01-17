@@ -23,11 +23,43 @@ namespace web.Controllers
         }
 
         // GET: Benevoles
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var query = _context.ListAllowedBenevoles(GetCurrentUser());
+            var model = new BenevoleFilterModel
+            {
+                Term = string.Empty
+            };
 
-            return View(await query.ToListAsync());
+            if (User.IsInRole("SuperAdmin"))
+                model.Centres = _context.Centres;
+            else
+                model.CentreID = GetCurrentUser().CentreID;
+
+            return View(model);
+        }
+
+        // AJAX : Benevoles/Filter
+        public IActionResult Filter(BenevoleFilterModel filter)
+        {
+            if (filter.Term == null)
+                filter.Term = string.Empty;
+
+            if (!User.IsInRole("SuperAdmin"))
+                filter.CentreID = GetCurrentUser().CentreID;
+
+            var query = _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre)
+                .Where(b => b.Adresses.Any(a => a.CentreID == filter.CentreID))
+                .Where(b => b.Nom.ToLower().StartsWith(filter.Term.Trim().ToLower()));
+
+            var model = query.Select(b => new BenevolePointageListItemModel
+            {
+                BenevoleID = b.ID,
+                BenevoleNom = b.Nom,
+                BenevolePrenom = b.Prenom,
+                ShowAddressWarning = b.Adresses.Any(a => a.CentreID == filter.CentreID && a.IsCurrent)
+            }).AsEnumerable();
+
+            return View(model);
         }
 
         [HttpPost]
@@ -54,13 +86,13 @@ namespace web.Controllers
             if (id == null)
                 return NotFound();
 
-            var benevole = await _context.Benevoles.Include(b => b.Centre)
+            var benevole = await _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre)
                 .SingleOrDefaultAsync(m => m.ID == id);
 
             if (benevole == null)
                 return NotFound();
 
-            if (GetCurrentUser().CentreID != null && GetCurrentUser().CentreID != benevole.CentreID)
+            if (GetCurrentUser().CentreID != null && GetCurrentUser().CentreID != benevole.CurrentAdresse.CentreID)
                 return Forbid();
 
             return View(benevole);
@@ -71,7 +103,13 @@ namespace web.Controllers
         {
             SetViewBagCentres();
 
-            return View();
+            var benevole = new BenevoleWithAdresse
+            {
+                Benevole = new Benevole(),
+                Adresse = new Adresse(),
+            };
+
+            return View(benevole);
         }
 
         // POST: Benevoles/Create
@@ -79,16 +117,25 @@ namespace web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Nom,Prenom,AdresseLigne1,AdresseLigne2,AdresseLigne3,CodePostal,Ville,Telephone,CentreID")] Benevole benevole)
+        public async Task<IActionResult> Create(BenevoleWithAdresse benevoleWithAddress)
         {
-            if (!_context.ContainsCentre(benevole.CentreID))
+            if (!_context.ContainsCentre(benevoleWithAddress.Adresse.CentreID))
                 ModelState.AddModelError("CentreID", "Le centre n'existe pas");
 
-            if (!ModelState.IsValid)
-                return View(benevole);
+            SetViewBagCentres();
 
-            _context.Add(benevole);
+            if (!ModelState.IsValid)
+                return View(benevoleWithAddress);
+
+            benevoleWithAddress.Adresse.IsCurrent = true;
+            benevoleWithAddress.Adresse.Benevole = benevoleWithAddress.Benevole;
+
+            _context.Add(benevoleWithAddress.Adresse);
+            _context.Add(benevoleWithAddress.Benevole);
             await _context.SaveChangesAsync();
+
+            LogInfo("Benevole #{BenevoleID} ({BenevolePrenom} {BenevoleNom}) créé", benevoleWithAddress.Benevole.ID, benevoleWithAddress.Benevole.Prenom, benevoleWithAddress.Benevole.Nom);
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -98,12 +145,15 @@ namespace web.Controllers
             if (id == null)
                 return NotFound();
 
-            var benevole = await _context.Benevoles.SingleOrDefaultAsync(m => m.ID == id);
+            var benevole = await _context.Benevoles
+                .Include(b => b.Adresses)
+                .ThenInclude(a => a.Centre)
+                .SingleOrDefaultAsync(m => m.ID == id);
 
             if (benevole == null)
                 return NotFound();
 
-            if(GetCurrentUser().CentreID != null && GetCurrentUser().CentreID != benevole.CentreID)
+            if(GetCurrentUser().CentreID != null && GetCurrentUser().CentreID != benevole.CurrentAdresse.CentreID)
                 return Forbid();
 
             SetViewBagCentres();
@@ -121,14 +171,14 @@ namespace web.Controllers
             if (id != benevole.ID)
                 return NotFound();
 
-            if (!_context.ContainsCentre(benevole.CentreID))
+            if (!_context.ContainsCentre(benevole.CurrentAdresse.CentreID))
                 ModelState.AddModelError("CentreID", "Le centre n'existe pas");
 
             var user = GetCurrentUser();
 
             if (user.Centre != null)
             {
-                if (benevole.CentreID != user.Centre.ID)
+                if (benevole.CurrentAdresse.CentreID != user.Centre.ID)
                     ModelState.AddModelError("CentreID", "Vous ne pouvez pas créer de bénévole sur un autre centre que celui qui vous est affecté");
             }
 
@@ -138,6 +188,9 @@ namespace web.Controllers
             try
             {
                 _context.Update(benevole);
+                            
+                LogInfo("Benevole #{BenevoleID} ({BenevolePrenom} {BenevoleNom}) modifié", benevole.ID, benevole.Prenom, benevole.Nom);
+
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
@@ -177,7 +230,117 @@ namespace web.Controllers
             var benevole = await _context.Benevoles.SingleOrDefaultAsync(m => m.ID == id);
             _context.Benevoles.Remove(benevole);
             await _context.SaveChangesAsync();
+
+            LogInfo("Benevole #{BenevoleID} ({BenevolePrenom} {BenevoleNom}) supprimé", benevole.ID, benevole.Prenom, benevole.Nom);
+            
             return RedirectToAction(nameof(Index));
+        }
+
+        // GET: Benevoles/ChangeAddress/5
+        public async Task<IActionResult> ChangeAddress(int id, bool? force = false)
+        {
+            var benevole = await _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre)
+                .SingleOrDefaultAsync(m => m.ID == id);
+
+            if (benevole == null)
+                return NotFound();
+
+            if (GetCurrentUser().CentreID != null && GetCurrentUser().CentreID != benevole.CurrentAdresse.CentreID)
+                return Forbid();
+
+            SetViewBagCentres();
+
+            var benevoleWithAddress = new BenevoleWithAdresse
+            {
+                Benevole = benevole,
+                Adresse = new Adresse
+                {
+                    BenevoleID = id,
+                    CentreID = benevole.CurrentAdresse.CentreID,
+                    Centre = benevole.CurrentAdresse.Centre,
+                    DateChangement = DateTime.Today,
+                }
+            };
+
+            ViewBag.Force = force;
+
+            return View(benevoleWithAddress);
+        }
+
+        // POST: Benevoles/ChangeAddress/5
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeAddress(int id, BenevoleWithAdresse benevoleWithAddress, bool force = false)
+        {
+            ViewBag.Force = force;
+            if (!_context.ContainsCentre(benevoleWithAddress.Adresse.CentreID))
+                ModelState.AddModelError("Adresse.CentreID", "Le centre n'existe pas");
+
+            foreach (var ms in new List<string>(ModelState.Keys))
+            {
+                if(ms.StartsWith("Benevole."))
+                    ModelState.Remove(ms);
+            }
+
+            SetViewBagCentres();
+
+            benevoleWithAddress.Benevole = _context.Benevoles.SingleOrDefault(b => b.ID == benevoleWithAddress.Adresse.BenevoleID);
+
+            if (!ModelState.IsValid)
+                return View(benevoleWithAddress);
+
+            var benevole = await _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre)
+                .SingleOrDefaultAsync(b => b.ID == id);
+
+            // Recherche d'adresses déjà présentes à une date postérieure
+            var anyAddress = benevole.Adresses.Any(a => a.DateChangement >= benevoleWithAddress.Adresse.DateChangement);
+
+            if (anyAddress)
+            {
+                ModelState.AddModelError("Adresse.DateChangement", "Une adresse existe déjà à une date postérieure. Veuillez supprimer l'adresse postérieure d'abord");
+                return View(benevoleWithAddress);
+            }
+
+            // Recherche de pointages sur un centre différent à une date postérieure
+            var pointagesFromDate = _context.Pointages
+                .Where(p => p.BenevoleID == id)
+                .Where(p => p.CentreID != benevoleWithAddress.Adresse.CentreID)
+                .Where(p => p.Date >= benevoleWithAddress.Adresse.DateChangement);
+
+            if (pointagesFromDate.Count() > 0)
+            {
+                if (!force)
+                {
+                    ViewBag.Force = true;
+                    return View(benevoleWithAddress);
+                }
+                else
+                {
+                    // suppression des pointages précédents
+                    _context.Pointages.RemoveRange(pointagesFromDate);
+
+                }
+            }
+
+            benevole.CurrentAdresse.IsCurrent = false;
+
+            benevoleWithAddress.Adresse.BenevoleID = benevole.ID;
+            benevole.Adresses.Add(benevoleWithAddress.Adresse);
+
+            benevole.Adresses.OrderByDescending(a => a.DateChangement).First().IsCurrent = true;
+
+            _context.Add(benevoleWithAddress.Adresse);
+
+            await _context.SaveChangesAsync();
+
+            if (pointagesFromDate.Count() > 0)
+                LogInfo("Suppression de {NombrePointages} pointages du benevole #{BenevoleID} ({BenevolePrenom} {BenevoleNom}) après le {DateChangement:dd/MM/yyyy}", pointagesFromDate.Count(), benevole.ID, benevole.Prenom, benevole.Nom, benevoleWithAddress.Adresse.DateChangement);
+
+            LogInfo("Adresse {AdresseID} créée pour le benevole #{BenevoleID} ({BenevolePrenom} {BenevoleNom})", benevoleWithAddress.Adresse.ID, benevole.ID, benevole.Prenom, benevole.Nom);
+
+            return RedirectToAction(nameof(Details), new { id = id });
         }
 
         private bool BenevoleExists(int id)

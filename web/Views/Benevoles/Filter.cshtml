@@ -1,0 +1,32 @@
+﻿@model IEnumerable<BenevolePointageListItemModel>
+
+@{
+    Layout = null;
+}
+
+<tbody id="updateBody">
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @if (!item.ShowAddressWarning && !User.IsInRole("SuperAdmin"))
+            {
+                <i class="glyphicon glyphicon-warning-sign yellow" title="Le bénévole n'est plus lié à votre centre. Vous ne pourrez qu'effectuer les pointages et éditer des fiches sur les périodes où le bénévole était lié à votre centre"></i>
+            }
+            <span>@Html.DisplayFor(modelItem => item.BenevoleNom)</span>&nbsp;
+        </td>
+        <td>
+            <span>@Html.DisplayFor(modelItem => item.BenevolePrenom)</span>
+        </td>
+        <td>
+            <a asp-action="Benevole" asp-controller="Pointages" asp-route-id="@item.BenevoleID"><i class="glyphicon glyphicon-calendar"></i> Gérer les pointages</a> | 
+            <a asp-action="PrintIndex" asp-controller="Pointages" asp-route-id="@item.BenevoleID"><i class="glyphicon glyphicon-print"></i> Editer une fiche</a>
+            @if (item.ShowAddressWarning || User.IsInRole("SuperAdmin"))
+            {
+                <text>
+                | <a asp-action="Details" asp-route-id="@item.BenevoleID"><i class="glyphicon glyphicon-zoom-in"></i> Détails</a>
+                </text>
+            }
+        </td>
+    </tr>
+}
+</tbody>

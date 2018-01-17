@@ -59,6 +59,10 @@
     cursor: pointer;
 }
 
+.pointage.day_disabled {
+    background-color: #cfcfcf;
+}
+
 .pointage.none {
     background: none;
 }
@@ -95,4 +99,12 @@
 
 .calendarday.other_month {
     color: gray;
+}
+
+.calendarday.day_disabled {
+    color: gray;
+}
+
+.yellow {
+    color: #d1b951;
 }
