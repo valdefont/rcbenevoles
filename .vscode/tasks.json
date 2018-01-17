@@ -7,7 +7,7 @@
         {
             "taskName": "build",
             "args": [
-                "${workspaceRoot}/dalinit/dalinit.csproj"
+                "${workspaceRoot}/web/web.csproj"
             ],
             "isBuildCommand": true,
             "problemMatcher": "$msCompile"
