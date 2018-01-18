@@ -9,6 +9,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Globalization;
+using Microsoft.AspNetCore.Localization;
 
 namespace web
 {
@@ -64,6 +66,8 @@ namespace web
 				   ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 			});
 
+            app.UseRequestLocalization(BuildLocalizationOptions());
+            
             app.UseAuthentication();
 
             app.UseMvc(routes =>
@@ -79,5 +83,23 @@ namespace web
             serviceScopeFactory.SeedData();
         }
 
+        private RequestLocalizationOptions BuildLocalizationOptions()
+        {
+            var supportedCultures = new List<CultureInfo>
+            {
+                new CultureInfo("fr-FR"),
+                new CultureInfo("en-US"),
+                new CultureInfo("es-ES"),
+                new CultureInfo("de-DE"),
+            };
+ 
+            var options = new RequestLocalizationOptions {
+                DefaultRequestCulture = new RequestCulture("fr-FR"),
+                SupportedCultures = supportedCultures,
+                SupportedUICultures = supportedCultures
+            };
+ 
+            return options;
+        }
     }
 }
