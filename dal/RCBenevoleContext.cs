@@ -253,7 +253,7 @@ namespace dal
 		            this.Pointages.Add(new Pointage
 		            {
 		                Benevole = benevole1,
-		                Centre = centre,
+		                Adresse = benevole1.Adresses.First(),
 		                Date = new DateTime(2017, 1, 15),
 		                NbDemiJournees = 2,
 		            });
@@ -261,7 +261,7 @@ namespace dal
 		            this.Pointages.Add(new Pointage
 		            {
 		                Benevole = benevole1,
-		                Centre = centre,
+		                Adresse = benevole1.Adresses.Skip(1).First(),
 		                Date = new DateTime(2017, 2, 28),
 		                NbDemiJournees = 2,
 		            });
@@ -269,7 +269,7 @@ namespace dal
 		            this.Pointages.Add(new Pointage
 		            {
 		                Benevole = benevole1,
-		                Centre = centre_paris,
+		                Adresse = benevole1.Adresses.Skip(2).First(),
 		                Date = new DateTime(2017, 03, 03),
 		                NbDemiJournees = 1,
 		            });
@@ -277,7 +277,7 @@ namespace dal
 		            this.Pointages.Add(new Pointage
 		            {
 		                Benevole = benevole1,
-		                Centre = centre_paris,
+		                Adresse = benevole1.Adresses.Skip(2).First(),
 		                Date = new DateTime(2017, 03, 05),
 		                NbDemiJournees = 1,
 		            });
