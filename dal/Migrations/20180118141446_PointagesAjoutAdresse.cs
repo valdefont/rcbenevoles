@@ -36,7 +36,8 @@ namespace dal.Migrations
                 principalColumn: "ID",
                 onDelete: ReferentialAction.Restrict);
 
-            //migrationBuilder.Sql("")
+            migrationBuilder.Sql(@"UPDATE ""Pointages"" AS p SET ""AdresseID"" = 
+	(SELECT ""ID"" FROM ""Adresse"" AS a WHERE a.""BenevoleID"" = p.""BenevoleID"" AND a.""DateChangement"" <= p.""Date"" ORDER BY a.""DateChangement"" DESC LIMIT 1) ;");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
