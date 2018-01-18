@@ -66,7 +66,7 @@ namespace dal
 
             // *** POINTAGE
             modelBuilder.Entity<Pointage>()
-                .HasIndex(b => new { b.BenevoleID, b.CentreID, b.Date })
+                .HasIndex(b => new { b.BenevoleID, b.Date })
                 .IsUnique(true);
 
             modelBuilder.Entity<Pointage>(pt => pt.Property(p => p.Date)
@@ -93,7 +93,7 @@ namespace dal
 
         public void SeedData()
         {
-            this.Database.EnsureCreated();
+            this.Database.Migrate();
 
             if(this.Utilisateurs.Count() == 0)
             {
