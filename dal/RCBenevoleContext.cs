@@ -93,7 +93,7 @@ namespace dal
 
         public void SeedData()
         {
-            this.Database.EnsureCreated();
+            this.Database.Migrate();
 
             if(this.Utilisateurs.Count() == 0)
             {

@@ -35,6 +35,8 @@ namespace dal.Migrations
                 principalTable: "Adresse",
                 principalColumn: "ID",
                 onDelete: ReferentialAction.Restrict);
+
+            //migrationBuilder.Sql("")
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
