@@ -23,6 +23,13 @@ namespace dal.models
         [Display(Name = "Centre")]
         public Centre Centre { get; set; }
 
+        //[Required] -- sera mis required dans migration suivante
+        [Display(Name = "Adresse")]
+        public int? AdresseID { get; set; } //sera mis required dans migration suivante
+
+        [Display(Name = "Adresse")]
+        public Adresse Adresse { get; set; }
+
         [Required]
         [Display(Name = "Date")]
         [DataType(DataType.Date)]
