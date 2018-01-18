@@ -166,19 +166,30 @@ namespace web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Nom,Prenom,AdresseLigne1,AdresseLigne2,AdresseLigne3,CodePostal,Ville,Telephone,CentreID")] Benevole benevole)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Nom,Prenom,Telephone,CentreID")] Benevole benevole)
         {
             if (id != benevole.ID)
-                return NotFound();
+                return NotFound("Les identifiants ne correspondent pas");
 
-            if (!_context.ContainsCentre(benevole.CurrentAdresse.CentreID))
+            var existing = _context.Benevoles.Include(b => b.Adresses)
+                .SingleOrDefault(b => b.ID == id);
+
+            if(existing == null)
+                return NotFound("Le bénévole n'existe pas");
+
+            var adresse = existing.Adresses.SingleOrDefault(a => a.IsCurrent);
+
+            if(adresse == null)
+                return NotFound("Aucune adresse actuelle pour le bénévole");
+
+            if (!_context.ContainsCentre(adresse.CentreID))
                 ModelState.AddModelError("CentreID", "Le centre n'existe pas");
 
             var user = GetCurrentUser();
 
             if (user.Centre != null)
             {
-                if (benevole.CurrentAdresse.CentreID != user.Centre.ID)
+                if (adresse.CentreID != user.Centre.ID)
                     ModelState.AddModelError("CentreID", "Vous ne pouvez pas créer de bénévole sur un autre centre que celui qui vous est affecté");
             }
 
@@ -187,11 +198,15 @@ namespace web.Controllers
 
             try
             {
-                _context.Update(benevole);
+                existing.Nom = benevole.Nom;
+                existing.Prenom = benevole.Prenom;
+                existing.Telephone = benevole.Telephone;
+                
+                _context.Update(existing);
                             
-                LogInfo("Benevole #{BenevoleID} ({BenevolePrenom} {BenevoleNom}) modifié", benevole.ID, benevole.Prenom, benevole.Nom);
-
                 await _context.SaveChangesAsync();
+
+                LogInfo("Benevole #{BenevoleID} ({BenevolePrenom} {BenevoleNom}) modifié", benevole.ID, benevole.Prenom, benevole.Nom);
             }
             catch (DbUpdateConcurrencyException)
             {
