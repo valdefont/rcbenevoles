@@ -11,9 +11,10 @@ using System;
 namespace dal.Migrations
 {
     [DbContext(typeof(RCBenevoleContext))]
-    partial class RCBenevoleContextModelSnapshot : ModelSnapshot
+    [Migration("20180118141446_PointagesAjoutAdresse")]
+    partial class PointagesAjoutAdresse
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -124,9 +125,11 @@ namespace dal.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int>("AdresseID");
+                    b.Property<int?>("AdresseID");
 
                     b.Property<int>("BenevoleID");
+
+                    b.Property<int>("CentreID");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("date");
@@ -136,6 +139,8 @@ namespace dal.Migrations
                     b.HasKey("ID");
 
                     b.HasIndex("AdresseID");
+
+                    b.HasIndex("CentreID");
 
                     b.HasIndex("BenevoleID", "Date")
                         .IsUnique();
@@ -210,12 +215,16 @@ namespace dal.Migrations
                 {
                     b.HasOne("dal.models.Adresse", "Adresse")
                         .WithMany()
-                        .HasForeignKey("AdresseID")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("AdresseID");
 
                     b.HasOne("dal.models.Benevole", "Benevole")
                         .WithMany("Pointages")
                         .HasForeignKey("BenevoleID")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("dal.models.Centre", "Centre")
+                        .WithMany()
+                        .HasForeignKey("CentreID")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

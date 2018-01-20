@@ -318,10 +318,10 @@ namespace web.Controllers
                 return View(benevoleWithAddress);
             }
 
-            // Recherche de pointages sur un centre différent à une date postérieure
+            // Recherche de pointages sur une adresse différente à une date postérieure
             var pointagesFromDate = _context.Pointages
                 .Where(p => p.BenevoleID == id)
-                .Where(p => p.CentreID != benevoleWithAddress.Adresse.CentreID)
+                .Where(p => p.AdresseID != benevoleWithAddress.Adresse.ID)
                 .Where(p => p.Date >= benevoleWithAddress.Adresse.DateChangement);
 
             if (pointagesFromDate.Count() > 0)

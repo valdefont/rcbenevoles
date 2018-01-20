@@ -17,11 +17,11 @@ namespace dal.models
         public Benevole Benevole { get; set; }
 
         [Required]
-        [Display(Name = "Centre")]
-        public int CentreID { get; set; }
+        [Display(Name = "Adresse")]
+        public int AdresseID { get; set; }
 
-        [Display(Name = "Centre")]
-        public Centre Centre { get; set; }
+        [Display(Name = "Adresse")]
+        public Adresse Adresse { get; set; }
 
         [Required]
         [Display(Name = "Date")]

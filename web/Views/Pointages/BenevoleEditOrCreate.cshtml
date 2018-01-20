@@ -2,15 +2,13 @@
 
 @{
     Layout = null;
-
-    var adresse = Model.Benevole.GetAdresseFromDate(Model.Date);
 }
 
 
 <div id="detailPanel">
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h3 class="panel-title">Journée du <strong>@Model.Date.ToString("d")</strong> - Centre de @Model.Centre.Nom (@adresse.DistanceCentre km A/R)</h3>
+            <h3 class="panel-title">Journée du <strong>@Model.Date.ToString("d")</strong> - Centre de @Model.Adresse.Centre.Nom (@Model.Adresse.DistanceCentre km A/R)</h3>
         </div>
         <div class="panel-body">
             @if (!ViewBag.DisabledForCenter)
@@ -25,10 +23,10 @@
                             <div class="col-sm-6" style="margin-top:-10px">
                                 <input asp-for="NbDemiJournees" type="hidden" />
                                 <div class="radio">
-                                    <label><input id="NbDemiJournees1" name="RadioNbDemiJournees" type="radio" value="1" /> 1 (@(adresse.DistanceCentre) km)</label>
+                                    <label><input id="NbDemiJournees1" name="RadioNbDemiJournees" type="radio" value="1" /> 1 (@(Model.Adresse.DistanceCentre) km)</label>
                                 </div>
                                 <div class="radio">
-                                    <label><input id="NbDemiJournees2" name="RadioNbDemiJournees" type="radio" value="2" /> 2 (@(adresse.DistanceCentre * 2) km)</label>
+                                    <label><input id="NbDemiJournees2" name="RadioNbDemiJournees" type="radio" value="2" /> 2 (@(Model.Adresse.DistanceCentre * 2) km)</label>
                                 </div>
                                 <span asp-validation-for="NbDemiJournees" class="text-danger"></span>
                             </div>

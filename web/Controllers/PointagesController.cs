@@ -134,7 +134,8 @@ namespace web.Controllers
             if (benevole == null)
                 return NotFound();
 
-            var centre = benevole.GetAdresseFromDate(date).Centre;
+            var adresse = benevole.GetAdresseFromDate(date);
+            var centre = adresse.Centre;
             var userCentreId = GetCurrentUser().CentreID;
 
             var pointage = await _context.Pointages
@@ -147,13 +148,13 @@ namespace web.Controllers
                 pointage = new dal.models.Pointage
                 {
                     BenevoleID = id,
-                    CentreID = centre.ID,
+                    AdresseID = adresse.ID,
                     Date = date,
                     NbDemiJournees = 1,
                 };
 
                 pointage.Benevole = benevole;
-                pointage.Centre = centre;
+                pointage.Adresse = adresse;
             }
 
             return PartialView(pointage);
@@ -174,12 +175,13 @@ namespace web.Controllers
                 pointage.ID = existing.ID;
 
             var benevole = _context.Benevoles.Include(b => b.Adresses).SingleOrDefault(b => b.ID == pointage.BenevoleID);
-            var centreId = benevole.GetAdresseFromDate(pointage.Date).CentreID;
+            var adresse = benevole.GetAdresseFromDate(pointage.Date);
+            var centreId = adresse.CentreID;
 
-            pointage.CentreID = centreId;
+            pointage.AdresseID = adresse.ID;
 
-            if (existing != null && existing.CentreID != pointage.CentreID)
-                return BadRequest("centre id does not match with existing pointage");
+            if (existing != null && existing.AdresseID != pointage.AdresseID)
+                return BadRequest("AdresseID does not match with existing pointage");
 
             var userCentreId = GetCurrentUser().CentreID;
             if (userCentreId != null && centreId != userCentreId)
@@ -205,9 +207,9 @@ namespace web.Controllers
                     await _context.SaveChangesAsync();
 
                     if(created)
-                        LogInfo("Pointage créé au {DatePointage:dd/MM/yyyy} pour le benevole #{BenevoleID} sur le centre {CentreID}", pointage.Date, pointage.BenevoleID, pointage.CentreID);
+                        LogInfo("Pointage créé au {DatePointage:dd/MM/yyyy} pour le benevole #{BenevoleID} sur l'adresse {AdresseID}", pointage.Date, pointage.BenevoleID, pointage.AdresseID);
                     else
-                        LogInfo("Pointage modifié au {DatePointage:dd/MM/yyyy} pour le benevole #{BenevoleID} sur le centre {CentreID}", pointage.Date, pointage.BenevoleID, pointage.CentreID);
+                        LogInfo("Pointage modifié au {DatePointage:dd/MM/yyyy} pour le benevole #{BenevoleID} sur l'adresse {AdresseID}", pointage.Date, pointage.BenevoleID, pointage.AdresseID);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -251,7 +253,7 @@ namespace web.Controllers
             IQueryable<Pointage> ptgs = benevole.Pointages.AsQueryable();
 
             if (userCentreId != null)
-                ptgs = ptgs.Where(p => p.CentreID == userCentreId);
+                ptgs = ptgs.Where(p => p.Adresse.CentreID == userCentreId);
 
             var dates = ptgs
                 .OrderBy(p => p.Date)
@@ -387,30 +389,10 @@ namespace web.Controllers
             if(frais == null)
                 return NotFound("Frais non trouvé");
 
-            // ***** Recherches des dates des pointages à calculer
-            var start = periodStart;
-            var end = periodEnd;
-
-            if(adresse.DateChangement > start)
-                start = adresse.DateChangement;
-
-            var adressesByPeriod = benevole.GetAdressesInPeriod(start, end)
-                .OrderBy(x => x.Key);
-
-            var allAdresses = adressesByPeriod.Select(x => x.Value).ToList();
-
-            int index = allAdresses.IndexOf(adresse);
-
-            if (index < adressesByPeriod.Count() - 1)
-            {
-                var nextAdr = allAdresses[index + 1];
-                end = adressesByPeriod.Where(a => a.Value == nextAdr).Single().Key;
-            }
-
             // ***** Calcul du nombre de demi-journées pointées sur l'adresse
             var totalDemiJournees = _context.Pointages
-                .Where(p => p.BenevoleID == adresse.BenevoleID && p.CentreID == adresse.CentreID)
-                .Where(p => p.Date >= start && p.Date < end)
+                .Where(p => p.AdresseID == addressId)
+                .Where(p => p.Date >= periodStart && p.Date < periodEnd)
                 .Sum(p => p.NbDemiJournees);
 
             int monthCount;
@@ -448,7 +430,7 @@ namespace web.Controllers
             _context.Pointages.Remove(pointage);
             await _context.SaveChangesAsync();
 
-            LogInfo("Pointage supprimé au {DatePointage:dd/MM/yyyy} pour le benevole #{BenevoleID} sur le centre {CentreID}", pointage.Date, pointage.BenevoleID, pointage.CentreID);
+            LogInfo("Pointage supprimé au {DatePointage:dd/MM/yyyy} pour le benevole #{BenevoleID} sur l'adresse {AdresseID}", pointage.Date, pointage.BenevoleID, pointage.AdresseID);
             
             return Ok();
         }
