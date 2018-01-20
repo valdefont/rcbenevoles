@@ -110,7 +110,7 @@ namespace web.Models
                 if (this.Pointage.NbDemiJournees == 2)
                     dist *= 2;
 
-                return $"Centre de {this.Pointage.Centre.Nom} : {dist} km";
+                return $"Centre de {this.Pointage.Adresse.Centre.Nom} : {dist} km";
             }
             else
                 return string.Empty;
