@@ -17,15 +17,8 @@ namespace dal.models
         public Benevole Benevole { get; set; }
 
         [Required]
-        [Display(Name = "Centre")]
-        public int CentreID { get; set; }
-
-        [Display(Name = "Centre")]
-        public Centre Centre { get; set; }
-
-        //[Required] -- sera mis required dans migration suivante
         [Display(Name = "Adresse")]
-        public int? AdresseID { get; set; } //sera mis required dans migration suivante
+        public int AdresseID { get; set; }
 
         [Display(Name = "Adresse")]
         public Adresse Adresse { get; set; }

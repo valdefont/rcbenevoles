@@ -11,9 +11,10 @@ using System;
 namespace dal.Migrations
 {
     [DbContext(typeof(RCBenevoleContext))]
-    partial class RCBenevoleContextModelSnapshot : ModelSnapshot
+    [Migration("20180118224211_PointagesSupprCentre")]
+    partial class PointagesSupprCentre
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
