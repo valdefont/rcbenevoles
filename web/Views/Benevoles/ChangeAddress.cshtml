@@ -16,7 +16,7 @@
                 <div class="alert alert-warning">
                     <p>Des pointages ont été effectués sur une autre adresse après la date de changement. Cliquez sur <strong>Enregistrer la nouvelle adresse</strong> pour confirmer votre choix.
                     <br/> 
-                    Attention : Les pointages concernés seront supprimés !</p>
+                    Attention : Les pointages concernés seront supprimés ! (Concerne @ViewBag.ImpactedCount pointages)</p>
                 </div>
                 <div class="form-group" style="float:right">
                     <button type="submit" class="btn btn-success" onclick="submit(); return false;">Enregister la nouvelle adresse</button>
@@ -77,6 +77,17 @@
                                 <label asp-for="Adresse.DistanceCentre" class="control-label"></label>
                                 <input id="DistanceCentre" asp-for="Adresse.DistanceCentre" class="form-control" onblur="validateDistance();" />
                                 <span id="validationDistance" class="text-danger" style="display:none"></span>
+
+                                <div class="alert alert-info">
+                                    <p>
+                                        <span>Prière d’utiliser <a href="http://www.mappy.fr" target="_blank"><strong>MAPPY</strong></a> afin de déterminer la distance la plus courte A/R du domicile au lieu de bénévolat.</span>
+                                    </p>
+                                    @* ITINERAIRE PRE REMPLI
+                                    <p>
+                                        <a href="#" target="_blank" onclick="setMappyUrl(this);"><strong>Cliquez ici</strong></a> pour ouvrir Mappy avec l'itinéraire pré-rempli
+                                    </p>*@
+                                </div>
+
                             </div>
                         </fieldset>
                     </div>
@@ -94,6 +105,19 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 
     <script type="text/javascript">
+
+        function setMappyUrl(elem) {
+            //https://fr.mappy.com/#/4/M2/TItinerary/IFRRue%20de%20Copenhague%2C%2067300%20Schiltigheim|TOPlace%20des%20Halles%2C%2067000%20Strasbourg|MOvoiture|PRcar
+
+            var source = $("#Adresse_AdresseLigne1").val() + " ," + $("#Adresse_CodePostal").val() + " " + $("#Adresse_Ville").val();
+
+            var url = "https://fr.mappy.com/#/4/M2/TItinerary/IFR" + encodeURIComponent(source);
+            
+            // TODO
+            @*url = url + "|TOPlace%20des%20Halles%2C%2067000%20Strasbourg|MOvoiture|PRcar";*@
+
+            elem.href = url;
+        }
 
         function validateDistance() {
 

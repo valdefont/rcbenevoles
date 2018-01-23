@@ -1,0 +1,64 @@
+﻿@model BenevoleAllAdresses
+
+@{
+    ViewData["Title"] = "Adresses";
+}
+
+<h2>Gestion des bénévoles</h2>
+
+<h3>Adresses de @Model.Benevole.Nom @Model.Benevole.Prenom</h3>
+
+<p>
+    <a asp-action="ChangeAddress" asp-controller="Benevoles" asp-route-id="@Model.Benevole.ID">Enregistrer une nouvelle adresse</a>
+</p>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+                <th>
+                    Période
+                </th>
+                <th>
+                    Adresse
+                </th>
+                <th>
+                    Nombre de pointages
+                </th>
+                <th>
+                    Actions
+                </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var adr in Model.Adresses) {
+        <tr>
+            <td>
+                @if(adr.DateStart != null && adr.DateEnd != null) {
+                    <text>
+                    <span>Du @adr.DateStart.Value.ToString("d")</span>
+                    <span>au @adr.DateEnd.Value.ToString("d")</span>
+                    </text>
+                } else if(adr.DateStart != null) {
+                    <text>
+                    <span>Depuis le @adr.DateStart.Value.ToString("d")</span>
+                    </text>
+                } else if(adr.DateEnd != null) {
+                    <text>
+                    <span>Jusqu'au @adr.DateEnd.Value.ToString("d")</span>
+                    </text> 
+                }
+            </td>
+            <td>
+                @Html.Raw(adr.Adresse.GetAdresseComplete(forHtml:true))
+            </td>
+            <td>
+                <span>@adr.PointagesCount</span>
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@adr.Adresse.ID"><i class="glyphicon glyphicon-edit"></i> Corriger</a> |
+                <a asp-action="Delete" asp-route-id="@adr.Adresse.ID"><i class="glyphicon glyphicon-trash"></i> Supprimer [A VENIR]</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

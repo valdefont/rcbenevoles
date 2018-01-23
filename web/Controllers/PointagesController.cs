@@ -314,7 +314,7 @@ namespace web.Controllers
                     if(periodStart >= end)
                         break;
 
-                    var adressesWithDates = benevole.GetAdressesInPeriod(periodStart, periodEnd);
+                    var adressesWithDates = benevole.GetAdressesInPeriod(periodStart, periodEnd, excludeEnd:true);
 
                     var period = new PrintIndexPeriod
                     {

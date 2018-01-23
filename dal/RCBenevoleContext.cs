@@ -90,6 +90,7 @@ namespace dal
         public DbSet<Benevole> Benevoles { get; set; }
         public DbSet<Pointage> Pointages { get; set; }
         public DbSet<Frais> Frais { get; set; }
+        public DbSet<Adresse> Adresse { get; set; }
 
         public void SeedData()
         {

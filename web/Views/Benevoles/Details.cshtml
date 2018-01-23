@@ -38,6 +38,7 @@
                 </div>
                 <div>
                     <a asp-action="Edit" asp-route-id="@Model.ID" class="btn btn-primary"><i class="glyphicon glyphicon-edit"></i> Modifier</a>
+                    <a asp-action="Delete" asp-route-id="@Model.ID" class="btn btn-primary"><i class="glyphicon glyphicon-remove"></i> Supprimer</a>
                 </div>
             </div>
         </div>
@@ -50,7 +51,7 @@
                     <p>
                         Si le bénévole change d'adresse ou de centre en cours d'année, cliquez sur le bouton <strong>Enregistrer un changement d'adresse</strong>.
                         <br/>
-                        Si l'adresse ou le centre saisi est erroné, veuillez <a asp-action="Edit" asp-controller="Adresse" asp-route-id="@Model.CurrentAdresse.ID">cliquer ici pour les corriger</a>
+                        Si l'adresse ou le centre saisi est erroné, veuillez <a asp-action="Edit" asp-controller="Adresses" asp-route-id="@Model.CurrentAdresse.ID">cliquer ici pour les corriger</a>
                     </p>
                 </div>
                 <div>
@@ -84,7 +85,7 @@
                     <a asp-action="ChangeAddress" asp-route-id="@Model.ID" class="btn btn-primary"><i class="glyphicon glyphicon-plane"></i> Enregistrer un changement d'adresse</a>
                     @if (Model.CurrentAdresse.DateChangement != DateTime.MinValue)
                     {
-                        <a asp-action="ListPreviousAddresses" asp-route-id="@Model.ID" class="btn btn-link"><i class="glyphicon glyphicon-zoom-in"></i> Voir les anciennes adresses</a>
+                        <a asp-action="Index" asp-controller="Adresses" asp-route-idbenevole="@Model.ID" class="btn btn-link"><i class="glyphicon glyphicon-zoom-in"></i> Voir les anciennes adresses</a>
                     }
                 </div>
             </div>

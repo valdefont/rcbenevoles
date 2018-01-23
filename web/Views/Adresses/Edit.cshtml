@@ -1,0 +1,149 @@
+﻿@model dal.models.Adresse
+
+@{
+    ViewData["Title"] = "Corriger l'adresse";
+}
+
+<h2>Gestion des bénévoles</h2>
+
+<h3>Corriger l'adresse pour @Model.Benevole.Nom @Model.Benevole.Prenom</h3>
+<hr />
+<div class="row">
+    <form asp-action="Edit" asp-route-force="@ViewBag.Force" asp-antiforgery="true" onsubmit="submit();">
+        @if (ViewBag.Force && (ViewBag.DateChanged || ViewBag.CenterChanged))
+        {
+            <div class="col-md-12">
+                <div class="alert alert-warning">
+                    @if(ViewBag.DateChanged)
+                    {
+                    <text>
+                    <p>Vous avez modifié la date de changement : <strong>Tous les pointages du bénévole entre le @ViewBag.StartDate.ToString("d") et le @ViewBag.EndDate.ToString("d") seront supprimés</strong> (Concerne @ViewBag.DateImpactedCount pointages)
+                    </text>
+                    }
+                    @if(ViewBag.CenterChanged)
+                    {
+                    <text>
+                    <p>Vous avez modifié le centre : <strong>Tous les pointages du bénévole liés à cette adresse seront supprimés</strong> (Concerne @ViewBag.CenterImpactedCount pointages)
+                    </text>
+                    }
+                    <text>
+                    <p>Cliquez sur <strong>Corriger</strong> pour confirmer votre choix.</p>
+                    </text>
+                    <br/> 
+                </div>
+                <div class="form-group" style="float:right">
+                    <button type="submit" class="btn btn-success" onclick="submit(); return false;">Corriger</button>
+                    <a asp-action="Details" asp-controller="Benevoles" asp-route-id="@Model.Benevole.ID" class="btn btn-link">Annuler et retourner à la fiche du bénévole</a>
+                </div>
+            </div>
+        }
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <input asp-for="BenevoleID" type="hidden" />
+        <div class="col-md-6" style="@(ViewBag.Force ? "display:none" : "")">
+            <div class="panel panel-default">
+                <div class="panel-heading">Adresse &amp; Centre</div>
+                <div class="panel-body">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label asp-for="DateChangement" class="control-label"></label>
+                            <input asp-for="DateChangement" class="form-control" />
+                            <span asp-validation-for="DateChangement" class="text-danger"></span>
+                            <div>
+                                <div class="alert alert-warning">
+                                    <p>Attention : En cas de changement de date, tous les pointages seront supprimés entre le @(Model.DateChangement.ToString("d")) et la nouvelle date
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                        <fieldset>
+                            <div class="form-group">
+                                <label asp-for="AdresseLigne1" class="control-label"></label>
+                                <input asp-for="AdresseLigne1" class="form-control" />
+                                <span asp-validation-for="AdresseLigne1" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="AdresseLigne2" class="control-label"></label>
+                                <input asp-for="AdresseLigne2" class="form-control" />
+                                <span asp-validation-for="AdresseLigne2" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="AdresseLigne3" class="control-label"></label>
+                                <input asp-for="AdresseLigne3" class="form-control" />
+                                <span asp-validation-for="AdresseLigne3" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="CodePostal" class="control-label"></label>
+                                <input asp-for="CodePostal" class="form-control" />
+                                <span asp-validation-for="CodePostal" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Ville" class="control-label"></label>
+                                <input asp-for="Ville" class="form-control" />
+                                <span asp-validation-for="Ville" class="text-danger"></span>
+                            </div>
+                            <hr />
+                        </fieldset>
+                        <fieldset>
+                            <div class="form-group">
+                                <label asp-for="CentreID" class="control-label"></label>
+                                <select asp-for="CentreID" asp-items="@(new SelectList(ViewBag.Centres, "ID","Nom"))" class="form-control">
+                                    <option value="">- Veuillez sélectionner un centre -</option>
+                                </select>
+                                <span asp-validation-for="CentreID" class="text-danger"></span>
+                                <div>
+                                    <div class="alert alert-warning">
+                                        <p>Attention : En cas de changement de centre, tous les pointages liés à cette adresse seront supprimés
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="DistanceCentre" class="control-label"></label>
+                                <input id="DistanceCentre" asp-for="DistanceCentre" class="form-control" onblur="validateDistance();" />
+                                <span id="validationDistance" class="text-danger" style="display:none"></span>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group" style="float:right">
+                <button type="submit" class="btn btn-success" onclick="submit(); return false;">Corriger</button>
+                <a asp-action="Details" asp-controller="Benevoles" asp-route-id="@Model.BenevoleID" class="btn btn-link">Retourner à la fiche du bénévole</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script type="text/javascript">
+
+        function validateDistance() {
+
+            var valDistance = $("#DistanceCentre").val();
+            var distance = parseFloat(valDistance.replace(",", ".").replace(".", "!"));
+
+            if (isNaN(distance)) {
+                $("#validationDistance").html("Veuillez renseigner un nombre valide");
+                $("#validationDistance").show();
+                return false;
+            } else if (distance < 0) {
+                $("#validationDistance").html("La distance doit être supérieure ou égale à zéro");
+                $("#validationDistance").show();
+                return false;
+            } else {
+                $("#validationDistance").hide();
+                return true;
+            }
+        }
+
+        function submit() {
+
+            if (!validateDistance())
+                return;
+
+            $("form").submit();
+        }
+
+    </script>
+}

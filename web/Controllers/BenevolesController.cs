@@ -309,16 +309,16 @@ namespace web.Controllers
             var benevole = await _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre)
                 .SingleOrDefaultAsync(b => b.ID == id);
 
-            // Recherche d'adresses déjà présentes à une date postérieure
+            // Recherche d'adresses déjà présentes à une date ultérieure
             var anyAddress = benevole.Adresses.Any(a => a.DateChangement >= benevoleWithAddress.Adresse.DateChangement);
 
             if (anyAddress)
             {
-                ModelState.AddModelError("Adresse.DateChangement", "Une adresse existe déjà à une date postérieure. Veuillez supprimer l'adresse postérieure d'abord");
+                ModelState.AddModelError("Adresse.DateChangement", "Une adresse existe déjà à une date ultérieure. Veuillez supprimer l'adresse postérieure d'abord");
                 return View(benevoleWithAddress);
             }
 
-            // Recherche de pointages sur une adresse différente à une date postérieure
+            // Recherche de pointages sur une adresse différente à une date ultérieure
             var pointagesFromDate = _context.Pointages
                 .Where(p => p.BenevoleID == id)
                 .Where(p => p.AdresseID != benevoleWithAddress.Adresse.ID)
@@ -329,6 +329,7 @@ namespace web.Controllers
                 if (!force)
                 {
                     ViewBag.Force = true;
+                    ViewBag.ImpactedCount = pointagesFromDate.Count();
                     return View(benevoleWithAddress);
                 }
                 else

@@ -41,11 +41,16 @@ namespace dal.models
         }
 
 
-        public IDictionary<DateTime, Adresse> GetAdressesInPeriod(DateTime periodStart, DateTime periodEnd)
+        public IDictionary<DateTime, Adresse> GetAdressesInPeriod(DateTime periodStart, DateTime periodEnd, bool excludeEnd)
         {
-            var result = this.Adresses
-                .Where(a => a.DateChangement < periodEnd)
-                .ToDictionary(a => a.DateChangement);
+            IEnumerable<Adresse> adresses;
+            
+            if(excludeEnd)
+                adresses = this.Adresses.Where(a => a.DateChangement < periodEnd);
+            else
+                adresses = this.Adresses.Where(a => a.DateChangement <= periodEnd);
+
+            var result = adresses.ToDictionary(a => a.DateChangement);
             
             // on ajoute un element pour le debut de periode sauf si une adresse a été placée exactement sur la date de debut de periode
             result.TryAdd(periodStart, null);
@@ -63,6 +68,9 @@ namespace dal.models
                     addr = currentAddress;
                     result[date] = currentAddress;
                 }
+
+                if(date >= periodStart)
+                    break;
 
                 currentAddress = addr;
 
