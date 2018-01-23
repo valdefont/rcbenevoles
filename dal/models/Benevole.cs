@@ -64,6 +64,9 @@ namespace dal.models
                     result[date] = currentAddress;
                 }
 
+                if(date >= periodStart)
+                    break;
+
                 currentAddress = addr;
 
                 if(!periodStartSet)
