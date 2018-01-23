@@ -85,7 +85,7 @@
                     <a asp-action="ChangeAddress" asp-route-id="@Model.ID" class="btn btn-primary"><i class="glyphicon glyphicon-plane"></i> Enregistrer un changement d'adresse</a>
                     @if (Model.CurrentAdresse.DateChangement != DateTime.MinValue)
                     {
-                        <a asp-action="ListPreviousAddresses" asp-route-id="@Model.ID" class="btn btn-link"><i class="glyphicon glyphicon-zoom-in"></i> Voir les anciennes adresses</a>
+                        <a asp-action="Index" asp-controller="Adresses" asp-route-idbenevole="@Model.ID" class="btn btn-link"><i class="glyphicon glyphicon-zoom-in"></i> Voir les anciennes adresses</a>
                     }
                 </div>
             </div>

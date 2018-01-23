@@ -21,6 +21,45 @@ namespace web.Controllers
             _context = context;
         }
 
+        // GET: Adresses
+        public async Task<IActionResult> Index(int idBenevole)
+        {
+            var benevole = await _context.Benevoles
+                .Include(b => b.Adresses).ThenInclude(a => a.Centre)
+                .SingleOrDefaultAsync(b => b.ID == idBenevole);
+
+            if(benevole == null)
+                return NotFound();
+
+            if(!IsBenevoleAllowed(benevole))
+                return Forbid();
+
+            var adresses = new List<BenevoleAdresse>();
+
+            var model = new BenevoleAllAdresses
+            {
+                Benevole = benevole,
+                Adresses = adresses,
+            };
+
+            Adresse currentAddr = null;
+
+            foreach(var adr in benevole.Adresses.OrderByDescending(a => a.DateChangement))
+            {
+                adresses.Add(new BenevoleAdresse
+                {
+                    Adresse = adr,
+                    DateStart = (adr.DateChangement != DateTime.MinValue) ? (DateTime?)adr.DateChangement : null,
+                    DateEnd = (currentAddr != null) ? (DateTime?)currentAddr.DateChangement : null,
+                    PointagesCount = _context.Pointages.Count(p => p.AdresseID == adr.ID),
+                });
+
+                currentAddr = adr;
+            }
+
+            return View(model);
+        }
+
         // GET: Adresses/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -89,7 +128,7 @@ namespace web.Controllers
             {
                 // On recherche si la date de changement demandée entre en conflit avec une autre adresse
                 var adressesInPeriod = existing.Benevole
-                    .GetAdressesInPeriod(adresse.DateChangement, existing.DateChangement)
+                    .GetAdressesInPeriod(adresse.DateChangement, existing.DateChangement, excludeEnd:false)
                     .Where(p => p.Value != null)
                     .Select(p => p.Value);
 
@@ -119,7 +158,7 @@ namespace web.Controllers
             {
                 // On recherche si la date de changement demandée entre en conflit avec une autre adresse
                 var adressesInPeriod = existing.Benevole
-                    .GetAdressesInPeriod(existing.DateChangement, adresse.DateChangement)
+                    .GetAdressesInPeriod(existing.DateChangement, adresse.DateChangement, excludeEnd:false)
                     .Where(p => p.Value != null)
                     .Select(p => p.Value);
 
