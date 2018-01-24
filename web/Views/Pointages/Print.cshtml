@@ -299,7 +299,44 @@
 
     <div class="clearfix"></div>
 
-    <div class="fullpage">
+    <div class="fullpage landscape" style="background-color: blanchedalmond">
+        <h2>Détail des pointages kilométriques par jour</h2>
+        <table class="table_details">
+            <thead>
+                <tr>
+                    <th></th>
+                @for(var day = 1; day <= 31; day++)
+                {
+                    <th>@day</th>
+                }
+                </tr>
+            </thead>
+            <tbody>
+                @for(var dateMonth = Model.PeriodStart; dateMonth < Model.PeriodEnd; dateMonth = dateMonth.AddMonths(1))
+                {
+                <tr>
+                    <th>@dateMonth.ToString("MMM")</th>
+                    @for(var day = 1; day <= 31; day++)
+                    {
+                        <td>
+                            @{
+                                decimal? value = null;
+                                dal.models.Pointage pt;
+                                if(Model.DetailDemiJournees.TryGetValue(Tuple.Create(dateMonth.Month, day), out pt)) {
+                                    value = (decimal)pt.NbDemiJournees * Model.Adresse.DistanceCentre;
+                                }
+                            }
+                            
+                            @if(@value != null) 
+                            {
+                                <span>@value.Value.ToString("#0.#")</span>
+                            }
+                        </td>
+                    }
+                </tr>
+                }
+            </tbody>
+        </table>
     </div>
 
 </body>
