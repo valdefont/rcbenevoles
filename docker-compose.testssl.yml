@@ -24,11 +24,19 @@ services:
     # SERVICE reverseproxy
     rproxy:
         image: rproxy:local
+        volumes:
+            - nginx_certs:/etc/rproxy/certs
         deploy:
             restart_policy:
                 condition: on-failure
         ports:
             - "80:80"
+            - "443:443"
+        environment:
+            - NGINX_APP_SERVER=app
+            - NGINX_APP_PORT=5000
+            - NGINX_SSL_PUBLICKEY_FILE=cert.pem
+            - NGINX_SSL_PRIVATEKEY_FILE=key.pem
         links:
             - app
         networks:
@@ -55,4 +63,5 @@ networks:
 # ****** VOLUMES
 
 volumes:
-    db_data: 
+    db_data:
+    nginx_certs:  
