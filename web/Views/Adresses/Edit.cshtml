@@ -26,9 +26,7 @@
                     <p>Vous avez modifié le centre : <strong>Tous les pointages du bénévole liés à cette adresse seront supprimés</strong> (Concerne @ViewBag.CenterImpactedCount pointages)
                     </text>
                     }
-                    <text>
                     <p>Cliquez sur <strong>Corriger</strong> pour confirmer votre choix.</p>
-                    </text>
                     <br/> 
                 </div>
                 <div class="form-group" style="float:right">
@@ -45,7 +43,7 @@
                 <div class="panel-body">
                     <div class="col-md-8">
                         <div class="form-group">
-                            <label asp-for="DateChangement" class="control-label"></label>
+                            <label asp-for="DateChangement" class="control-label required"></label>
                             <input asp-for="DateChangement" class="form-control" />
                             <span asp-validation-for="DateChangement" class="text-danger"></span>
                             <div>
@@ -57,7 +55,7 @@
                         <hr />
                         <fieldset>
                             <div class="form-group">
-                                <label asp-for="AdresseLigne1" class="control-label"></label>
+                                <label asp-for="AdresseLigne1" class="control-label required"></label>
                                 <input asp-for="AdresseLigne1" class="form-control" />
                                 <span asp-validation-for="AdresseLigne1" class="text-danger"></span>
                             </div>
@@ -72,12 +70,12 @@
                                 <span asp-validation-for="AdresseLigne3" class="text-danger"></span>
                             </div>
                             <div class="form-group">
-                                <label asp-for="CodePostal" class="control-label"></label>
+                                <label asp-for="CodePostal" class="control-label required"></label>
                                 <input asp-for="CodePostal" class="form-control" />
                                 <span asp-validation-for="CodePostal" class="text-danger"></span>
                             </div>
                             <div class="form-group">
-                                <label asp-for="Ville" class="control-label"></label>
+                                <label asp-for="Ville" class="control-label required"></label>
                                 <input asp-for="Ville" class="form-control" />
                                 <span asp-validation-for="Ville" class="text-danger"></span>
                             </div>
@@ -85,7 +83,7 @@
                         </fieldset>
                         <fieldset>
                             <div class="form-group">
-                                <label asp-for="CentreID" class="control-label"></label>
+                                <label asp-for="CentreID" class="control-label required"></label>
                                 <select asp-for="CentreID" asp-items="@(new SelectList(ViewBag.Centres, "ID","Nom"))" class="form-control">
                                     <option value="">- Veuillez sélectionner un centre -</option>
                                 </select>
@@ -97,7 +95,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label asp-for="DistanceCentre" class="control-label"></label>
+                                <label asp-for="DistanceCentre" class="control-label required"></label>
                                 <input id="DistanceCentre" asp-for="DistanceCentre" class="form-control" onblur="validateDistance();" />
                                 <span id="validationDistance" class="text-danger" style="display:none"></span>
                             </div>

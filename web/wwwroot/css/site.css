@@ -108,3 +108,10 @@
 .yellow {
     color: #d1b951;
 }
+
+.required:after {
+    content: "*";
+    font-weight: bold;
+    color: red;
+    margin-left:2px;
+}
