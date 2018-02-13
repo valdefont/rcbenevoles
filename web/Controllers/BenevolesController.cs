@@ -135,6 +135,7 @@ namespace web.Controllers
             await _context.SaveChangesAsync();
 
             LogInfo("Benevole #{BenevoleID} ({BenevolePrenom} {BenevoleNom}) créé", benevoleWithAddress.Benevole.ID, benevoleWithAddress.Benevole.Prenom, benevoleWithAddress.Benevole.Nom);
+            SetGlobalMessage("Le bénévole a été créé avec succès", EGlobalMessageType.Success);
 
             return RedirectToAction(nameof(Index));
         }
@@ -207,6 +208,7 @@ namespace web.Controllers
                 await _context.SaveChangesAsync();
 
                 LogInfo("Benevole #{BenevoleID} ({BenevolePrenom} {BenevoleNom}) modifié", benevole.ID, benevole.Prenom, benevole.Nom);
+                SetGlobalMessage("Le bénévole a été modifié avec succès", EGlobalMessageType.Success);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -247,7 +249,8 @@ namespace web.Controllers
             await _context.SaveChangesAsync();
 
             LogInfo("Benevole #{BenevoleID} ({BenevolePrenom} {BenevoleNom}) supprimé", benevole.ID, benevole.Prenom, benevole.Nom);
-            
+            SetGlobalMessage("Le bénévole a été supprimé avec succès", EGlobalMessageType.Success);
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -355,6 +358,7 @@ namespace web.Controllers
                 LogInfo("Suppression de {NombrePointages} pointages du benevole #{BenevoleID} ({BenevolePrenom} {BenevoleNom}) après le {DateChangement:dd/MM/yyyy}", pointagesFromDate.Count(), benevole.ID, benevole.Prenom, benevole.Nom, benevoleWithAddress.Adresse.DateChangement);
 
             LogInfo("Adresse {AdresseID} créée pour le benevole #{BenevoleID} ({BenevolePrenom} {BenevoleNom})", benevoleWithAddress.Adresse.ID, benevole.ID, benevole.Prenom, benevole.Nom);
+            SetGlobalMessage("L'adresse a été créée avec succès", EGlobalMessageType.Success);
 
             return RedirectToAction(nameof(Details), new { id = id });
         }

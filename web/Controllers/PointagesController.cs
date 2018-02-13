@@ -390,10 +390,11 @@ namespace web.Controllers
                 return NotFound("Frais non trouvé");
 
             // ***** Calcul du nombre de demi-journées pointées sur l'adresse
-            var totalDemiJournees = _context.Pointages
+            var demiJournees = _context.Pointages
                 .Where(p => p.AdresseID == addressId)
-                .Where(p => p.Date >= periodStart && p.Date < periodEnd)
-                .Sum(p => p.NbDemiJournees);
+                .Where(p => p.Date >= periodStart && p.Date < periodEnd);
+
+            var totalDemiJournees = demiJournees.Sum(p => p.NbDemiJournees);
 
             int monthCount;
 
@@ -411,6 +412,7 @@ namespace web.Controllers
                 FraisKm = frais.TauxKilometrique,
                 MonthCount = monthCount,
                 TotalDemiJournees = totalDemiJournees,
+                DetailDemiJournees = demiJournees.ToDictionary(p => Tuple.Create(p.Date.Month, p.Date.Day)),
             };
 
             return View(model);

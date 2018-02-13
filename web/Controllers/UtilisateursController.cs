@@ -13,10 +13,8 @@ using web.Models;
 namespace web.Controllers
 {
     [Authorize(Roles = "SuperAdmin")]
-    public class UtilisateursController : Controller
+    public class UtilisateursController : RCBenevoleController
     {
-        private readonly RCBenevoleContext _context;
-
         public UtilisateursController(RCBenevoleContext context)
         {
             _context = context;
@@ -74,6 +72,7 @@ namespace web.Controllers
                 model.Utilisateur.SetPassword(model.Utilisateur.Password);
                 _context.Add(model.Utilisateur);
                 await _context.SaveChangesAsync();
+                SetGlobalMessage("L'utilisateur a été créé avec succès", EGlobalMessageType.Success);
                 return RedirectToAction(nameof(Index));
             }
             return View(model);
@@ -130,6 +129,8 @@ namespace web.Controllers
                         throw;
                     }
                 }
+
+                SetGlobalMessage("L'utilisateur a été modifié avec succès", EGlobalMessageType.Success);
                 return RedirectToAction(nameof(Index));
             }
             return View(utilisateur);
@@ -188,6 +189,7 @@ namespace web.Controllers
                 throw;
             }
 
+            SetGlobalMessage("Le mot de passe a été changé avec succès", EGlobalMessageType.Success);
             return RedirectToAction(nameof(Index));
         }
 
@@ -217,6 +219,7 @@ namespace web.Controllers
             var utilisateur = await _context.Utilisateurs.SingleOrDefaultAsync(m => m.ID == id);
             _context.Utilisateurs.Remove(utilisateur);
             await _context.SaveChangesAsync();
+            SetGlobalMessage("L'utilisateur a été supprimé avec succès", EGlobalMessageType.Success);
             return RedirectToAction(nameof(Index));
         }
 

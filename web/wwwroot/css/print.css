@@ -1,7 +1,10 @@
-﻿@page 
-{ 
-    size: A4;
-    margin: 3%;
+﻿@media print 
+{
+    @page
+    { 
+        size: A4 portrait;
+        margin: 3%;
+    }
 }
 
 body
@@ -10,8 +13,14 @@ body
     font-family:Calibri,Arial;
 }
 
+.landscape {
+    transform: rotate(-90deg);
+}
+
 .fullpage {
     page-break-after:always;
+    height: 21cm;
+    width: 29.7cm;
 }
 
 .adresse_nom {
@@ -166,4 +175,20 @@ div .clearfix {
 .signature {
     vertical-align:top;
     padding-left:0.2cm;
+}
+
+.table_details td {
+    width: 20pt;
+    border-color: gray;
+    border-width: 1pt;
+    border-style: solid;
+    text-align: center;
+}
+
+.table_details td {
+    width: 30pt;
+    border-color: gray;
+    border-width: 1pt;
+    border-style: solid;
+    text-align: center;
 }
