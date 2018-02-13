@@ -6,6 +6,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using dal.models;
+using web.Models;
+using Newtonsoft.Json;
 
 namespace web.Controllers
 {
@@ -91,6 +93,15 @@ namespace web.Controllers
             propertyValues.CopyTo(realProps, NB_PROPERTIES_ADDED);
 
             return realProps;
+        }
+
+        public void SetGlobalMessage(string message, EGlobalMessageType messageType)
+        {
+            TempData["__GlobalMessage"] = JsonConvert.SerializeObject(new GlobalMessage
+            {
+                Message = message,
+                Type = messageType,
+            });
         }
     }
 }

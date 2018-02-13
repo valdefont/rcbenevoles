@@ -9,6 +9,7 @@ using dal;
 using dal.models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using web.Models;
 
 namespace web.Controllers
 {
@@ -74,6 +75,8 @@ namespace web.Controllers
                 _context.Add(centre);
                 await _context.SaveChangesAsync();
                 LogInfo("Centre #{CentreID} ({Centre}) créé", centre.ID, centre.Nom);
+                SetGlobalMessage("Le centre a été créé avec succès", EGlobalMessageType.Success);
+
                 return RedirectToAction(nameof(Index));
             }
             return View(centre);
@@ -116,6 +119,7 @@ namespace web.Controllers
                     _context.Update(centre);
                     await _context.SaveChangesAsync();
                     LogInfo("Centre #{CentreID} ({Centre}) modifié", centre.ID, centre.Nom);
+                    SetGlobalMessage("Le centre a été modifié avec succès", EGlobalMessageType.Success);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -162,6 +166,7 @@ namespace web.Controllers
             await _context.SaveChangesAsync();
 
             LogInfo("Centre #{CentreID} ({Centre}) supprimé", centre.ID, centre.Nom);
+            SetGlobalMessage("Le centre a été supprimé avec succès", EGlobalMessageType.Success);
 
             return RedirectToAction(nameof(Index));
         }

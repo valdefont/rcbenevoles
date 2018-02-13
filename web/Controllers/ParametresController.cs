@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using dal;
 using Microsoft.AspNetCore.Authorization;
+using web.Models;
 
 namespace web.Controllers
 {
@@ -70,6 +71,7 @@ namespace web.Controllers
             else
             {
                 LogInfo("Taux kilométriques modifié");
+                SetGlobalMessage("Les taux ont été sauvegardés avec succès", EGlobalMessageType.Success);
                 _context.SaveChanges();
             }
 

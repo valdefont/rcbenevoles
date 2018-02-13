@@ -53,6 +53,15 @@
         </div>
     </nav>
     <div class="container body-content">
+        @if (TempData.ContainsKey("__GlobalMessage"))
+        {
+            var message = Newtonsoft.Json.JsonConvert.DeserializeObject<GlobalMessage>(Convert.ToString(TempData["__GlobalMessage"]));
+        <div class="alert @message.GetCssClass()" style="margin-top:8px">
+            <p>
+                @message.Message
+            </p>
+        </div>
+        }
         @RenderBody()
         <hr />
         <footer>

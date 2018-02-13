@@ -234,6 +234,7 @@ namespace web.Controllers
                 await _context.SaveChangesAsync();
 
                 LogInfo("Adresse #{AdresseID} (du bénévole #{BenevoleID}) modifiée", adresse.ID, adresse.BenevoleID);
+                SetGlobalMessage("L'adresse a été modifiée avec succès", EGlobalMessageType.Success);
             }
             catch (DbUpdateConcurrencyException)
             {
