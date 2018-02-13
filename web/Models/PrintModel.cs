@@ -21,5 +21,7 @@ namespace web.Models
         public decimal FraisKm { get; set; }
 
         public decimal TotalDemiJournees { get; set; }
+
+        public IDictionary<Tuple<int, int>, dal.models.Pointage> DetailDemiJournees { get; set; }
     }
 }

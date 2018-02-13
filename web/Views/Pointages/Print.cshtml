@@ -300,6 +300,66 @@
     <div class="clearfix"></div>
 
     <div class="fullpage">
+        <h2>Détail des pointages kilométriques par jour</h2>
+        <table class="table table_details table-bordered">
+            <thead>
+                <tr>
+                    <th></th>
+                @for(var dateMonth = Model.PeriodStart; dateMonth < Model.PeriodEnd; dateMonth = dateMonth.AddMonths(1))
+                {
+                    <th>@dateMonth.ToString("MMMM")</th>
+                }
+                </tr>
+            </thead>
+            <tbody>
+                @{ var totalByMonth = new Dictionary<int, decimal>(); }
+                @for (var day = 1; day <= 31; day++)
+                {
+                <tr>
+                    <th>@day</th>
+                    @for(var dateMonth = Model.PeriodStart; dateMonth < Model.PeriodEnd; dateMonth = dateMonth.AddMonths(1))
+                    {
+                        <td>
+                            @{
+                                decimal? value = null;
+                                dal.models.Pointage pt;
+                                if(Model.DetailDemiJournees.TryGetValue(Tuple.Create(dateMonth.Month, day), out pt)) {
+                                    value = (decimal)pt.NbDemiJournees * Model.Adresse.DistanceCentre;
+                                    if(!totalByMonth.ContainsKey(dateMonth.Month))
+                                    {
+                                        totalByMonth[dateMonth.Month] = value.Value;
+                                    }
+                                    else
+                                    {
+                                        totalByMonth[dateMonth.Month] += value.Value;
+                                    }
+                                }
+                            }
+                            
+                            @if(@value != null) 
+                            {
+                                <span>@value.Value.ToString("#0.#")</span>
+                            }
+                        </td>
+                    }
+                </tr>
+                }
+                <tr>
+                    <th>Total</th>
+                    @for (var dateMonth = Model.PeriodStart; dateMonth < Model.PeriodEnd; dateMonth = dateMonth.AddMonths(1))
+                    {
+                        if (totalByMonth.ContainsKey(dateMonth.Month))
+                        {
+                            <td><strong>@totalByMonth[dateMonth.Month]</strong></td>
+                        }
+                        else
+                        {
+                            <td><strong>0</strong></td>
+                        }
+                    }
+                </tr>
+            </tbody>
+        </table>
     </div>
 
 </body>
