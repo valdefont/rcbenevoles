@@ -1,0 +1,81 @@
+﻿@model BenevoleAllVehicules
+
+@{
+    ViewData["Title"] = "Vehicules";
+}
+
+<h2>Gestion des bénévoles</h2>
+
+<h3>Véhicules de @Model.Benevole.Nom @Model.Benevole.Prenom</h3>
+
+<p>
+    <a asp-action="ChangeVehicule" asp-controller="Benevoles" asp-route-id="@Model.Benevole.ID">Enregistrer un nouveau véhicule</a>
+</p>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+                <th>
+                    Période
+                </th>
+                <th>
+                   Nombre Chevaux
+                </th>               
+                <th>
+                    Nombre de pointages
+                </th>
+                <th>
+                    Electrique
+                </th>
+                <th>
+                    Actions
+                </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var veh in Model.Vehicules) {
+        <tr>
+            <td>
+                @if(veh.DateStart != null && veh.DateEnd != null) {
+                    <text>
+                    <span>Du @veh.DateStart.Value.ToString("d")</span>
+                    <span>au @veh.DateEnd.Value.AddDays(-1).ToString("d")</span>
+                    </text>
+                } else if(veh.DateStart != null) {
+                    <text>
+                    <span>Depuis le @veh.DateStart.Value.ToString("d")</span>
+                    </text>
+                } else if(veh.DateEnd != null) {
+                    <text>
+                    <span>Jusqu'au @veh.DateEnd.Value.AddDays(-1).ToString("d")</span>
+                    </text> 
+                }
+            </td>
+            <td>
+                 @Html.Raw(veh.Vehicule.NbChevaux)
+            </td>          
+            <td>
+                <span>@veh.PointagesCount</span>
+            </td>
+            <td>
+                    @if (veh.Vehicule.IsElectric)
+                    {
+                        <text>
+                            <span>Oui</span>                            
+                        </text>
+                    }
+                    else
+                    {
+                        <text>
+                            <span>Non</span>
+                        </text>
+                    }
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@veh.Vehicule.id"><i class="glyphicon glyphicon-edit"></i> Corriger</a> |
+                    <a asp-action="Delete" asp-route-id="@veh.Vehicule.id"><i class="glyphicon glyphicon-trash"></i> Supprimer</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

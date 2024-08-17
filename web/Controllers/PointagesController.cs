@@ -175,11 +175,13 @@ namespace web.Controllers
             if (existing != null)
                 pointage.ID = existing.ID;
 
-            var benevole = _context.Benevoles.Include(b => b.Adresses).SingleOrDefault(b => b.ID == pointage.BenevoleID);
+            var benevole = _context.Benevoles.Include(b => b.Adresses).Include(b => b.Vehicules).SingleOrDefault(b => b.ID == pointage.BenevoleID);
             var adresse = benevole.GetAdresseFromDate(pointage.Date);
             var centreId = adresse.CentreID;
+            var vehicule = benevole.GetVehiculeFromDate(pointage.Date);
 
             pointage.AdresseID = adresse.ID;
+            pointage.VehiculeID = vehicule.id;
 
             if (existing != null && existing.AdresseID != pointage.AdresseID)
                 return BadRequest("AdresseID does not match with existing pointage");
@@ -230,131 +232,433 @@ namespace web.Controllers
             return View(pointage);
         }
 
+
         [HttpGet("Pointages/Benevole/{id}/printindex")]
         public async Task<IActionResult> PrintIndex(int id)
         {
+
+            var benevole = await _context.Benevoles
+               .Include(b => b.Adresses).ThenInclude(a => a.Centre)
+               .Include(b => b.Pointages)
+               .SingleOrDefaultAsync(b => b.ID == id);
+
+            var mymodel = new PrintIndexModel
+            {
+                Benevole = benevole,
+                ListYears = GetAllYears(),
+                SelectedYear = -1,
+                Periods = null
+            };
+            
+
+            return View(mymodel);
+        }
+
+        [HttpPost, ActionName("GetPeriods")]
+        public async Task<IActionResult> GetPeriods()
+        {
+            bool haserror = false;
+            var formdata = Request.Form;           
+            var yearstring = Convert.ToInt16(formdata["year"].ToString());
+            int benevoleID = Convert.ToInt16(formdata["benevoleID"]);
+
             var benevole = await _context.Benevoles
                 .Include(b => b.Adresses).ThenInclude(a => a.Centre)
                 .Include(b => b.Pointages)
-                .SingleOrDefaultAsync(b => b.ID == id);
+                .Include(b => b.Vehicules)
+                .SingleOrDefaultAsync(b => b.ID == benevoleID);
 
-            if (benevole == null)
-                return NotFound("Bénévole non trouvé");
 
-            var model = new PrintIndexModel
+            var mymodel = new PrintIndexModel
             {
                 Benevole = benevole,
+                ListYears = GetAllYears(),
+                SelectedYear = yearstring,
+                Periods = GetListPeriodsForYear(yearstring,benevole)
             };
+            return View(mymodel);
 
-            var userCentreId = GetCurrentUser().CentreID;
+        }
+
+        private List<PrintIndexPeriod> GetListPeriodsForYear(int year, Benevole benevole)
+        {
+           List<PrintIndexPeriod> newPerFinal = new List<PrintIndexPeriod>();
+            List <PrintIndexPeriod> PtgsPeriods = new List<PrintIndexPeriod>();
+           var userCentreId = GetCurrentUser().CentreID;
 
             // début : début de période à partir du premier pointage du bénévole
             int startPeriodId;
 
-            IQueryable<Pointage> ptgs = benevole.Pointages.AsQueryable();
+            IQueryable<Pointage> ptgs = benevole.Pointages.Where(s=>s.Date.Year== year).AsQueryable();
 
             if (userCentreId != null)
                 ptgs = ptgs.Where(p => p.Adresse.CentreID == userCentreId);
 
-            var dates = ptgs
-                .OrderBy(p => p.Date)
-                .Select(p => p.Date);
-
-            var start = dates.FirstOrDefault();
-
-            if (start == DateTime.MinValue)
-                return View(model);
-            else
+            if (ptgs.Count() > 0)
             {
-                if (start.Month >= 5)
-                {
-                    start = new DateTime(start.Year, 5, 1);
-                    startPeriodId = 2;
-                }
+                var dates = ptgs.OrderBy(p => p.Date).Select(p => p.Date);
+
+                var start = dates.FirstOrDefault();
+                var end = dates.LastOrDefault();
+
+                if (start == DateTime.MinValue)
+                    return null;
                 else
-                {
-                    start = new DateTime(start.Year, 1, 1);
-                    startPeriodId = 1;
-                }
-            }
-
-            // fin : fin de période à partir du dernier pointage du bénévole
-            var end = dates.LastOrDefault();
-
-            if (end.Month >= 5)
-                end = new DateTime(end.Year + 1, 1, 1);
-            else
-                end = new DateTime(end.Year, 5, 1);
-
-            // calcul des périodes
-            DateTime periodStart;
-            DateTime periodEnd;
-
-            for (int year = start.Year; year <= end.AddDays(-1).Year; year++)
-            {
-                if (year >= 2022)
-                {
-                    var period = new PrintIndexPeriod
+                {                    
+                    if (start.Month >= 5)
                     {
-                        PeriodId = -1,
-                        Start = new DateTime(year, 1, 1),
-                        End = new DateTime(year + 1, 1, 1),
-                    };
-
-                    model.Periods.Add(period);
-                }
-                else
-                {
-
-                    for (int periodId = startPeriodId; periodId <= 2; periodId++)
-                    {
-                        switch (periodId)
-                        {
-                            case 1:
-                                {
-                                    periodStart = new DateTime(year, 1, 1);
-                                    periodEnd = new DateTime(year, 5, 1);
-                                }
-                                break;
-                            case 2:
-                                {
-                                    periodStart = new DateTime(year, 5, 1);
-                                    periodEnd = new DateTime(year + 1, 1, 1);
-                                }
-                                break;
-                            default:
-                                return BadRequest("Période invalide");
-                        }
-
-                        if (periodStart >= end)
-                            break;
-
-                        var adressesWithDates = benevole.GetAdressesInPeriod(periodStart, periodEnd, excludeEnd: true);
-
+                        DateTime startDate = new DateTime(year, 5, 1);
+                        DateTime endDate = new DateTime(year + 1, 1, 1);
                         var period = new PrintIndexPeriod
                         {
-                            PeriodId = periodId,
-                            Start = periodStart,
-                            End = periodEnd,
+                            PeriodId = 2,
+                            Start = startDate,
+                            End = endDate,
+                            Adresse =null,
+                            Vehicule = null,
+                            Remark = "Master Period",
+                            PointagesPeriod = benevole.Pointages.Where(s=>s.Date >=startDate && s.Date<endDate).ToList(),
+                            printIndexPeriods = new List<PrintIndexPeriod>()
                         };
 
-                        foreach (var adrDate in adressesWithDates.Keys.OrderBy(k => k))
-                        {
-                            var adr = adressesWithDates[adrDate];
+                        PtgsPeriods.Add(period);
 
-                            if (GetCurrentUser().CentreID == null || adr.CentreID == GetCurrentUser().CentreID)
-                                period.Adresses.Add(adr);
+                    }
+                    else
+                    {
+                        DateTime startDate = new DateTime(year, 1, 1);
+                        DateTime endDate = new DateTime(year , 5, 1);
+                        PtgsPeriods.Add(new PrintIndexPeriod
+                        {
+                            PeriodId = 1,
+                            Start = startDate,
+                            End = endDate,
+                            Adresse = null,
+                            Vehicule = null,
+                            Remark = "Master Period",
+                            PointagesPeriod = benevole.Pointages.Where(s => s.Date >= startDate && s.Date < endDate).ToList(),
+                            printIndexPeriods = new List<PrintIndexPeriod>()
+                        });
+
+                        if (end.Month >= 5)
+                        {
+                            startDate = new DateTime(year, 5, 1);
+                            endDate = new DateTime(year + 1, 1, 1);
+                            PtgsPeriods.Add(new PrintIndexPeriod
+                            {
+                                PeriodId = 2,
+                                Start = startDate,
+                                End = endDate,
+                                Adresse = null,
+                                Vehicule = null,
+                                Remark = "Master Period",
+                                PointagesPeriod = benevole.Pointages.Where(s => s.Date >= startDate && s.Date < endDate).ToList(),
+                                printIndexPeriods = new List<PrintIndexPeriod>()
+
+                            });       
+                        }
+                        
+                    }
+
+                    // Ajouter periodes en cas de changement d'adresse ou vehicule 
+                    //List<PrintIndexPeriod>  newPerAdr = GetListPeriods_Adresses(PtgsPeriods, benevole);
+                    GetListPeriods_Adresses(ref PtgsPeriods, benevole);
+                    //newPerFinal = GetListPeriods_Vehicules(newPerAdr, benevole);
+                    GetListPeriods_Vehicules(ref PtgsPeriods, benevole);
+
+                }
+            }    
+
+            return PtgsPeriods;
+
+        }
+
+        private List<PrintIndexPeriod> GetListPeriods_Adresses(ref List<PrintIndexPeriod> Periods, Benevole benevole)
+        {
+            //List<PrintIndexPeriod> newPeriods = new List<PrintIndexPeriod>();
+            
+
+            foreach (PrintIndexPeriod Period in Periods)
+            {
+                IDictionary<DateTime, Adresse> adressesWithDates = benevole.GetAdressesInPeriod(Period.Start, Period.End, excludeEnd: true);
+                DateTime newStart = new DateTime();
+                DateTime newEnd = new DateTime();
+
+                //foreach (var adrDate in )
+                // adressesWithDates.Keys.OrderBy(k => k)
+                List<DateTime> adrDates = adressesWithDates.Keys.OrderBy(k => k).ToList();
+                for (int i = 0; i < adrDates.Count ; i++)
+                {
+
+                    var adr = adressesWithDates[adrDates[i]];
+                    newStart = (newEnd != DateTime.MinValue) ? newEnd : Period.Start;
+
+                    if (Period.Start <= adr.DateChangement && Period.End >= adr.DateChangement)
+                    {
+                        if (i == (adrDates.Count - 1)) // Last element
+                        {
+                            newEnd = Period.End;
+                        }
+                        else // End is element change date
+                        {
+                            newEnd = adr.DateChangement;
+                        }
+                          
+                    }
+                    else
+                    {
+                        // si derniere adresse => end = date fin periode, sinon fin= date changement de prochaine adresse
+                        if (i == (adrDates.Count - 1)) // Last element
+                        {
+                            newEnd = Period.End;
+                        }
+                        else // End is next element change date
+                        {
+                            newEnd = adressesWithDates[adrDates[i + 1]].DateChangement;
+                        }
+                    }
+
+                    List<Pointage> pointages = Period.PointagesPeriod.Where(s => s.Date >= newStart && s.Date < newEnd).ToList();
+
+                    if(pointages.Count > 0)
+                    {
+                        if (GetCurrentUser().CentreID == null || adr.CentreID == GetCurrentUser().CentreID)
+                        {
+                            Period.printIndexPeriods.Add(new PrintIndexPeriod
+                            {
+                                PeriodId = Period.PeriodId,
+                                Start = newStart,
+                                End = newEnd,
+                                Adresse = adr,
+                                Vehicule = null,
+                                Remark = "Adresse : " + adressesWithDates[adrDates[i]].AdresseLigne1
+                                          + " " + adressesWithDates[adrDates[i]].CodePostal
+                                          + " " + adressesWithDates[adrDates[i]].Ville + " ( Changement le " + adr.DateChangement.ToString("d MMMM yyyy") + " )",
+                                PointagesPeriod = benevole.Pointages.Where(s => s.Date >= newStart && s.Date < newEnd).ToList(),
+                                printIndexPeriods = new List<PrintIndexPeriod>()
+                            });
+                        }
+                    }
+
+                    
+
+                }                
+            }
+           
+            return Periods;
+        }
+
+        private List<PrintIndexPeriod> GetListPeriods_Vehicules(ref List<PrintIndexPeriod> Periods, Benevole benevole)
+        {
+
+            //List<PrintIndexPeriod> newPeriods = new List<PrintIndexPeriod>();
+            foreach (PrintIndexPeriod Period in Periods)
+            {
+                DateTime newStart = new DateTime();
+                DateTime newEnd = new DateTime();
+
+                foreach (PrintIndexPeriod PeriodAdresse in Period.printIndexPeriods)
+                {
+                    var vehiculesWithDates = benevole.GetVehiculesInPeriod(Period.Start, Period.End, excludeEnd: true);
+                    List<DateTime> vehDates = vehiculesWithDates.Keys.OrderBy(k => k).ToList();
+                    for (int i = 0; i < vehDates.Count; i++)
+                    {
+                         
+                        
+                        Vehicule veh = vehiculesWithDates[vehDates[i]];
+
+                       // int nbVeh = vehiculesWithDates.Values.Where(s => s.DateChangement > PeriodAdresse.Adresse.DateChangement).Count();
+
+                        newStart = (newEnd != DateTime.MinValue) ? newEnd : PeriodAdresse.Start;
+
+                        if (PeriodAdresse.Start <= veh.DateChangement && PeriodAdresse.End >= veh.DateChangement)
+                        {
+                            if (i == (vehDates.Count - 1)) // Last element
+                            {
+                                newEnd = Period.End;
+                            }
+                            else // End is element change date
+                            {
+                                newEnd = veh.DateChangement;
+                            }
 
                         }
+                        else
+                        {
+                            // si derniere adresse => end = date fin periode, sinon fin= date changement de prochaine adresse
+                            if (i == (vehDates.Count - 1)) // Last element
+                            {
+                                newEnd = PeriodAdresse.End;
+                            }
+                            else // End is next element change date
+                            {
+                                newEnd = vehiculesWithDates[vehDates[i + 1]].DateChangement;
+                            }
+                        }
 
-                        if (period.Adresses.Count() > 0)
-                            model.Periods.Add(period);
+                        List<Pointage> pointages = PeriodAdresse.PointagesPeriod.Where(s => s.Date >= newStart && s.Date < newEnd).ToList();
+
+                        if (pointages.Count > 0)
+                        {
+
+                            PeriodAdresse.printIndexPeriods.Add(new PrintIndexPeriod
+                            {
+                                PeriodId = PeriodAdresse.PeriodId,
+                                Start = newStart,
+                                End = newEnd,
+                                Adresse = PeriodAdresse.Adresse,
+                                Vehicule = veh,
+                                Remark = "Véhicule " + (i + 1).ToString() + " ( " + veh.NbChevaux + " chevaux " + (veh.IsElectric ? " / Electrique " : "") 
+                                            + " - Changement le "+ veh.DateChangement.ToString("d MMMM yyyy") + " )" ,
+                                PointagesPeriod = benevole.Pointages.Where(s => s.Date >= newStart && s.Date < newEnd).ToList(),
+                                printIndexPeriods = null
+                            });
+                        }
+                        
+
                     }
-                    startPeriodId = 1;
                 }
+                    
             }
 
-            return View(model);
+            return Periods;
+        }
+
+
+        /* [HttpGet("Pointages/Benevole/{id}/printindex")]
+         public async Task<IActionResult> GetListPeriodsForYear(int id)
+         {
+
+
+             var benevole = await _context.Benevoles
+                 .Include(b => b.Adresses).ThenInclude(a => a.Centre)
+                 .Include(b => b.Pointages)
+                 .SingleOrDefaultAsync(b => b.ID == id);
+
+             if (benevole == null)
+                 return NotFound("Bénévole non trouvé");
+
+             var model = new PrintIndexModel
+             {
+                 Benevole = benevole,
+             };
+
+             var userCentreId = GetCurrentUser().CentreID;
+
+             // début : début de période à partir du premier pointage du bénévole
+             int startPeriodId;
+
+             IQueryable<Pointage> ptgs = benevole.Pointages.AsQueryable();
+
+             if (userCentreId != null)
+                 ptgs = ptgs.Where(p => p.Adresse.CentreID == userCentreId);
+
+             var dates = ptgs
+                 .OrderBy(p => p.Date)
+                 .Select(p => p.Date);
+
+             var start = dates.FirstOrDefault();
+
+             if (start == DateTime.MinValue)
+                 return View(model);
+             else
+             {
+                 if (start.Month >= 5)
+                 {
+                     start = new DateTime(start.Year, 5, 1);
+                     startPeriodId = 2;
+                 }
+                 else
+                 {
+                     start = new DateTime(start.Year, 1, 1);
+                     startPeriodId = 1;
+                 }
+             }
+
+             // fin : fin de période à partir du dernier pointage du bénévole
+             var end = dates.LastOrDefault();
+
+             if (end.Month >= 5)
+                 end = new DateTime(end.Year + 1, 1, 1);
+             else
+                 end = new DateTime(end.Year, 5, 1);
+
+             // calcul des périodes
+             DateTime periodStart;
+             DateTime periodEnd;
+
+             for (int year = start.Year; year <= end.AddDays(-1).Year; year++)
+             {
+                 if (year >= 2022)
+                 {
+                     var period = new PrintIndexPeriod
+                     {
+                         PeriodId = -1,
+                         Start = new DateTime(year, 1, 1),
+                         End = new DateTime(year + 1, 1, 1),
+                     };
+
+                     model.Periods.Add(period);
+                 }
+                 else
+                 {
+
+                     for (int periodId = startPeriodId; periodId <= 2; periodId++)
+                     {
+                         switch (periodId)
+                         {
+                             case 1:
+                                 {
+                                     periodStart = new DateTime(year, 1, 1);
+                                     periodEnd = new DateTime(year, 5, 1);
+                                 }
+                                 break;
+                             case 2:
+                                 {
+                                     periodStart = new DateTime(year, 5, 1);
+                                     periodEnd = new DateTime(year + 1, 1, 1);
+                                 }
+                                 break;
+                             default:
+                                 return BadRequest("Période invalide");
+                         }
+
+                         if (periodStart >= end)
+                             break;
+
+                         var adressesWithDates = benevole.GetAdressesInPeriod(periodStart, periodEnd, excludeEnd: true);
+
+                         var period = new PrintIndexPeriod
+                         {
+                             PeriodId = periodId,
+                             Start = periodStart,
+                             End = periodEnd,
+                         };
+
+                         foreach (var adrDate in adressesWithDates.Keys.OrderBy(k => k))
+                         {
+                             var adr = adressesWithDates[adrDate];
+
+                             if (GetCurrentUser().CentreID == null || adr.CentreID == GetCurrentUser().CentreID)
+                                 period.Adresses.Add(adr);
+
+                         }
+
+                         if (period.Adresses.Count() > 0)
+                             model.Periods.Add(period);
+                     }
+                     startPeriodId = 1;
+                 }
+             }
+
+             return View(model);
+         }*/
+
+        private List<int> GetAllYears()
+        {
+            var list = new List<int>(_context.Pointages.OrderBy(s => s.Date).Select(x => x.Date.Year).Distinct());           
+            return list;
+
         }
 
         [HttpGet("Pointages/Benevole/{id}/print")]
@@ -435,8 +739,8 @@ namespace web.Controllers
             if (benevole == null)
                 return NotFound("Bénévole non trouvé");
 
-            if (benevole.NbChevauxFiscauxVoiture == null)
-                return BadRequest("Le nombre de chevaux fiscaux doit être renseigné pour le bénévole");
+            //if (benevole.NbChevauxFiscauxVoiture == null)
+               // return BadRequest("Le nombre de chevaux fiscaux doit être renseigné pour le bénévole");
 
             DateTime periodStart = new DateTime(year, 1, 1);
             DateTime periodEnd = periodStart.AddYears(1);
@@ -495,7 +799,7 @@ namespace web.Controllers
             if (baremesAnnee.Count() == 0)
                 return NotFound("Barème de l'année demandée non trouvée");
 
-            if (!baremesAnnee.TryGetValue(benevole.NbChevauxFiscauxVoiture.Value, out var baremesChevaux))
+            /*if (!baremesAnnee.TryGetValue(benevole.NbChevauxFiscauxVoiture.Value, out var baremesChevaux))
             {
                 var minChevaux = baremesAnnee.Select(ba => ba.Key).Min();
                 var maxChevaux = baremesAnnee.Select(ba => ba.Key).Max();
@@ -504,24 +808,24 @@ namespace web.Controllers
                     baremesChevaux = baremesAnnee[minChevaux];
                 else if (benevole.NbChevauxFiscauxVoiture >= maxChevaux)
                     baremesChevaux = baremesAnnee[maxChevaux];
-            }
+            }*/
 
             decimal distanceAppliquee = model.DistanceTotale;
             BaremeFiscalLigne bareme = null;
 
-            foreach (var baremeKm in baremesChevaux.OrderBy(bc => bc.LimiteKm))
+           /* foreach (var baremeKm in baremesChevaux.OrderBy(bc => bc.LimiteKm))
             {
                 if (model.DistanceTotale <= baremeKm.LimiteKm)
                 {
                     bareme = baremeKm;
                     break;
                 }
-            }
+            }*/
 
             if (bareme == null)
             {
                 // on applique la bareme limité au nombre de kilometre maximum
-                bareme = baremesChevaux.Single(b => b.LimiteKm == baremesChevaux.Select(bc => bc.LimiteKm).Max());
+               // bareme = baremesChevaux.Single(b => b.LimiteKm == baremesChevaux.Select(bc => bc.LimiteKm).Max());
                 distanceAppliquee = bareme.LimiteKm;
             }
 

@@ -1,6 +1,9 @@
 ﻿body {
     padding-top: 50px;
     padding-bottom: 20px;
+    min-height: 100vh;
+    
+   
 }
 
 /* Wrapping element */
@@ -8,6 +11,14 @@
 .body-content {
     padding-left: 15px;
     padding-right: 15px;
+    min-width: 90%;
+    min-height:90vh;
+}
+.footer {
+    margin-left:auto;
+    margin-right:auto;
+    margin-top: auto;
+    max-width:70%;
 }
 
 /* Carousel */
@@ -16,6 +27,10 @@
     line-height: 1.4;
 }
 
+.panel-details {
+    height: 45vh;
+   
+}
 /* Make .svg files in the carousel display properly in older browsers */
 .carousel-inner .item img[src$=".svg"] {
     width: 100%;

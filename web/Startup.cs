@@ -31,6 +31,7 @@ namespace web
         {
             string connectionString = dal.RCBenevoleContextFactory.GetConnectionString();
 
+           
             services.AddDbContext<dal.RCBenevoleContext>(options =>
                 options.UseNpgsql(connectionString));
 
@@ -49,6 +50,8 @@ namespace web
                     opt.LoginPath = "/Home";
                     opt.LogoutPath = "/Account/Logout";
                 });
+
+            services.AddControllersWithViews().AddRazorRuntimeCompilation();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -56,7 +59,11 @@ namespace web
         {
 			// Pour utilisation d'un sous-répertoire via nginx (rendre configurable pour docker par variable d'environnement)
 			var pathBase = Environment.GetEnvironmentVariable("APP_PATH_BASE");
-			if(!string.IsNullOrEmpty(pathBase))
+
+            // Line below avoid errors while saving datetime in PostGreSQL
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
+            if (!string.IsNullOrEmpty(pathBase))
 				app.UsePathBase(pathBase);
 
             if (env.IsDevelopment())
@@ -85,7 +92,7 @@ namespace web
             app.UseEndpoints(endpoints => {
                 endpoints.MapControllers();
                 endpoints.MapDefaultControllerRoute();
-                //endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
             });
 
             // Astuce pour appeler une méthode de SeedData
@@ -104,7 +111,8 @@ namespace web
             };
  
             var options = new RequestLocalizationOptions {
-                DefaultRequestCulture = new RequestCulture("fr-FR"),
+                //DefaultRequestCulture = new RequestCulture("fr-FR"),
+                DefaultRequestCulture = new RequestCulture("en-US"),
                 SupportedCultures = supportedCultures,
                 SupportedUICultures = supportedCultures
             };

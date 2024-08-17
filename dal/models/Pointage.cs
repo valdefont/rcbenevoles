@@ -32,5 +32,12 @@ namespace dal.models
         [Display(Name = "Demi-journées")]
         [Range(1, 2, ErrorMessage = "Le nombre de demi-journées doit être 1 ou 2")]
         public int NbDemiJournees { get; set; }
+
+        [Required]
+        [Display(Name = "Vehicule")]
+        public int VehiculeID { get; set; }
+
+        [Display(Name = "Vehicule")]
+        public Vehicule Vehicule { get; set; }
     }
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Core;
@@ -26,7 +27,8 @@ namespace web
                 .MinimumLevel.Debug()
                 .MinimumLevel.Override("Microsoft", new LoggingLevelSwitch(Serilog.Events.LogEventLevel.Information))
                 .MinimumLevel.Override("System", new LoggingLevelSwitch(Serilog.Events.LogEventLevel.Information))
-                .WriteTo.LiterateConsole();
+                //.WriteTo.LiterateConsole();
+                .WriteTo.Console();
 
             var fileLogPath = Environment.GetEnvironmentVariable("APP_LOG_FILE_PATH");
 
@@ -58,7 +60,7 @@ namespace web
             {
                 Log.CloseAndFlush();
             }
-        }
+        }       
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
 
@@ -67,7 +69,7 @@ namespace web
                 {
                     webBuilder.UseStartup<Startup>();
                     webBuilder.UseSerilog();
-                    webBuilder.UseKestrel(k => k.ListenAnyIP(5125));
+                    //webBuilder.UseKestrel(k => k.ListenAnyIP(5125));
                 });
     }
 }

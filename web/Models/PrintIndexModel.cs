@@ -12,6 +12,10 @@ namespace web.Models
 
         public dal.models.Benevole Benevole { get; set; }
 
+        public Int16 SelectedYear { get; set; }
+
+        public List<int> ListYears { get; set; }
+
         public PrintIndexModel()
         {
             this.Periods = new List<PrintIndexPeriod>();
@@ -24,12 +28,16 @@ namespace web.Models
 
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
+     
+        public dal.models.Adresse Adresse { get; set; }
 
-        public List<dal.models.Adresse> Adresses { get; set; }
+        public dal.models.Vehicule Vehicule { get; set; }
 
-        public PrintIndexPeriod()
-        {
-            this.Adresses = new List<dal.models.Adresse>();
-        }
+        public List<dal.models.Pointage> PointagesPeriod { get; set; }
+
+        public string Remark { get; set; }
+        public  List<PrintIndexPeriod> printIndexPeriods { get; set; }
+
+
     }
 }

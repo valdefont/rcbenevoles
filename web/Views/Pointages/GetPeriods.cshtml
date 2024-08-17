@@ -1,0 +1,89 @@
+﻿@model PrintIndexModel
+
+@if (Model.Periods!=null)
+{
+    @if (Model.Periods.Count == 0)
+    {
+        <div class="">
+            <p>Aucune fiche n'est disponible pour l'édition. Il est possible qu'aucun pointage du bénévole n'ait été effectué sur cette période</p>
+        </div>
+    }
+    else
+    {
+        <div class="">
+            <p>Sélectionnez la fiche que vous souhaitez éditer</p>
+        </div>
+
+        <div>
+            <hr />
+            <ul>
+                @foreach (var period in Model.Periods)
+                {
+
+                    <li style="margin: 10px 0;">
+                        <span style="color:midnightblue">
+                            Du <strong>@period.Start.ToString("dddd d MMMM")</strong> au <strong>@period.End.AddDays(-1).ToString("dddd d MMMM yyyy")</strong>
+                        </span>
+                        <ul>
+                            @foreach (var periodAdresse in period.printIndexPeriods)
+                            {
+                                <li style="margin: 10px 0;">
+                                    <span style="color:black">
+                                        <strong>@periodAdresse.Remark</strong>
+                                        <ul>
+                                        @foreach (var periodVehicule in periodAdresse.printIndexPeriods)
+                                        {
+                                            <li>
+                                                <span style="color:gray">
+                                                    <strong>@periodVehicule.Remark</strong>
+                                                    <a asp-action="PrintFraisKm" asp-route-id="@Model.Benevole.ID" asp-route-year="@period.Start.Year" target="_blank">
+                                                            <u><b>Ouvrir Fiche</b></u>
+                                                    </a>
+                                                </span>
+                                            </li>
+
+                                        }
+                                        </ul>
+                                    </span>
+                                </li>
+                               
+                            }
+                        </ul>
+                     
+                        
+                       
+                        </li>  
+                        
+                }
+            </ul>
+        </div>
+    }
+
+    
+    @* @if (period.Adresse != null && period.Adresse.AdresseLigne1 != "")
+    {
+        @if (period.Vehicule != null && period.Vehicule.NbChevaux > 0)
+        {
+
+                                                <a asp-action="PrintFraisKm" asp-route-id="@Model.Benevole.ID" asp-route-year="@period.Start.Year" target="_blank">
+                                                    Du <strong>@period.Start.ToString("dddd d MMMM")</strong> au <strong>@period.End.AddDays(-1).ToString("dddd d MMMM yyyy")</strong> @period.Remark
+                                                </a>
+
+        }
+        else
+        {
+                                                <span style="color:gray">
+                                                    Du <strong>@period.Start.ToString("dddd d MMMM")</strong> au <strong>@period.End.AddDays(-1).ToString("dddd d MMMM yyyy")</strong>
+                                                </span>
+                                                <i class="glyphicon glyphicon-info-sign blue" title="Vous devez renseigner le nombre de chevaux fiscaux du véhicule pour editer les fiches"></i>
+        }
+    }
+    else
+    {
+                                    <span style="color:gray">
+                                        Du <strong>@period.Start.ToString("dddd d MMMM")</strong> au <strong>@period.End.AddDays(-1).ToString("dddd d MMMM yyyy")</strong>
+                                    </span>
+                                    <i class="glyphicon glyphicon-info-sign blue" title="Vous devez renseigner une Adresse pour editer les fiches"></i>
+    } *@
+                        
+}

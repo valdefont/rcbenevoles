@@ -10,6 +10,7 @@ using dal.models;
 using web.Models;
 using web.Filters;
 using Microsoft.AspNetCore.Authorization;
+using System.Globalization;
 
 namespace web.Controllers
 {
@@ -52,7 +53,7 @@ namespace web.Controllers
                 bCurrentCentreOnly = false;
             }
 
-            var query = _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre).AsQueryable();
+            var query = _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre).Include(a=>a.Vehicules.Where(s=>s.IsCurrent==true)).AsQueryable();
 
             if (filter.CentreID > 0)
             {
@@ -61,6 +62,7 @@ namespace web.Controllers
                 else
                     query = query.Where(b => b.Adresses.SingleOrDefault(a => a.IsCurrent).CentreID == filter.CentreID);
             }
+                      
 
             if (!string.IsNullOrEmpty(filter.Term))
                 query = query.Where(b => b.Nom.ToLower().StartsWith(filter.Term.Trim().ToLower()));
@@ -75,7 +77,8 @@ namespace web.Controllers
                 BenevoleNom = b.Nom,
                 BenevolePrenom = b.Prenom,
                 BenevoleCentre = b.Adresses.SingleOrDefault(a => a.IsCurrent).Centre.Nom,
-                ChevauxFiscauxNonRenseignes = (b.NbChevauxFiscauxVoiture == null),
+                NbChevaux = (b.Vehicules==null) ? null : b.Vehicules.FirstOrDefault(a=>a.IsCurrent).NbChevaux,
+                ChevauxFiscauxNonRenseignes = (b.CurrentVehicule==null || b.CurrentVehicule.NbChevaux == 0),
                 ShowAddressWarning = b.Adresses.Any(a => a.CentreID == filter.CentreID && a.IsCurrent)
             }).AsEnumerable();
 
@@ -106,7 +109,7 @@ namespace web.Controllers
             if (id == null)
                 return NotFound();
 
-            var benevole = await _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre)
+            var benevole = await _context.Benevoles.Include(b => b.Vehicules).Include(b => b.Adresses).ThenInclude(a => a.Centre)
                 .SingleOrDefaultAsync(m => m.ID == id);
 
             if (benevole == null)
@@ -168,7 +171,7 @@ namespace web.Controllers
 
             var benevole = await _context.Benevoles
                 .Include(b => b.Adresses)
-                .ThenInclude(a => a.Centre)
+                .ThenInclude(a => a.Centre)                
                 .SingleOrDefaultAsync(m => m.ID == id);
 
             if (benevole == null)
@@ -187,13 +190,12 @@ namespace web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Nom,Prenom,Telephone,NbChevauxFiscauxVoiture,CentreID")] Benevole benevole)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Nom,Prenom,Telephone,CentreID")] Benevole benevole,int NbChevaux)
         {
             if (id != benevole.ID)
                 return NotFound("Les identifiants ne correspondent pas");
 
-            var existing = _context.Benevoles.Include(b => b.Adresses)
-                .SingleOrDefault(b => b.ID == id);
+            var existing = _context.Benevoles.Include(b => b.Adresses).SingleOrDefault(b => b.ID == id);
 
             if(existing == null)
                 return NotFound("Le bénévole n'existe pas");
@@ -221,8 +223,7 @@ namespace web.Controllers
             {
                 existing.Nom = benevole.Nom;
                 existing.Prenom = benevole.Prenom;
-                existing.Telephone = benevole.Telephone;
-                existing.NbChevauxFiscauxVoiture = benevole.NbChevauxFiscauxVoiture;
+                existing.Telephone = benevole.Telephone;            
                 
                 _context.Update(existing);
                             
@@ -238,6 +239,7 @@ namespace web.Controllers
                 else
                     throw;
             }
+           
 
             return RedirectToAction(nameof(Index));
         }
@@ -305,6 +307,7 @@ namespace web.Controllers
 
             return View(benevoleWithAddress);
         }
+
 
         // POST: Benevoles/ChangeAddress/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
@@ -380,6 +383,109 @@ namespace web.Controllers
 
             LogInfo("Adresse {AdresseID} créée pour le benevole #{BenevoleID} ({BenevolePrenom} {BenevoleNom})", benevoleWithAddress.Adresse.ID, benevole.ID, benevole.Prenom, benevole.Nom);
             SetGlobalMessage("L'adresse a été créée avec succès", EGlobalMessageType.Success);
+
+            return RedirectToAction(nameof(Details), new { id = id });
+        }
+
+        // GET: Benevoles/ChangeAddress/5
+        public async Task<IActionResult> ChangeVehicule(int id, bool? force = false)
+        {
+            var benevole = await _context.Benevoles.Include(b => b.Vehicules).SingleOrDefaultAsync(m => m.ID == id);
+
+            if (benevole == null)
+                return NotFound();           
+
+            SetViewBagCentres();           
+
+            ViewBag.Force = force;
+
+            var benevoleWithVehicule = new BenevoleWithVehicule
+            {
+                Benevole = benevole,
+                Vehicule = new Vehicule
+                {
+                    BenevoleID = id,
+                    NbChevaux = (benevole.CurrentVehicule!=null) ? benevole.CurrentVehicule.NbChevaux: 0,
+                    DateChangement = DateTime.Today
+                }
+            };
+
+            return View(benevoleWithVehicule);
+        }
+
+        // POST: Benevoles/ChangeAddress/5
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeVehicule(int id, BenevoleWithVehicule benevoleWithVehicule, bool force = false)
+        {
+            ViewBag.Force = force;          
+
+            foreach (var ms in new List<string>(ModelState.Keys))
+            {
+                if (ms.StartsWith("Benevole."))
+                    ModelState.Remove(ms);
+            }
+
+            benevoleWithVehicule.Benevole = _context.Benevoles.SingleOrDefault(b => b.ID == benevoleWithVehicule.Vehicule.BenevoleID);
+
+            if (!ModelState.IsValid)
+                return View(benevoleWithVehicule);
+
+            var benevole = await _context.Benevoles.Include(b => b.Vehicules).SingleOrDefaultAsync(b => b.ID == id);
+
+            // Recherche d'adresses déjà présentes à une date ultérieure
+            var anyVehicules = benevole.Vehicules.Any(a => a.DateChangement >= benevoleWithVehicule.Vehicule.DateChangement);
+
+            if (anyVehicules)
+            {
+                ModelState.AddModelError("Vehicule.DateChangement", "Un véhicule existe déjà à une date ultérieure. Veuillez supprimer le véhicule précédent.");
+                return View(benevoleWithVehicule);
+            }
+
+            // Recherche de pointages sur une adresse différente à une date ultérieure
+            var pointagesFromDate = _context.Pointages
+                .Where(p => p.BenevoleID == id)
+                .Where(p => p.VehiculeID != benevoleWithVehicule.Vehicule.id)
+                .Where(p => p.Date >= benevoleWithVehicule.Vehicule.DateChangement);
+
+            if (pointagesFromDate.Count() > 0)
+            {
+                if (!force)
+                {
+                    ViewBag.Force = true;
+                    ViewBag.ImpactedCount = pointagesFromDate.Count();
+                    return View(benevoleWithVehicule);
+                }
+                else
+                {
+                    // suppression des pointages précédents
+                    _context.Pointages.RemoveRange(pointagesFromDate);
+
+                }
+            }
+
+            if(benevole.CurrentVehicule != null)
+            {
+                benevole.CurrentVehicule.IsCurrent = false;
+            }
+            
+
+            benevoleWithVehicule.Vehicule.BenevoleID = benevole.ID;
+            benevole.Vehicules.Add(benevoleWithVehicule.Vehicule);
+
+            benevole.Vehicules.OrderByDescending(a => a.DateChangement).First().IsCurrent = true;
+
+            _context.Add(benevoleWithVehicule.Vehicule);
+
+            await _context.SaveChangesAsync();
+
+            if (pointagesFromDate.Count() > 0)
+                LogInfo("Suppression de {NombrePointages} pointages du benevole #{BenevoleID} ({BenevolePrenom} {BenevoleNom}) après le {DateChangement:dd/MM/yyyy}", pointagesFromDate.Count(), benevole.ID, benevole.Prenom, benevole.Nom, benevoleWithVehicule.Vehicule.DateChangement);
+
+            LogInfo("Véhicule {VehiculeID} créée pour le benevole #{BenevoleID} ({BenevolePrenom} {BenevoleNom})", benevoleWithVehicule.Vehicule.id, benevole.ID, benevole.Prenom, benevole.Nom);
+            SetGlobalMessage("Le véhicule a été créée avec succès", EGlobalMessageType.Success);
 
             return RedirectToAction(nameof(Details), new { id = id });
         }

@@ -35,11 +35,18 @@ namespace web.Controllers
             return user.Centre == null || user.Centre == centre;
         }
 
-        protected bool IsBenevoleAllowed(Benevole benevole)
+        protected bool IsBenevoleFromCentreAllowed(Benevole benevole)
         {
             if (benevole == null) throw new ArgumentNullException(nameof(benevole));
 
             return IsCentreIdAllowed(benevole.CurrentAdresse.CentreID);
+        }
+
+        protected bool IsBenevoleAllowed(Benevole benevole)
+        {
+            if (benevole == null) throw new ArgumentNullException(nameof(benevole));
+
+            return true;
         }
 
         protected void LogDebug(string templateMessage, params object[] propertyValues)

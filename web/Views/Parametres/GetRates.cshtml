@@ -1,0 +1,60 @@
+﻿@model dal.models.ViewModelBaremeFiscalLigne
+
+
+<div class="form-group">
+    <label class="control-label">Pourcentage Véhicule Electrique :</label>
+    <input name="PourcentageVehiculeElectrique" value="@Model.PourcentageVehiculeElectrique" class="form-control" style="max-width:300px" />
+        
+</div>
+<hr>
+
+
+@if (Model.ListBaremeFiscalLigne != null)
+{
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>
+                    Nombre Chevaux
+                </th>
+                <th>
+                    Limite Km
+                </th>
+                <th>
+                   Coef
+                </th>
+                <th>
+                   Ajout
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in Model.ListBaremeFiscalLigne)
+            {
+                string id =  @item.NbChevaux + "_" +@item.LimiteKm;
+                <tr>
+                    <td> @item.NbChevaux   </td>
+                    <td> @item.LimiteKm   </td>
+                    <td>
+                        <input type="text" id="coef_@id" name="coef_@id" value="@item.Coef" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="text" id="ajout_@id" name="ajout_@id" value="@item.Ajout" class="form-control" />
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+}
+
+
+
+@if (Model.ListBaremeFiscalLigne != null)
+{
+    <div>
+        <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-save"></i> Modifier</button>
+    </div>
+}
+

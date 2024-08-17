@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Globalization;
 using System.Text;
 
 namespace dal.models
@@ -52,7 +53,8 @@ namespace dal.models
 
         public Adresse()
         {
-            this.DateChangement = DateTime.MinValue;
+            string str = DateTime.MinValue.ToString("yyyy-MM-dd hh:MM:ss");           
+            this.DateChangement = DateTime.ParseExact(str, "yyyy-MM-dd hh:MM:ss", CultureInfo.InvariantCulture);
         }
 
         public string GetAdresseComplete(bool forHtml)

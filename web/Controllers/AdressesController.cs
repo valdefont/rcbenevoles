@@ -31,7 +31,7 @@ namespace web.Controllers
             if(benevole == null)
                 return NotFound();
 
-            if(!IsBenevoleAllowed(benevole))
+            if(!IsBenevoleFromCentreAllowed(benevole))
                 return Forbid();
 
             var adresses = new List<BenevoleAdresse>();
