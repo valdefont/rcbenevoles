@@ -6,7 +6,7 @@
 
 <h2>Gestion des bénévoles</h2>
 
-<h3>Détail du bénévole</h3>
+<h3>Détail du bénévole - <span style="color:steelblue">@Html.DisplayFor(model => model.Prenom) @Html.DisplayFor(model => model.Nom) </span></h3>
 
 <div>
     <div>
@@ -16,8 +16,8 @@
     </div>
 
     <hr />
-    <div class="col-md-6">
-        <div class="panel panel-default">
+    <div class="col-md-4">
+        <div class="panel panel-default  panel-details">
             <div class="panel-heading">Identification</div>
             <div class="panel-body">
                 <div>
@@ -40,21 +40,16 @@
                         <dd>
                             @Html.DisplayFor(model => model.Telephone)
                         </dd>
-                        <dt>
-                            @Html.DisplayNameFor(model => model.NbChevauxFiscauxVoiture)
-                        </dt>
-                        <dd>
-                            @Html.DisplayFor(model => model.NbChevauxFiscauxVoitureDisplay)
-                        </dd>
+                        
                     </dl>
                 </div>
-                @if(Model.NbChevauxFiscauxVoiture == null) {
+                @*@if(Model.NbChevauxFiscauxVoiture == null) {*@
                 <div class="alert alert-warning">
                     <p>
                         Pensez à indiquer le nombre de <b>chevaux fiscaux</b> afin de pouvoir bénéficier du calcul des frais via le barème kilométrique des impôts. Cliquez sur le bouton Modifier ci-dessous. 
                     </p>
                 </div>
-                }
+                @*}*@
                 <div>
                     <a asp-action="Edit" asp-route-id="@Model.ID" class="btn btn-primary"><i class="glyphicon glyphicon-edit"></i> Modifier</a>
                     <a asp-action="Delete" asp-route-id="@Model.ID" class="btn btn-primary"><i class="glyphicon glyphicon-remove"></i> Supprimer</a>
@@ -62,8 +57,9 @@
             </div>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="panel panel-default">
+    <!-- Adresse-->
+    <div class="col-md-4">
+        <div class="panel panel-default panel-details">
             <div class="panel-heading">Adresse &amp; Centre</div>
             <div class="panel-body">
                 <div class="alert alert-warning">
@@ -105,6 +101,47 @@
                     @if (Model.CurrentAdresse.DateChangement != DateTime.MinValue)
                     {
                         <a asp-action="Index" asp-controller="Adresses" asp-route-idbenevole="@Model.ID" class="btn btn-link"><i class="glyphicon glyphicon-zoom-in"></i> Voir les anciennes adresses</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Vehicule-->
+    <div class="col-md-4">
+        <div class="panel panel-default panel-details">
+            <div class="panel-heading">Véhicule</div>
+            <div class="panel-body">
+                <div class="alert alert-warning">
+                    <p>
+                        Si le bénévole change de véhicule en cours d'année, cliquez sur le bouton <strong>Enregistrer un changement de véhicule</strong>.
+                        <br />
+                        Si le véhicule saisi est erroné, veuillez <a asp-action="Edit" asp-controller="Adresses" asp-route-id="@Model.CurrentAdresse.ID">cliquer ici pour les corriger</a>
+                    </p>
+                </div>
+                <div>
+                    @if (Model.CurrentVehicule != null )
+                    {
+                        @if (Model.CurrentVehicule.DateChangement != DateTime.MinValue)
+                        {
+                            <em>Depuis le @Model.CurrentVehicule.DateChangement.ToString("d")</em>
+                            <br />
+                        }
+                        <dl class="dl-horizontal">
+                            <dt>
+                                Véhicule 
+                            </dt>
+                            <dd>
+                                @Html.Raw(Model.CurrentVehicule.NbChevaux) Chevaux
+                            </dd>
+
+                        </dl>
+                    }
+                </div>
+                <div>
+                    <a asp-action="ChangeVehicule" asp-route-id="@Model.ID" class="btn btn-primary"><i class="glyphicon glyphicon-plane"></i> Enregistrer un changement de véhicule</a>
+                    @if (Model.CurrentVehicule != null && Model.CurrentVehicule.DateChangement != DateTime.MinValue)
+                    {
+                        <a asp-action="Index" asp-controller="Vehicules" asp-route-idbenevole="@Model.ID" class="btn btn-link"><i class="glyphicon glyphicon-zoom-in"></i> Voir les anciens véhicules</a>
                     }
                 </div>
             </div>

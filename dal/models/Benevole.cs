@@ -28,14 +28,13 @@ namespace dal.models
 
         public List<Pointage> Pointages { get; set; }
 
-        [Display(Name = "Nb chevaux fiscaux (voiture)")]
-        public int? NbChevauxFiscauxVoiture { get; set; }
-
-        [NotMapped]
-        public string NbChevauxFiscauxVoitureDisplay => NbChevauxFiscauxVoiture?.ToString() ?? "Non renseigné";
+        public List<Vehicule> Vehicules { get; set; }
 
         [NotMapped]
         public Adresse CurrentAdresse => Adresses?.SingleOrDefault(a => a.IsCurrent);
+
+        [NotMapped]
+        public virtual Vehicule? CurrentVehicule => Vehicules?.SingleOrDefault(a => a.IsCurrent);
 
         public Adresse GetAdresseFromDate(DateTime date)
         {
@@ -46,8 +45,17 @@ namespace dal.models
             return addresses.FirstOrDefault();
         }
 
+        public Vehicule GetVehiculeFromDate(DateTime date)
+        {
+            var vehicules = this.Vehicules
+                .Where(a => a.DateChangement <= date)
+                .OrderByDescending(a => a.DateChangement);
 
-        public IDictionary<DateTime, Adresse> GetAdressesInPeriod(DateTime periodStart, DateTime periodEnd, bool excludeEnd)
+            return vehicules.FirstOrDefault();
+        }
+
+
+        public IDictionary<DateTime, Adresse> GetAdressesInPeriod(DateTime periodStart, DateTime? periodEnd, bool excludeEnd)
         {
             IEnumerable<Adresse> adresses;
             
@@ -83,6 +91,48 @@ namespace dal.models
                 if(!periodStartSet)
                     result.Remove(date);
             }
+
+            return result;
+        }
+
+        public IDictionary<DateTime, Vehicule> GetVehiculesInPeriod(DateTime periodStart, DateTime periodEnd, bool excludeEnd)
+        {
+            IEnumerable<Vehicule> vehicules;
+
+            if (excludeEnd)
+            {
+                vehicules = this.Vehicules.Where(a => a.DateChangement < periodEnd).ToList();
+            }
+            else
+            {
+                vehicules = this.Vehicules.Where(a => a.DateChangement <= periodEnd).ToList();
+            }
+                
+
+            var result = vehicules.ToDictionary(a => a.DateChangement);
+           
+            /*bool periodStartSet = false;
+            Vehicule currentVehicule = null;
+
+            foreach (var date in result.Keys.OrderBy(d => d))
+            {
+                var veh = result[date];
+
+                if (veh == null)     // period start
+                {
+                    periodStartSet = true;
+                    veh = currentVehicule;
+                    result[date] = currentVehicule;
+                }
+
+                if (date >= periodStart)
+                    break;
+
+                currentVehicule = veh;
+
+                if (!periodStartSet)
+                    result.Remove(date);
+            }*/
 
             return result;
         }

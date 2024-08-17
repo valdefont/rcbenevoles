@@ -4,64 +4,68 @@
     ViewData["Title"] = "Détails";
 }
 
-<h2>Edition des fiches d'abandon</h2>
+<h2>Edition des fiches d'abandon pour @Model.Benevole.Prenom @Model.Benevole.Nom</h2>
 
-@if(Model.Periods.Count == 0) 
-{
-<div class="alert alert-warning">
-    <p>Aucune fiche n'est disponible pour l'édition. Il est possible qu'aucun pointage du bénévole n'ait été effectué sur cette période</p>
-</div>
-}
-else
-{
-<div class="alert alert-info">
-    <p>Sélectionnez la fiche que vous souhaitez éditer</p>
-</div>
+<form asp-action="Index" id="formBareme">
 
-<div>
-    <hr />
-    <ul>
-        @foreach (var period in Model.Periods)
-        {
-            if(period.PeriodId == -1)
+    @if (Model.ListYears != null)
+    {
+        <label>Sélectionner une année :</label>
+        <input type="hidden" id="BenevoleID"  value="@Model.Benevole.ID.ToString()" />
+        <select id="selectYear" name="selectYear" class="form-control" style="max-width:300px;">
+            <option></option>
+            @foreach (var year in Model.ListYears)
             {
-                <li>
-                    @if(Model.Benevole.NbChevauxFiscauxVoiture != null)
-                    {
-                        <a asp-action="PrintFraisKm" asp-route-id="@Model.Benevole.ID" asp-route-year="@period.Start.Year" target="_blank">
-                            Du <strong>@period.Start.ToString("dddd d MMMM")</strong> au <strong>@period.End.AddDays(-1).ToString("dddd d MMMM yyyy")</strong>
-                        </a>
-                    } else {
-                        <span style="color:gray">
-                            Du <strong>@period.Start.ToString("dddd d MMMM")</strong> au <strong>@period.End.AddDays(-1).ToString("dddd d MMMM yyyy")</strong>
-                        </span>
-                        <i class="glyphicon glyphicon-info-sign blue" title="Vous devez renseigner le nombre de chevaux fiscaux du véhicule pour editer les fiches"></i>
-                    }
-                </li>
+                <option value="@year">@year</option>
             }
-            else if (period.Adresses.Count == 1)
-            {
-                <li>
-                    <a asp-action="Print" asp-route-id="@Model.Benevole.ID" asp-route-addressId="@period.Adresses.First().ID" asp-route-period="@period.PeriodId" asp-route-year="@period.Start.Year" target="_blank">
-                        Du <strong>@period.Start.ToString("dddd d MMMM")</strong> au <strong>@period.End.AddDays(-1).ToString("dddd d MMMM yyyy")</strong>
-                    </a>
-                </li>
-            }
-            else
-            {
-            <li>
-                <span>Du <strong>@period.Start.ToString("dddd d MMMM")</strong> au <strong>@period.End.AddDays(-1).ToString("dddd d MMMM yyyy")</strong></span>
-                <ul>
-                @foreach (var adresse in period.Adresses)
-                {
-                    <li>
-                        à l'adresse <a asp-action="Print" asp-route-id="@Model.Benevole.ID" asp-route-addressId="@adresse.ID" asp-route-period="@period.PeriodId" asp-route-year="@period.Start.Year" target="_blank">@adresse.GetAdresseComplete(false)</a>
-                    </li>
+        </select>
+        <hr />
+    }
+
+    <div id="TblPeriods"></div>
+</form>
+
+@section scripts
+    {
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            $('#selectYear').on('change', function () {
+                var sel = $('select#selectYear option:selected').val();
+                var benID = $('input#BenevoleID').val();
+                if (sel !== undefined) {
+                    getPeriods(sel,benID);
                 }
-                </ul>
-            </li>
-            }
+
+            });
+
+
+        });
+
+        function getPeriods(Year,benevoleID) {
+
+
+            console.log(benevoleID);
+            $.ajax({
+                url: '@Url.Action("GetPeriods")',
+                data: { year: Year, benevoleID: benevoleID },
+                type: 'POST',
+                success: function (data) {
+                    $('#TblPeriods').html(data);
+                    $('.alert').remove();
+                },
+                error: function (data) {
+                    alert('Une erreur est apparue pendant le chargement des périodes');
+                }
+            });
         }
-    </ul>
-</div>
+    </script>
+}
+
+
+@if (1 == 2)
+{
+    
+    
 }

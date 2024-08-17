@@ -13,5 +13,7 @@ namespace dal.models
 
         [Required]
         public decimal TauxKilometrique { get; set; }
+   
+        public int? PourcentageVehiculeElectrique { get; set; }
     }
 }

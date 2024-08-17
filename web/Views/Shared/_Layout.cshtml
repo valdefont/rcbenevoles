@@ -63,24 +63,27 @@
             </p>
         </div>
         }
+
         @RenderBody()
+       
         <hr />
-        <footer>
-            <div style="float:left">
-                <p>&copy; 2017 - David Durain</p>
-            </div>
-            <div style="float:left;margin-left:32px">
-                <ul class="list-unstyled list-inline">
-                    <li><a href="@Url.Action("Legal", "Home")#license">Licence</a></li>
-                    <li><a href="@Url.Action("Legal", "Home")#components">Composants</a></li>
-                    <li><a href="@Url.Action("Legal", "Home")#privacy">Données personnelles</a></li>
-                </ul>
-            </div>
-            <div style="float:right">
-                version @(System.Reflection.Assembly.GetAssembly(typeof(web.Program)).GetName().Version.ToString())
-            </div>
-        </footer>
+        
     </div>
+    <footer class="footer">
+        <div style="float:left">
+            <p>&copy; 2023 - David Durain</p>
+        </div>
+        <div style="float:left;margin-left:32px;padding-right:100px;">
+            <ul class="list-unstyled list-inline">
+                <li><a href="@Url.Action("Legal", "Home")#license">Licence</a></li>
+                <li><a href="@Url.Action("Legal", "Home")#components">Composants</a></li>
+                <li><a href="@Url.Action("Legal", "Home")#privacy">Données personnelles</a></li>
+            </ul>
+        </div>
+        <div>
+            Version @(System.Reflection.Assembly.GetAssembly(typeof(web.Program)).GetName().Version.ToString())
+        </div>
+    </footer>
 
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>

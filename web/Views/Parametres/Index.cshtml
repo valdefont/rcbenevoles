@@ -1,4 +1,4 @@
-﻿@model IEnumerable<dal.models.Frais>
+﻿@model dal.models.ViewModelBaremeFiscalLigne
 
 @{
     ViewData["Title"] = "Taux kilométriques";
@@ -14,34 +14,56 @@
 }
 
 
-<form asp-action="Index">
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.Annee)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.TauxKilometrique)
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Annee)
-                    </td>
-                    <td>
-                        <input type="text" id="frais_@item.Annee" name="frais_@item.Annee" value="@item.TauxKilometrique" class="form-control" />
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+<form asp-action="Index" id="formBareme">
 
-    <div>
-        <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-save"></i> Modifier</button>
-    </div>
+    @if (Model.ListYears != null)
+    {
+        <label>Sélectionner une année :</label>
+        <select id="selectYear" name="selectYear" class="form-control" style="max-width:300px;">
+            <option></option>
+        @foreach (var year in Model.ListYears)
+        {
+            <option value="@year">@year</option>
+        }
+        </select>
+        <hr />
+    }
+
+        <div id="TblRates"></div>           
 </form>
+
+@section scripts
+    {
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            $('#selectYear').on('change', function () {
+                var sel = $('select#selectYear option:selected').val();
+                if (sel !== undefined) {
+                    getRates(sel);
+                }
+                
+            });
+           
+
+        });
+
+        function getRates(Year) {
+
+           
+            $.ajax({
+                url: '@Url.Action("GetRates")',
+                data: { year: Year },                
+                type: 'POST',               
+                success: function (data) {
+                    $('#TblRates').html(data);
+                    $('.alert').remove();
+                },
+                error: function (data) {
+                    alert('Une erreur est apparue pendant le chargement des bénévoles');
+                }
+            });
+        }
+    </script>
+}

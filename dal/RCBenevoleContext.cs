@@ -43,6 +43,12 @@ namespace dal
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Benevole>()
+                .HasMany(b => b.Vehicules)
+                .WithOne(a => a.Benevole)
+                .HasForeignKey(a => a.BenevoleID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Benevole>()
                 .HasMany(b => b.Pointages)
                 .WithOne(p => p.Benevole)
                 .HasForeignKey(p => p.BenevoleID)
@@ -82,11 +88,22 @@ namespace dal
                 .WithMany()
                 .HasForeignKey(c => c.CentreID)
                 .OnDelete(DeleteBehavior.Restrict);
-        
-            // *** BAREME FISCAUX			
-            modelBuilder.Entity<BaremeFiscalLigne>()
+
+			// *** BAREME FISCAUX			
+			modelBuilder.Entity<BaremeFiscalLigne>()
 				.HasKey(bf => new { bf.Annee, bf.NbChevaux, bf.LimiteKm });
-		}
+
+            // ***  BAREME FISCAL DEFAUT		
+            modelBuilder.Entity<BaremeFiscalDefault>()
+				.HasIndex(b => b.id);
+
+            // ***  VEHICULE		
+            modelBuilder.Entity<Vehicule>()
+                .HasIndex(b => b.id)
+				.IsUnique(true);
+
+
+        }
 
         public DbSet<Utilisateur> Utilisateurs { get; set; }
         public DbSet<Siege> Sieges { get; set; }
@@ -96,6 +113,8 @@ namespace dal
         public DbSet<Frais> Frais { get; set; }
         public DbSet<Adresse> Adresse { get; set; }
 		public DbSet<BaremeFiscalLigne> BaremeFiscalLignes { get; set; }
+        public DbSet<BaremeFiscalDefault> BaremeFiscalDefault { get; set; }
+        public DbSet<Vehicule> Vehicule { get; set; }
 
         public void SeedData()
         {
@@ -104,8 +123,8 @@ namespace dal
 			// Seed utilisateurs et données 
             if(this.Utilisateurs.Count() == 0)
             {
-            	var seedDevData = Environment.GetEnvironmentVariable("APP_GENERATE_DEV_DATA");
-				var adminPassword = Environment.GetEnvironmentVariable("APP_ADMIN_PASSWORD");
+				var seedDevData = "1";//Environment.GetEnvironmentVariable("APP_GENERATE_DEV_DATA");
+				var adminPassword = "admin!2008";// Environment.GetEnvironmentVariable("APP_ADMIN_PASSWORD");
 
             	if (!string.IsNullOrEmpty(seedDevData) && (seedDevData == "1" || seedDevData.ToLower() == "true"))
 				{

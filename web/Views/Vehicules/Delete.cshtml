@@ -1,0 +1,45 @@
+﻿@model dal.models.Vehicule
+
+@{
+    ViewData["Title"] = "Supprimer";
+}
+
+<h2>Gestion des bénévoles</h2>
+
+<h3>Confirmez-vous la suppression du véhicule suivant ?</h3>
+
+@if (ViewBag.NombrePointages > 0)
+{
+<div class="alert alert-warning">
+    <p>
+        Attention : @ViewBag.NombrePointages pointages existent sur ce véhicule. <strong>Ils seront supprimés !</strong>
+    </p>
+</div>
+}
+
+@if (Model.IsCurrent)
+{
+<div class="alert alert-warning">
+    <p>
+        Attention : Il s'agit du véhicule actuel du bénévole !
+    </p>
+</div>
+}
+
+<div>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.NbChevaux) :&nbsp;
+        </dt>       
+    </dl>   
+    <dd>
+        @Html.DisplayFor(model => model.NbChevaux)
+    </dd>
+    <br /> <br />
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="id" />
+        <input type="submit" value="Supprimer" class="btn btn-danger" />
+        <a asp-action="Index" asp-route-idbenevole="@Model.BenevoleID" class="btn btn-link">Retourner à la liste des véhicules</a>
+    </form>
+</div>

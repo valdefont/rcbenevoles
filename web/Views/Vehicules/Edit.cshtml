@@ -1,0 +1,74 @@
+﻿@model dal.models.Vehicule
+
+@{
+    ViewData["Title"] = "Corriger le véhicule";
+}
+
+<h2>Gestion des bénévoles</h2>
+
+<h3>Corriger le véhicule pour @Model.Benevole.Prenom @Model.Benevole.Nom</h3>
+<hr />
+<div class="row">
+    <form asp-action="Edit" asp-route-force="@ViewBag.Force" asp-antiforgery="true" onsubmit="submit();">
+        @if (ViewBag.Force && (ViewBag.DateChanged || ViewBag.CenterChanged))
+        {
+            <div class="col-md-12">
+                <div class="alert alert-warning">
+                    @if(ViewBag.DateChanged)
+                    {
+                    <text>
+                    <p>Vous avez modifié la date de changement : <strong>Tous les pointages du bénévole entre le @ViewBag.StartDate.ToString("d") et le @ViewBag.EndDate.ToString("d") seront supprimés</strong> (Concerne @ViewBag.DateImpactedCount pointages)
+                    </text>
+                    }
+                   
+                    <p>Cliquez sur <strong>Corriger</strong> pour confirmer votre choix.</p>
+                    <br/> 
+                </div>
+                <div class="form-group" style="float:right">
+                    <button type="submit" class="btn btn-success" onclick="submit(); return false;">Corriger</button>
+                    <a asp-action="Details" asp-controller="Benevoles" asp-route-id="@Model.Benevole.ID" class="btn btn-link">Annuler et retourner à la fiche du bénévole</a>
+                </div>
+            </div>
+        }
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <input asp-for="BenevoleID" type="hidden" />
+        <div class="col-md-6" style="@(ViewBag.Force ? "display:none" : "")">
+            <div class="panel panel-default">
+                <div class="panel-heading">Véhicule</div>
+                <div class="panel-body">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label asp-for="DateChangement" class="control-label required"></label>
+                            <input asp-for="DateChangement" class="form-control" />
+                            <span asp-validation-for="DateChangement" class="text-danger"></span>
+                            <div>
+                                <div class="alert alert-warning">
+                                    <p>Attention : En cas de changement de date, tous les pointages seront supprimés entre le @(Model.DateChangement.ToString("d")) et la nouvelle date
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                        <fieldset>
+                            <div class="form-group">
+                                <label asp-for="NbChevaux" class="control-label required"></label>
+                                <input asp-for="NbChevaux" class="form-control" />
+                                <span asp-validation-for="NbChevaux" class="text-danger"></span>
+                            </div>                          
+                            <hr />
+                        </fieldset>   
+                        <div class="form-group" style="float:left">
+                            <label asp-for="IsElectric" class="control-label required"></label>
+                            <input asp-for="IsElectric" type="checkbox" class="form-control" style="max-height:20px;" />
+                            <span asp-validation-for="IsElectric" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group" style="float:right">
+                <button type="submit" class="btn btn-success" onclick="submit(); return false;">Corriger</button>
+                <a asp-action="Details" asp-controller="Benevoles" asp-route-id="@Model.BenevoleID" class="btn btn-link">Retourner à la fiche du bénévole</a>
+            </div>
+        </div>
+    </form>
+</div>
+
