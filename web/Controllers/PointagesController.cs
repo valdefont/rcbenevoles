@@ -475,11 +475,13 @@ namespace web.Controllers
                         {
                             if (i == (vehDates.Count - 1)) // Last element
                             {
-                                newEnd = Period.End;
+                                //newEnd = Period.End;
+                                newEnd = PeriodAdresse.End;
                             }
                             else // End is element change date
                             {
-                                newEnd = veh.DateChangement;
+                                //newEnd = veh.DateChangement;
+                                newEnd = vehiculesWithDates[vehDates[i + 1]].DateChangement;
                             }
 
                         }
