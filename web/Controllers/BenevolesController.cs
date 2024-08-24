@@ -126,10 +126,11 @@ namespace web.Controllers
         {
             SetViewBagCentres();
 
-            var benevole = new BenevoleWithAdresse
+            var benevole = new BenevoleWithAdresseAndVehicule
             {
                 Benevole = new Benevole(),
                 Adresse = new Adresse(),
+                Vehicule=new Vehicule(),
             };
 
             return View(benevole);
@@ -140,7 +141,7 @@ namespace web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(BenevoleWithAdresse benevoleWithAddress)
+        public async Task<IActionResult> Create(BenevoleWithAdresseAndVehicule benevoleWithAddress)
         {
             if (!_context.ContainsCentre(benevoleWithAddress.Adresse.CentreID))
                 ModelState.AddModelError("CentreID", "Le centre n'existe pas");
@@ -153,8 +154,12 @@ namespace web.Controllers
             benevoleWithAddress.Adresse.IsCurrent = true;
             benevoleWithAddress.Adresse.Benevole = benevoleWithAddress.Benevole;
 
+            benevoleWithAddress.Vehicule.IsCurrent = true;
+            benevoleWithAddress.Vehicule.Benevole = benevoleWithAddress.Benevole;
+
             _context.Add(benevoleWithAddress.Adresse);
             _context.Add(benevoleWithAddress.Benevole);
+            _context.Add(benevoleWithAddress.Vehicule);
             await _context.SaveChangesAsync();
 
             LogInfo("Benevole #{BenevoleID} ({BenevolePrenom} {BenevoleNom}) créé", benevoleWithAddress.Benevole.ID, benevoleWithAddress.Benevole.Prenom, benevoleWithAddress.Benevole.Nom);
@@ -280,7 +285,7 @@ namespace web.Controllers
         // GET: Benevoles/ChangeAddress/5
         public async Task<IActionResult> ChangeAddress(int id, bool? force = false)
         {
-            var benevole = await _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre)
+            var benevole = await _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre).Include(s=>s.CurrentVehicule)
                 .SingleOrDefaultAsync(m => m.ID == id);
 
             if (benevole == null)
@@ -291,7 +296,7 @@ namespace web.Controllers
 
             SetViewBagCentres();
 
-            var benevoleWithAddress = new BenevoleWithAdresse
+            var benevoleWithAddress = new BenevoleWithAdresseAndVehicule
             {
                 Benevole = benevole,
                 Adresse = new Adresse
@@ -300,7 +305,8 @@ namespace web.Controllers
                     CentreID = benevole.CurrentAdresse.CentreID,
                     Centre = benevole.CurrentAdresse.Centre,
                     DateChangement = DateTime.Today,
-                }
+                },
+                Vehicule=benevole.CurrentVehicule
             };
 
             ViewBag.Force = force;
@@ -314,7 +320,7 @@ namespace web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ChangeAddress(int id, BenevoleWithAdresse benevoleWithAddress, bool force = false)
+        public async Task<IActionResult> ChangeAddress(int id, BenevoleWithAdresseAndVehicule benevoleWithAddress, bool force = false)
         {
             ViewBag.Force = force;
             if (!_context.ContainsCentre(benevoleWithAddress.Adresse.CentreID))

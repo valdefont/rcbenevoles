@@ -1,4 +1,4 @@
-﻿@model BenevoleWithAdresse
+﻿@model BenevoleWithAdresseAndVehicule
 
 @{
     ViewData["Title"] = "Créer";
@@ -11,7 +11,7 @@
 <div class="row">
     <form asp-action="Create" asp-antiforgery="true" onsubmit="submit();">
         <div asp-validation-summary="All" class="text-danger"></div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">Identification</div>
                 <div class="panel-body">
@@ -35,7 +35,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">Adresse &amp; Centre</div>
                 <div class="panel-body">
@@ -98,11 +98,43 @@
                 </div>
             </div>
         </div>
-        <div class="form-group" style="float:right">
-            <button type="submit" class="btn btn-success" onclick="submit(); return false;">Créer</button>
-            <a asp-action="Index" class="btn btn-link">Retourner à la liste</a>
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">Identification</div>
+                <div class="panel-body">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label asp-for="Vehicule.DateChangement" class="control-label required"></label>
+                            <input asp-for="Vehicule.DateChangement" id="dateChangement" class="form-control" />
+                            <span asp-validation-for="Vehicule.DateChangement" class="text-danger"></span>
+                        </div>
+                        <hr />
+                        <fieldset>
+                            <div class="form-group">
+                                <label asp-for="Vehicule.NbChevaux" class="control-label required"></label>
+                                <input asp-for="Vehicule.NbChevaux" id="nbChevaux" class="form-control" />
+                                <span asp-validation-for="Vehicule.NbChevaux" class="text-danger"></span>
+                            </div>
+                            <hr />
+                        </fieldset>
+                        <div class="form-group" style="float:left">
+                            <label asp-for="Vehicule.IsElectric" class="control-label required"></label>
+                            <input asp-for="Vehicule.IsElectric" type="checkbox" class="form-control" style="max-height:20px;" />
+                            <span asp-validation-for="Vehicule.IsElectric" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" style="float:left">
+                            <span id="validationVehicule" class="text-danger" style="display:none"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>     
         </div>
+       
     </form>
+    <div class="form-group" style="float:right">
+        <button type="button" class="btn btn-success" onclick="submit(); return false;">Créer</button>
+        <a asp-action="Index" class="btn btn-link">Retourner à la liste</a>
+    </div>
 </div>
 
 @section Scripts {
@@ -113,7 +145,7 @@
     function validateDistance() {
 
         var valDistance = $("#DistanceCentre").val();
-        var distance = parseFloat(valDistance.replace(",", ".").replace(".", "!"));
+        var distance = parseFloat(valDistance.replace(",", ".").replace(".", "!"));       
 
         if (isNaN(distance)) {
             $("#validationDistance").html("Veuillez renseigner un nombre valide");
@@ -129,10 +161,67 @@
         }
     }
 
+    function validateVehicule() {
+        var retval = true;
+        var dateChange = $("#dateChangement").val();
+        if ($("#nbChevaux").val() == 0) {
+
+            $("#validationVehicule").html("Veuillez renseigner un nombre valide de chevaux fiscaux");
+            $("#validationVehicule").show();
+            retval = false;
+
+        } else if (!isValidDate(dateChange) ) {
+
+            $("#validationVehicule").html("Veuillez rentrer une date valide d'acquisition de votre véhicule.");
+            $("#validationVehicule").show();
+            retval = false;
+        }
+
+        return retval;
+
+    }
+
+    function isValidDate(dateString) {
+        // Check if the date format is yyyy-mm-ddTHH:MM
+        var regex = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/;
+        if (!regex.test(dateString)) {
+            return false;
+        }
+
+        // Parse the date parts to integers
+        var parts = dateString.split(/[-T:]/);
+        var year = parseInt(parts[0], 10);
+        var month = parseInt(parts[1], 10) - 1; // Months are 0-based in JavaScript
+        var day = parseInt(parts[2], 10);
+        var hours = parseInt(parts[3], 10);
+        var minutes = parseInt(parts[4], 10);
+
+        // Check if the date is valid
+        var date = new Date(year, month, day, hours, minutes);
+        var dateCheck = date.getFullYear();
+        var monthCheck = date.getMonth();
+        var dayCheck = date.getDate();
+
+        // Additional check to ensure the year is not too far in the past
+        if (year < 1901) {
+            return false;
+        }
+
+        if (dateCheck !== year || monthCheck !== month || dayCheck !== day) {
+            return false;
+        }
+
+       
+
+        return true;
+    }
+
     function submit() {
 
-        if (!validateDistance())
-            return;
+        if (!validateDistance() || !validateVehicule()) {
+                return;
+        }
+            
 
         $("form").submit();
     }
