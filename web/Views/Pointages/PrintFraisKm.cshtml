@@ -125,7 +125,7 @@
                         </tr>
                         <tr>
                             <td colspan="4" class="total_line">
-                                <b>Formule appliquée : <span class="code">@Model.FormuleBareme = </span></b>
+                                <b>Formule appliquée ( Vehicule <span>@Model.Benevole.CurrentVehicule.NbChevaux</span> chevaux ): <span class="code">@Model.FormuleBareme = </span></b>
                             </td>
                             <td class="total_line">
                                 <span class="code"><b>@Model.FraisTotaux.ToString("0.00 €")</b></span>
@@ -302,13 +302,13 @@
                         <th class="table_separator"></th>
                         @for (int i = 0; i < 3; i++)
                         {
-                        <th>Lu</th>
-                        <th>Ma</th>
-                        <th>Me</th>
-                        <th>Je</th>
-                        <th>Ve</th>
-                        <th>Sa</th>
-                        <th class="table_separator">Di</th>
+                            <th>Lu</th>
+                            <th>Ma</th>
+                            <th>Me</th>
+                            <th>Je</th>
+                            <th>Ve</th>
+                            <th>Sa</th>
+                            <th class="table_separator">Di</th>
                         }
                     </tr>
                 </thead>
@@ -320,9 +320,9 @@
                             <th class="month_name">@(new DateTime(Model.PeriodStart.Year, month, 1).ToString("MMMM"))</th>
 
                             @{
-                            var firstDate = new DateTime(Model.PeriodStart.Year, month, 1);
-                            var firstDayOfWeek = (firstDate.DayOfWeek == DayOfWeek.Sunday) ? 7 : (int)firstDate.DayOfWeek;
-                            var firstDateMonday = firstDate.AddDays(1 - firstDayOfWeek);
+                                var firstDate = new DateTime(Model.PeriodStart.Year, month, 1);
+                                var firstDayOfWeek = (firstDate.DayOfWeek == DayOfWeek.Sunday) ? 7 : (int)firstDate.DayOfWeek;
+                                var firstDateMonday = firstDate.AddDays(1 - firstDayOfWeek);
                             }
 
                             @for (var dayIndex = 0; dayIndex < 21; dayIndex++)
@@ -337,21 +337,21 @@
 
                                     decimal? value = null;
                                     dal.models.Pointage pt;
-                                    foreach(var fraisParAdresse in Model.FraisParAdresse)
+                                    foreach (var fraisParAdresse in Model.FraisParAdresse)
                                     {
-                                        if(fraisParAdresse.DetailDemiJournees.TryGetValue(Tuple.Create(selectedDate.Month, selectedDate.Day), out pt))
+                                        if (fraisParAdresse.DetailDemiJournees.TryGetValue(Tuple.Create(selectedDate.Month, selectedDate.Day), out pt))
                                         {
-                                            if(value == null)
+                                            if (value == null)
                                                 value = 0m;
 
                                             value += pt.NbDemiJournees * pt.Adresse.DistanceCentre;
                                         }
                                     }
 
-                                    if(value != null)
+                                    if (value != null)
                                     {
                                         tdValue = value.ToString();
-                                        
+
                                         if (!totalByMonth.ContainsKey(selectedDate.Month))
                                         {
                                             totalByMonth[selectedDate.Month] = value.Value;
@@ -363,10 +363,10 @@
                                     }
                                 }
 
-                            <td class="@tdclass">@tdValue</td>
-                        }
+                                <td class="@tdclass">@tdValue</td>
+                            }
                         </tr>
-                }
+                    }
                 </tbody>
             </table>
             <table class="table_details" style="margin-top:2mm">
