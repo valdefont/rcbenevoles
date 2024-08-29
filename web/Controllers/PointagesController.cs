@@ -730,12 +730,13 @@ namespace web.Controllers
         }
 
         [HttpGet("Pointages/Benevole/{id}/print-frais-km")]
-        public async Task<IActionResult> PrintFraisKm(int id, int year)
+        public async Task<IActionResult> PrintFraisKm(int id, DateTime startPeriod, DateTime endPeriod, int idAdresse,int idVehicule)
         {
             var benevole = await _context.Benevoles
-                .Include(b => b.Adresses)
+                .Include(b => b.Adresses)                
                 .ThenInclude(a => a.Centre)
                 .ThenInclude(c => c.Siege)
+                .Include(s=>s.Vehicules)
                 .SingleOrDefaultAsync(b => b.ID == id);
 
             if (benevole == null)
@@ -743,99 +744,82 @@ namespace web.Controllers
 
             //if (benevole.NbChevauxFiscauxVoiture == null)
                // return BadRequest("Le nombre de chevaux fiscaux doit être renseigné pour le bénévole");
+           
 
-            DateTime periodStart = new DateTime(year, 1, 1);
-            DateTime periodEnd = periodStart.AddYears(1);
+            var adresse = await _context.Adresse.Where(s=>s.ID==idAdresse).SingleOrDefaultAsync();
 
-            var adresses = benevole.GetAdressesInPeriod(periodStart, periodEnd, excludeEnd: true)
-                .OrderBy(ap => ap.Key)
-                .Select(ap => ap.Value)
-                .Distinct();
+            var vehicule = await _context.Vehicule.Where(s=>s.id==idVehicule).SingleOrDefaultAsync();
 
-            var centres = adresses.Select(a => a.Centre).Distinct();
+            var centre = adresse.Centre;
 
-            if (GetCurrentUser().Centre != null && !centres.Contains(GetCurrentUser().Centre))
+            if (GetCurrentUser().Centre != null && centre != GetCurrentUser().Centre)
                 return Forbid();
 
             PrintFraisKmModel model = new PrintFraisKmModel
             {
-                PeriodStart = periodStart,
-                PeriodEnd = periodEnd.AddDays(-1),
+                PeriodStart = startPeriod,
+                PeriodEnd = endPeriod.AddDays(-1),
                 Benevole = benevole,
-                MonthCount = 12,
+                MonthCount = 12, //!!!!!!!!!!!!!!! to review
             };
 
-            foreach (var adresse in adresses)
+            
+            // ***** Calcul du nombre de demi-journées pointées sur l'adresse
+            var demiJournees = _context.Pointages
+                .Where(p => p.Adresse.ID == idAdresse && p.Vehicule.id==idVehicule)
+                .Where(p => p.Date >= startPeriod && p.Date < endPeriod);
+
+            var totalDemiJournees = demiJournees.Sum(p => p.NbDemiJournees);
+
+            if (totalDemiJournees > 0)
             {
-                // ***** Calcul du nombre de demi-journées pointées sur l'adresse
-                var demiJournees = _context.Pointages
-                    .Where(p => p.Adresse == adresse)
-                    .Where(p => p.Date >= periodStart && p.Date < periodEnd);
-
-                var totalDemiJournees = demiJournees.Sum(p => p.NbDemiJournees);
-
-                if (totalDemiJournees > 0)
+                var addressData = new PrintFraisKmAddressVehiculeModel
                 {
-                    var addressData = new PrintFraisKmAddressModel
-                    {
-                        Adresse = adresse,
-                        FirstDate = demiJournees.Select(p => p.Date).Min(),
-                        LastDate = demiJournees.Select(p => p.Date).Max(),
-                        TotalDemiJournees = totalDemiJournees,
-                        Distance = totalDemiJournees * adresse.DistanceCentre,
-                        DetailDemiJournees = demiJournees.ToDictionary(p => Tuple.Create(p.Date.Month, p.Date.Day)),
-                    };
+                    Adresse = adresse,
+                    Vehicule = vehicule,
+                    FirstDate = demiJournees.Select(p => p.Date).Min(),
+                    LastDate = demiJournees.Select(p => p.Date).Max(),
+                    TotalDemiJournees = totalDemiJournees,
+                    Distance = totalDemiJournees * adresse.DistanceCentre,
+                    DetailDemiJournees = demiJournees.ToDictionary(p => Tuple.Create(p.Date.Month, p.Date.Day)),
+                };
 
-                    model.FraisParAdresse.Add(addressData);
-                    model.DistanceTotale += addressData.Distance;
-                }
+                model.FraisParAdresse.Add(addressData);
+                model.DistanceTotale += addressData.Distance;
             }
+            
+            
+            // Barème impots revenus
+            List<BaremeFiscalLigne> baremesAnnee = await _context.BaremeFiscalLignes.Where(bf => bf.Annee == startPeriod.Year).ToListAsync();            
+           
 
-            // Barème impots revenus 2022
-            var baremesAnnee = _context.BaremeFiscalLignes
-                .Where(bf => bf.Annee == year)
-                .AsEnumerable()
-                .GroupBy(bf => bf.NbChevaux)
-                .ToDictionary(g => g.Key, g => g.AsEnumerable());
-
-            if (baremesAnnee.Count() == 0)
-                return NotFound("Barème de l'année demandée non trouvée");
-
-            /*if (!baremesAnnee.TryGetValue(benevole.NbChevauxFiscauxVoiture.Value, out var baremesChevaux))
-            {
-                var minChevaux = baremesAnnee.Select(ba => ba.Key).Min();
-                var maxChevaux = baremesAnnee.Select(ba => ba.Key).Max();
-
-                if (benevole.NbChevauxFiscauxVoiture <= minChevaux)
-                    baremesChevaux = baremesAnnee[minChevaux];
-                else if (benevole.NbChevauxFiscauxVoiture >= maxChevaux)
-                    baremesChevaux = baremesAnnee[maxChevaux];
-            }*/
-
-            decimal distanceAppliquee = model.DistanceTotale;
-            BaremeFiscalLigne bareme = null;
-
-           /* foreach (var baremeKm in baremesChevaux.OrderBy(bc => bc.LimiteKm))
-            {
-                if (model.DistanceTotale <= baremeKm.LimiteKm)
-                {
-                    bareme = baremeKm;
-                    break;
-                }
-            }*/
+            BaremeFiscalLigne bareme = baremesAnnee
+             .Where(bf => bf.NbChevaux == vehicule.NbChevaux && bf.LimiteKm > model.DistanceTotale)
+             .OrderBy(bf => bf.LimiteKm)
+             .FirstOrDefault();
 
             if (bareme == null)
             {
-                // on applique la bareme limité au nombre de kilometre maximum
-               // bareme = baremesChevaux.Single(b => b.LimiteKm == baremesChevaux.Select(bc => bc.LimiteKm).Max());
-                distanceAppliquee = bareme.LimiteKm;
+                int maxLimiteKm = baremesAnnee.Max(bf => bf.LimiteKm);
+                bareme = baremesAnnee
+                    .Where(bf => bf.NbChevaux == vehicule.NbChevaux && bf.LimiteKm == maxLimiteKm)
+                    .FirstOrDefault();
             }
 
-            model.FormuleBareme = $"({distanceAppliquee} * {bareme.Coef}) + {bareme.Ajout}";
+            if (bareme == null)
+            {
+                bareme = baremesAnnee
+                    .OrderByDescending(bf => bf.NbChevaux)
+                    .ThenByDescending(bf => bf.LimiteKm)
+                    .FirstOrDefault();
+            }
+           
+
+            model.FormuleBareme = $"({model.DistanceTotale} * {bareme.Coef}) + {bareme.Ajout}";
 
             LogDebug($"Bareme appliqué : {bareme.NbChevaux} ch, {bareme.LimiteKm} km => {model.FormuleBareme}");
 
-            model.FraisTotaux = distanceAppliquee * bareme.Coef + bareme.Ajout;
+            model.FraisTotaux = model.DistanceTotale * bareme.Coef + bareme.Ajout;
 
             return View(model);
         }

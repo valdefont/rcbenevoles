@@ -17,7 +17,7 @@ namespace web.Models
 
         public dal.models.Benevole Benevole { get; set; }
 
-        public List<PrintFraisKmAddressModel> FraisParAdresse { get; set; } = new List<PrintFraisKmAddressModel>();
+        public List<PrintFraisKmAddressVehiculeModel> FraisParAdresse { get; set; } = new List<PrintFraisKmAddressVehiculeModel>();
 
         public decimal DistanceTotale { get; set; }
         
@@ -42,9 +42,11 @@ namespace web.Models
         }
     }
 
-    public class PrintFraisKmAddressModel
+    public class PrintFraisKmAddressVehiculeModel
     {
         public dal.models.Adresse Adresse { get; set; }
+
+        public dal.models.Vehicule Vehicule { get; set; }
 
         public decimal Distance { get; set; }
         

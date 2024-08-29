@@ -36,7 +36,7 @@
                                             <li>
                                                 <span style="color:gray">
                                                     <strong>@periodVehicule.Remark</strong>
-                                                    <a asp-action="PrintFraisKm" asp-route-id="@Model.Benevole.ID" asp-route-year="@period.Start.Year" target="_blank">
+                                                        <a asp-action="PrintFraisKm" asp-route-id="@Model.Benevole.ID" asp-route-startPeriod="@period.Start.ToString("yyyy-MM-dd")" asp-route-endPeriod="@period.End.ToString("yyyy-MM-dd")" asp-route-idAdresse="@periodAdresse.Adresse.ID" asp-route-idVehicule="@periodVehicule.Vehicule.id" target="_blank">
                                                             <u><b>Ouvrir Fiche</b></u>
                                                     </a>
                                                 </span>
