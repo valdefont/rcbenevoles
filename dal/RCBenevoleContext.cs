@@ -214,7 +214,25 @@ namespace dal
 		                        IsCurrent = true,
 		                    }
 		                },
-		            };
+                        Vehicules = new List<Vehicule>
+						{
+							new Vehicule
+							{
+								NbChevaux=5,
+								IsCurrent=true,
+								DateChangement=new DateTime(2022,1,1),
+								IsElectric=true,
+							},
+                            new Vehicule
+                            {
+                                NbChevaux=3,
+                                IsCurrent=false,
+                                DateChangement=new DateTime(2019,2,10),
+                                IsElectric=false,
+                            }
+
+                        }
+                    };
 
 		            this.Benevoles.Add(benevole1);
 
@@ -234,8 +252,18 @@ namespace dal
 		                        DistanceCentre = 10,
 		                        IsCurrent = true,
 		                    }
-		                }
-		            });
+		                },
+                        Vehicules = new List<Vehicule>
+                        {
+                            new Vehicule
+                            {
+                                NbChevaux=7,
+                                IsCurrent=true,
+                                DateChangement=new DateTime(2024,5,5),
+                                IsElectric=true,
+                            }
+                        }
+                    });
 
 		            this.Benevoles.Add(new Benevole
 		            {
@@ -253,8 +281,18 @@ namespace dal
 		                        DistanceCentre = 65.5m,
 		                        IsCurrent = true,
 		                    }
-		                }
-		            });
+		                },
+                        Vehicules = new List<Vehicule>
+                        {
+                            new Vehicule
+                            {
+                                NbChevaux=4,
+                                IsCurrent=true,
+                                DateChangement=new DateTime(2023,12,2),
+                                IsElectric=true,
+                            }
+                        }
+                    });
 
 		            this.Benevoles.Add(new Benevole
 		            {
@@ -272,8 +310,18 @@ namespace dal
 		                        DistanceCentre = 80,
 		                        IsCurrent = true,
 		                    }
-		                }
-		            });
+		                },
+                        Vehicules = new List<Vehicule>
+                        {
+                            new Vehicule
+                            {
+                                NbChevaux=8,
+                                IsCurrent=true,
+                                DateChangement=new DateTime(2016,6,6),
+                                IsElectric=true,
+                            }
+                        }
+                    });
 
 		            // ****** Pointages
 		            this.Pointages.Add(new Pointage
@@ -282,7 +330,8 @@ namespace dal
 		                Adresse = benevole1.Adresses.First(),
 		                Date = new DateTime(2017, 1, 15),
 		                NbDemiJournees = 2,
-		            });
+                        Vehicule = benevole1.Vehicules.First()
+                    });
 
 		            this.Pointages.Add(new Pointage
 		            {
@@ -290,7 +339,8 @@ namespace dal
 		                Adresse = benevole1.Adresses.Skip(1).First(),
 		                Date = new DateTime(2017, 2, 28),
 		                NbDemiJournees = 2,
-		            });
+                        Vehicule = benevole1.Vehicules.First()
+                    });
 
 		            this.Pointages.Add(new Pointage
 		            {
@@ -298,7 +348,8 @@ namespace dal
 		                Adresse = benevole1.Adresses.Skip(2).First(),
 		                Date = new DateTime(2017, 03, 03),
 		                NbDemiJournees = 1,
-		            });
+                        Vehicule = benevole1.Vehicules.First()
+                    });
 
 		            this.Pointages.Add(new Pointage
 		            {
@@ -306,6 +357,7 @@ namespace dal
 		                Adresse = benevole1.Adresses.Skip(2).First(),
 		                Date = new DateTime(2017, 03, 05),
 		                NbDemiJournees = 1,
+						Vehicule=benevole1.Vehicules.First()
 		            });
 				}
 				else
@@ -338,16 +390,115 @@ namespace dal
                 {
                     Annee = 2017,
                     TauxKilometrique = 0.308m,
+					PourcentageVehiculeElectrique=20
                 });
 
                 this.Frais.Add(new Frais
                 {
                     Annee = 2018,
                     TauxKilometrique = 0.308m,
+                    PourcentageVehiculeElectrique = 20
                 });
 
                 this.SaveChanges();
             }
+
+			if (this.BaremeFiscalDefault.Count() == 0)
+			{
+				this.BaremeFiscalDefault.Add(new BaremeFiscalDefault
+				{
+					NbChevaux = 3,
+					LimiteKm = 5000
+				}
+				);
+                this.BaremeFiscalDefault.Add(new BaremeFiscalDefault
+                {
+                    NbChevaux = 4,
+                    LimiteKm = 5000
+                }
+                );
+                this.BaremeFiscalDefault.Add(new BaremeFiscalDefault
+                {
+                    NbChevaux = 5,
+                    LimiteKm = 5000
+                }
+                );
+                this.BaremeFiscalDefault.Add(new BaremeFiscalDefault
+                {
+                    NbChevaux = 6,
+                    LimiteKm = 5000
+                }
+                );
+                this.BaremeFiscalDefault.Add(new BaremeFiscalDefault
+                {
+                    NbChevaux = 7,
+                    LimiteKm = 5000
+                }
+                );
+                this.BaremeFiscalDefault.Add(new BaremeFiscalDefault
+                {
+                    NbChevaux = 3,
+                    LimiteKm = 20000
+                }
+                );
+                this.BaremeFiscalDefault.Add(new BaremeFiscalDefault
+                {
+                    NbChevaux = 4,
+                    LimiteKm = 20000
+                }
+                );
+                this.BaremeFiscalDefault.Add(new BaremeFiscalDefault
+                {
+                    NbChevaux = 5,
+                    LimiteKm = 20000
+                }
+                );
+                this.BaremeFiscalDefault.Add(new BaremeFiscalDefault
+                {
+                    NbChevaux = 6,
+                    LimiteKm = 20000
+                }
+                );
+                this.BaremeFiscalDefault.Add(new BaremeFiscalDefault
+                {
+                    NbChevaux = 7,
+                    LimiteKm = 20000
+                }
+                );
+                this.BaremeFiscalDefault.Add(new BaremeFiscalDefault
+                {
+                    NbChevaux = 3,
+                    LimiteKm = 1000000
+                }
+                );
+                this.BaremeFiscalDefault.Add(new BaremeFiscalDefault
+                {
+                    NbChevaux = 4,
+                    LimiteKm = 1000000
+                }
+                );
+                this.BaremeFiscalDefault.Add(new BaremeFiscalDefault
+                {
+                    NbChevaux = 5,
+                    LimiteKm = 1000000
+                }
+                );
+                this.BaremeFiscalDefault.Add(new BaremeFiscalDefault
+                {
+                    NbChevaux = 6,
+                    LimiteKm = 1000000
+                }
+                );
+                this.BaremeFiscalDefault.Add(new BaremeFiscalDefault
+                {
+                    NbChevaux = 7,
+                    LimiteKm = 1000000
+                }
+                );
+                this.SaveChanges();
+            }
+
+           
         }
 
         public bool ContainsCentre(int id)

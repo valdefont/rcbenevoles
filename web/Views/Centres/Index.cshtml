@@ -22,20 +22,54 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+        @foreach (var item in Model) {
+                <tr>
+                    <td width="20%">
+                        @Html.DisplayFor(modelItem => item.Nom)
+                    </td>
+                    <td width="50%">
+                        @Html.DisplayFor(modelItem => item.Adresse)
+                    </td>
+                    <td width="30%">
+                        <a asp-action="Details" asp-route-id="@item.ID">Détails</a> |
+                        <a asp-action="Edit" asp-route-id="@item.ID"><i class="glyphicon glyphicon-edit"></i> Modifier</a> |
+                        <a asp-action="Delete" asp-route-id="@item.ID"><i class="glyphicon glyphicon-trash"></i> Supprimer</a>
+                    </td>
+                </tr>
+        }
+    </tbody>
+</table>
+
+
+<h2>Gestion du siège</h2>
+
+
+<table class="table table-bordered table-striped">
+    <thead>
         <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nom)
+            <th>
+                Nom
+            </th>
+            <th>
+               Adresse
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var itemSiege = Model.First(); // or Model[0]
+        }
+        <tr>
+            <td width="20%">
+                @Html.DisplayFor(modelItem => itemSiege.Siege.Nom)
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Adresse)
+            <td width="50%">
+                @Html.DisplayFor(modelItem => itemSiege.Siege.Adresse)
             </td>
-            <td>
-                <a asp-action="Details" asp-route-id="@item.ID">Détails</a> |
-                <a asp-action="Edit" asp-route-id="@item.ID"><i class="glyphicon glyphicon-edit"></i> Modifier</a> |
-                <a asp-action="Delete" asp-route-id="@item.ID"><i class="glyphicon glyphicon-trash"></i> Supprimer</a>
+            <td width="30%">
+                <a asp-action="EditSiege" asp-route-id="@itemSiege.Siege.ID"><i class="glyphicon glyphicon-edit"></i> Modifier</a> 
             </td>
         </tr>
-}
     </tbody>
 </table>

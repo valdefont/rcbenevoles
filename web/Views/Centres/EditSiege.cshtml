@@ -1,0 +1,36 @@
+﻿@model dal.models.Siege
+
+@{
+    ViewData["Title"] = "Modifier";
+}
+
+<h2>Gestion du Siège</h2>
+
+<h3>Modifier le Siège</h3>
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="EditSiege">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ID" />			
+            <div class="form-group">
+                <label asp-for="Nom" class="control-label required"></label>
+                <input asp-for="Nom" class="form-control" />
+                <span asp-validation-for="Nom" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Adresse" class="control-label required"></label>
+                <input asp-for="Adresse" class="form-control" />
+                <span asp-validation-for="Adresse" class="t ext-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Modifier" class="btn btn-success" />
+                <a asp-action="Index" class="btn btn-link">Retourner à la liste</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

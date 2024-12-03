@@ -183,11 +183,11 @@ namespace dal.Migrations
                     b.Property<int>("Annee")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("PourcentageVehiculeElectrique")
+                        .HasColumnType("integer");
+
                     b.Property<decimal>("TauxKilometrique")
                         .HasColumnType("numeric");
-
-                    b.Property<int>("PourcentageVehiculeElectrique")
-                        .HasColumnType("int");
 
                     b.HasKey("ID");
 
@@ -217,9 +217,14 @@ namespace dal.Migrations
                     b.Property<int>("NbDemiJournees")
                         .HasColumnType("integer");
 
+                    b.Property<int>("VehiculeID")
+                        .HasColumnType("integer");
+
                     b.HasKey("ID");
 
                     b.HasIndex("AdresseID");
+
+                    b.HasIndex("VehiculeID");
 
                     b.HasIndex("BenevoleID", "Date")
                         .IsUnique();
@@ -280,6 +285,39 @@ namespace dal.Migrations
                     b.ToTable("Utilisateurs");
                 });
 
+            modelBuilder.Entity("dal.models.Vehicule", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
+
+                    b.Property<int>("BenevoleID")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("DateChangement")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsCurrent")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsElectric")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("NbChevaux")
+                        .HasColumnType("integer");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("BenevoleID");
+
+                    b.HasIndex("id")
+                        .IsUnique();
+
+                    b.ToTable("Vehicule");
+                });
+
             modelBuilder.Entity("dal.models.Adresse", b =>
                 {
                     b.HasOne("dal.models.Benevole", "Benevole")
@@ -324,9 +362,17 @@ namespace dal.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("dal.models.Vehicule", "Vehicule")
+                        .WithMany()
+                        .HasForeignKey("VehiculeID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Adresse");
 
                     b.Navigation("Benevole");
+
+                    b.Navigation("Vehicule");
                 });
 
             modelBuilder.Entity("dal.models.Utilisateur", b =>
@@ -339,11 +385,24 @@ namespace dal.Migrations
                     b.Navigation("Centre");
                 });
 
+            modelBuilder.Entity("dal.models.Vehicule", b =>
+                {
+                    b.HasOne("dal.models.Benevole", "Benevole")
+                        .WithMany("Vehicules")
+                        .HasForeignKey("BenevoleID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Benevole");
+                });
+
             modelBuilder.Entity("dal.models.Benevole", b =>
                 {
                     b.Navigation("Adresses");
 
                     b.Navigation("Pointages");
+
+                    b.Navigation("Vehicules");
                 });
 
             modelBuilder.Entity("dal.models.Siege", b =>

@@ -25,7 +25,7 @@ namespace web.Controllers
         [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Centres.ToListAsync());
+            return View(await _context.Centres.Include(s=>s.Siege).ToListAsync());
         }
 
         [Authorize(Roles = "BasicAdmin")]
@@ -99,6 +99,23 @@ namespace web.Controllers
             return View(centre);
         }
 
+        // GET: Centres/EditSiege/5
+        [Authorize(Roles = "SuperAdmin")]
+        public async Task<IActionResult> EditSiege(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var siege = await _context.Sieges.SingleOrDefaultAsync(m => m.ID == id);
+            if (siege == null)
+            {
+                return NotFound();
+            }
+            return View(siege);
+        }
+
         // POST: Centres/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -135,6 +152,44 @@ namespace web.Controllers
                 return RedirectToAction(nameof(Index));
             }
             return View(centre);
+        }
+
+        // POST: Centres/EditSiege/5
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "SuperAdmin")]
+        public async Task<IActionResult> EditSiege(int id, [Bind("ID,Nom,Adresse")] Siege siege)
+        {
+            if (id != siege.ID)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(siege);
+                    await _context.SaveChangesAsync();
+                    LogInfo("Siege #{SiegeID} ({Siege}) modifié", siege.ID, siege.Nom);
+                    SetGlobalMessage("Le siège a été modifié avec succès", EGlobalMessageType.Success);
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!CentreExists(siege.ID))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(siege);
         }
 
         // GET: Centres/Delete/5

@@ -59,7 +59,7 @@ namespace dal.models
 
         public string GetAdresseComplete(bool forHtml)
         {
-            const string HTML_NEWLINE = "</br>";
+            const string HTML_NEWLINE = "<br>";
 
             string newline;
 

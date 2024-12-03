@@ -190,10 +190,11 @@ div .clearfix {
 
 .total_line {
     padding-top: 4pt;
-    border-top-width: 0.5pt;
+    /*border-top-width: 0.5pt;
     border-top-color: gray;
-    border-top-style: solid;
+    border-top-style: solid;*/
     text-align: right;
+    background-color:lightgrey!important;
 }
 
 .table_details {

@@ -70,6 +70,22 @@
                                 <span>@Model.Benevole.Prenom</span>
                             </td>
                         </tr>
+                        <tr>
+                            <td class="formlabel">
+                                <span>Adresse :</span>
+                            </td>
+                            <td class="formfield">
+                                <span>@Html.Raw(@Model.Benevole.CurrentAdresse.GetAdresseComplete(true))</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="formlabel">
+                                <span>Centre :</span>
+                            </td>
+                            <td class="formfield">
+                                <span><b>@Model.Benevole.CurrentAdresse.Centre.Nom</b><br/> @Model.Benevole.CurrentAdresse.Centre.Adresse</span>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -82,55 +98,35 @@
                 </span>
             </div>
             <div class="border_double" style="padding:0.2cm">
+                <b>Véhicule Personnel (<span>@Model.Benevole.CurrentVehicule.NbChevaux</span> chevaux ) :</b>
                 <table style="width:100%">
-                    <thead>
-                        <tr>
-                            <th style="width:25%">Adresse</th>
-                            <th style="width:25%">Centre de bénévolat</th>
-                            <th style="width:15%">Nb d'allers/retours</th>
-                            <th style="width:15%">Distance du centre</th>
-                            <th style="width:20%">Distance totale</th>
-                        </tr>
-                    </thead>
+                    
                     <tbody>
                         @foreach(var fraisParAdresse in Model.FraisParAdresse)
                         {
                             <tr>
-                                <td>
-                                    <span>@Html.Raw(fraisParAdresse.Adresse.GetAdresseComplete(true))</span>
+                                <td class="formlabel">
+                                    Kms parcourus pendant la période (<span><b>@fraisParAdresse.TotalDemiJournees</b> A/R</span> x
+                                    <span><b>@fraisParAdresse.Adresse.DistanceCentre.ToString("0.0")</b>) km: </span>
                                 </td>
-                                <td>
-                                    <span><b>@fraisParAdresse.Adresse.Centre.Nom</b></span>
-                                    <br/>
-                                    <span>@fraisParAdresse.Adresse.Centre.Adresse</span>
+                                <td class="total_line">
+                                    <span><b>@Model.DistanceTotale.ToString("0.0")</b></span>
                                 </td>
-                                <td class="frais_label_right">
-                                    <span><b>@fraisParAdresse.TotalDemiJournees</b> A/R</span>
-                                </td>
-                                <td class="frais_label_right">
-                                    <span><b>@fraisParAdresse.Adresse.DistanceCentre.ToString("0.0")</b> km</span>
-                                </td>
-                                <td class="frais_label_right">
-                                    <span><b>@fraisParAdresse.Distance.ToString("0.0")</b> km</span>
-                                </td>
+                                <td></td>
                             </tr>
+                            <tr>
+                                <td  class="formlabel">
+                                   Formule appliquée : <span>@Model.FormuleBareme = </span>
+                                </td>
+                                <td class="total_line">
+                                    <span><b>@Model.FraisTotaux.ToString("0.00")</b></span>
+                                </td>
+                                <td>€</td>
+                            </tr>
+
+                            
                         }
-                        <tr>
-                            <td colspan="4" class="total_line">
-                                <b>TOTAL</b>
-                            </td>
-                            <td class="total_line">
-                                <span><b>@Model.DistanceTotale.ToString("0.0")</b> km</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="4" class="total_line">
-                                <b>Formule appliquée ( Vehicule <span>@Model.Benevole.CurrentVehicule.NbChevaux</span> chevaux ): <span class="code">@Model.FormuleBareme = </span></b>
-                            </td>
-                            <td class="total_line">
-                                <span class="code"><b>@Model.FraisTotaux.ToString("0.00 €")</b></span>
-                            </td>
-                        </tr>
+                        
                     </tbody>
                 </table>
             </div>
@@ -287,7 +283,9 @@
             </div>
         </div>
 
-        @{ var totalByMonth = new Dictionary<int, decimal>(); }
+        @{ var totalByMonth = new Dictionary<int, decimal>(); 
+           var totalByMonthHalfDay = new Dictionary<int, decimal>();
+        }
         
         <div style="display:block;margin-top:2mm">
             <table class="table_details">
@@ -330,12 +328,15 @@
                                 var selectedDate = firstDateMonday.AddDays(dayIndex);
                                 string tdclass = "";
                                 string tdValue = "";
+                                string tdValueHalfDay = "";
+
 
                                 if (selectedDate.Month == month)
                                 {
                                     tdclass = "day_in_month";
 
                                     decimal? value = null;
+                                    decimal? valueHalfDay = null;
                                     dal.models.Pointage pt;
                                     foreach (var fraisParAdresse in Model.FraisParAdresse)
                                     {
@@ -344,7 +345,11 @@
                                             if (value == null)
                                                 value = 0m;
 
+                                            if (valueHalfDay == null)
+                                                valueHalfDay = 0m;
+
                                             value += pt.NbDemiJournees * pt.Adresse.DistanceCentre;
+                                            valueHalfDay += pt.NbDemiJournees ;
                                         }
                                     }
 
@@ -355,15 +360,20 @@
                                         if (!totalByMonth.ContainsKey(selectedDate.Month))
                                         {
                                             totalByMonth[selectedDate.Month] = value.Value;
+                                            totalByMonthHalfDay[selectedDate.Month] = valueHalfDay.Value;
                                         }
                                         else
                                         {
                                             totalByMonth[selectedDate.Month] += value.Value;
+                                            totalByMonthHalfDay[selectedDate.Month] += valueHalfDay.Value;
                                         }
+                                    }
+                                    if(valueHalfDay != null){
+                                        tdValueHalfDay = valueHalfDay.ToString();
                                     }
                                 }
 
-                                <td class="@tdclass">@tdValue</td>
+                                <td class="@tdclass">@tdValueHalfDay</td>
                             }
                         </tr>
                     }
@@ -395,7 +405,8 @@
                         else
                         {
                         <th class="table_separator">Me</th>
-                        <th colspan="4" class="quad_size">Dist. totale</th>
+                        <th colspan="2" class="quad_size">Nb A/R</th>
+                        <th colspan="2" class="quad_size">Dist. totale</th>
                         }
                     }
                     </tr>
@@ -417,6 +428,7 @@
                             var selectedDate = firstDateMonday.AddDays(dayIndex);
                             string tdclass = "";
                             string tdValue = "";
+                            string tdValueHalfDay = "";
 
                             if(dayIndex % 7 == 0)
                             {
@@ -428,6 +440,7 @@
                                 tdclass += " day_in_month";
 
                                 decimal? value = null;
+                                decimal? valueHalfDay = null;
                                 dal.models.Pointage pt;
 
                                 foreach(var fraisParAdresse in Model.FraisParAdresse)
@@ -437,7 +450,11 @@
                                         if(value == null)
                                             value = 0m;
 
+                                        if (valueHalfDay == null)
+                                            valueHalfDay = 0m;
+
                                         value += pt.NbDemiJournees * pt.Adresse.DistanceCentre;
+                                        valueHalfDay += pt.NbDemiJournees;
                                     }
                                 }
 
@@ -448,23 +465,30 @@
                                     if (!totalByMonth.ContainsKey(selectedDate.Month))
                                     {
                                         totalByMonth[selectedDate.Month] = value.Value;
+                                        totalByMonthHalfDay[selectedDate.Month] = valueHalfDay.Value;
                                     }
                                     else
                                     {
                                         totalByMonth[selectedDate.Month] += value.Value;
+                                        totalByMonthHalfDay[selectedDate.Month] += valueHalfDay.Value;
                                     }
+                                }
+                                if (valueHalfDay != null)
+                                {
+                                    tdValueHalfDay = valueHalfDay.ToString();
                                 }
                             }
 
-                        <td class="@tdclass">@tdValue</td>
+                            <td class="@tdclass">@tdValueHalfDay</td>
                         }
-
+                        <td class="table_separator" colspan="2"><strong>@(totalByMonthHalfDay.ContainsKey(month) ? totalByMonthHalfDay[month].ToString("0") : "")</strong></td>
                         <td class="table_separator" colspan="2"><strong>@(totalByMonth.ContainsKey(month) ? totalByMonth[month].ToString("0.# km") : "")</strong></td>
                     </tr>
                 }
                     <tr>
                         <th>TOTAL</th>
                         <td colspan="17"></td>
+                        <td colspan="2"><strong>@(totalByMonthHalfDay.Sum(t => t.Value).ToString("0"))</strong></td>
                         <td colspan="2"><strong>@(totalByMonth.Sum(t => t.Value).ToString("0.# km"))</strong></td>
                     </tr>
                 </tbody>

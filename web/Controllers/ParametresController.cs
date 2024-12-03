@@ -55,6 +55,14 @@ namespace web.Controllers
 
             // Get Frais
             Frais LigneFrais = GetFraisWithYear(Year);
+            if (LigneFrais == null)
+            {
+                LigneFrais = new Frais{
+                    Annee = Year,
+                    TauxKilometrique = 0,
+                    PourcentageVehiculeElectrique = 20
+                };
+            }
             mymodel.PourcentageVehiculeElectrique = LigneFrais.PourcentageVehiculeElectrique ?? 0;
 
             return PartialView(mymodel);
@@ -83,7 +91,21 @@ namespace web.Controllers
 
             // Save Frais
             var lnFrais = _context.Frais.SingleOrDefault(f => f.Annee == yearstring);
-            lnFrais.PourcentageVehiculeElectrique = PourcentageElec;
+            if (lnFrais==null)
+            {
+                lnFrais = new Frais
+                {
+                    Annee = yearstring,
+                    PourcentageVehiculeElectrique = PourcentageElec,
+                    TauxKilometrique = 0
+                };
+            }
+            else
+            {
+                lnFrais.PourcentageVehiculeElectrique = PourcentageElec;
+            }
+
+           
             _context.SaveChanges();
 
             // Save Rates 
@@ -92,11 +114,11 @@ namespace web.Controllers
 
                 string[] formStr = key.Split("_");
                 int nbchevaux = Convert.ToInt16(formStr[1]);
-                int limitekm = Convert.ToInt16(formStr[2]);
+                int limitekm = Convert.ToInt32(formStr[2]);
 
-                var coef_val = formdata["coef_" + formStr[1].ToString() + "_" + formStr[2].ToString()];
-                ;
-                
+                string coef_val = formdata["coef_" + formStr[1].ToString() + "_" + formStr[2].ToString()].ToString();
+                coef_val = coef_val.Replace('.', ',');
+
 
                 if (!decimal.TryParse(coef_val, out decimal coef) || coef < 0 || coef == 0)
                 {
@@ -132,8 +154,16 @@ namespace web.Controllers
         private List<int> GetAllYearsPlusOne()
         {
             var list = new List<int>(_context.BaremeFiscalLignes.OrderBy(s => s.Annee).Select(x => x.Annee).Distinct());
-            var maxAnnee = _context.BaremeFiscalLignes.Max(f => f.Annee);
-            list.Add(maxAnnee + 1);
+            if(list!=null && list.Count() > 0)
+            {
+                var maxAnnee = _context.BaremeFiscalLignes.Max(f => f.Annee);
+                list.Add(maxAnnee + 1);
+            }
+            else
+            {
+                list.Add(Convert.ToInt32(DateTime.Now.Year.ToString("0000")));
+            }
+            
             return list;
 
         }
