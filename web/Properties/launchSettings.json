@@ -1,4 +1,26 @@
 {
+  // PROD
+  /*"iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:50189/",
+      "sslPort": 0
+    }
+  },
+  "profiles": {
+    "web": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
+      },
+      "applicationUrl": "http://141.94.203.88:80"
+    }
+  }*/
+
+  // DEV
+  
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,

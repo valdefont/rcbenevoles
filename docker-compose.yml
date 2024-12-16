@@ -1,0 +1,21 @@
+services:
+  webapp:
+    image: web
+    ports:
+      - "5000:5000"
+    networks:
+      - backnet
+
+  appdb:
+    image: postgres:alpine
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - backnet
+
+networks:
+  backnet:
+    driver: bridge
+
+volumes:
+  db_data:

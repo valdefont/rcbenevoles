@@ -13,7 +13,7 @@ services:
       restart_policy:
         condition: on-failure
     ports:
-      - "8080:80"
+      - "80:80"
     volumes:
       - log_data:/var/log
       - db_backups:/var/backups:ro

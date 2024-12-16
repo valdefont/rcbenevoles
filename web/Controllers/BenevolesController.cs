@@ -285,7 +285,7 @@ namespace web.Controllers
         // GET: Benevoles/ChangeAddress/5
         public async Task<IActionResult> ChangeAddress(int id, bool? force = false)
         {
-            var benevole = await _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre).Include(s=>s.CurrentVehicule)
+            var benevole = await _context.Benevoles.Include(s => s.Vehicules).Include(b => b.Adresses).ThenInclude(a => a.Centre)
                 .SingleOrDefaultAsync(m => m.ID == id);
 
             if (benevole == null)
@@ -306,7 +306,7 @@ namespace web.Controllers
                     Centre = benevole.CurrentAdresse.Centre,
                     DateChangement = DateTime.Today,
                 },
-                Vehicule=benevole.CurrentVehicule
+                Vehicule=benevole?.CurrentVehicule
             };
 
             ViewBag.Force = force;

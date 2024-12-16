@@ -4,6 +4,39 @@
     ViewData["Title"] = "Liste";
 }
 
+<h2>Gestion du siège</h2>
+
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>
+                Nom
+            </th>
+            <th>
+                Adresse
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var itemSiege = Model.First(); // or Model[0]
+        }
+        <tr>
+            <td width="20%">
+                @Html.DisplayFor(modelItem => itemSiege.Siege.Nom)
+            </td>
+            <td width="50%">
+                @Html.DisplayFor(modelItem => itemSiege.Siege.Adresse)
+            </td>
+            <td width="30%">
+                <a asp-action="EditSiege" asp-route-id="@itemSiege.Siege.ID"><i class="glyphicon glyphicon-edit"></i> Modifier</a>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
 <h2>Gestion des centres</h2>
 
 <p>
@@ -41,35 +74,4 @@
 </table>
 
 
-<h2>Gestion du siège</h2>
 
-
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>
-                Nom
-            </th>
-            <th>
-               Adresse
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @{
-            var itemSiege = Model.First(); // or Model[0]
-        }
-        <tr>
-            <td width="20%">
-                @Html.DisplayFor(modelItem => itemSiege.Siege.Nom)
-            </td>
-            <td width="50%">
-                @Html.DisplayFor(modelItem => itemSiege.Siege.Adresse)
-            </td>
-            <td width="30%">
-                <a asp-action="EditSiege" asp-route-id="@itemSiege.Siege.ID"><i class="glyphicon glyphicon-edit"></i> Modifier</a> 
-            </td>
-        </tr>
-    </tbody>
-</table>

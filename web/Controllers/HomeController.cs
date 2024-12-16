@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using dal;
+using dal.models;
 
 namespace web.Controllers
 {
@@ -23,6 +24,7 @@ namespace web.Controllers
 
         public IActionResult Index(string ReturnUrl = null)
         {
+
             const string HOME_MESSAGE_FILE = "external/home_message";
             if(System.IO.File.Exists(HOME_MESSAGE_FILE))
                 ViewData["InformationMessage"] = System.IO.File.ReadAllText(HOME_MESSAGE_FILE);
@@ -39,6 +41,8 @@ namespace web.Controllers
         {
             LogInfo("[LOGIN-TRY:{UserLogin}] Tentative de connexion de {UserLogin}", model.Login);
 
+           
+
             if (!ModelState.IsValid)
             {
                 LogWarning("[LOGIN-FAIL:{UserLogin}] Echec de connexion de {UserLogin} : ModelState invalide ({@ModelState})", model.Login, ModelState);
@@ -46,7 +50,7 @@ namespace web.Controllers
             }
 
             var dbuser = _context.Utilisateurs.Include(u => u.Centre).Where(u => u.Login == model.Login).SingleOrDefault();
-
+           
             if (dbuser == null)
             {
                 LogWarning("[LOGIN-FAIL:{UserLogin}] Echec de connexion de {UserLogin} : Utilisateur inconnu", model.Login);

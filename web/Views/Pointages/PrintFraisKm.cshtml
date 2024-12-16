@@ -27,6 +27,15 @@
             <div class="right">
                 <span>Année <strong>@Model.PeriodStart.Year</strong></span>
             </div>
+            <div class="clearfix"></div>
+            <div style="display:inline-block;width:100%">
+                <div style="float:left">
+                    <span class="adresse_rue">@Model.Benevole.CurrentAdresse.Centre.Adresse</span>
+                </div>
+                <div style="float:right">
+                    <span>Durée : <strong>@Model.MonthCount mois</strong></span>
+                </div>
+            </div>
 
             <div>
                 <div class="border_all" style="float:right;padding-left:4px;padding-right:4px">

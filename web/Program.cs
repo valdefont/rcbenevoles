@@ -60,16 +60,15 @@ namespace web
             {
                 Log.CloseAndFlush();
             }
-        }       
+        }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
-
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                    webBuilder.UseSerilog();
-                    //webBuilder.UseKestrel(k => k.ListenAnyIP(5125));
-                });
+        Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseStartup<Startup>();
+                webBuilder.UseSerilog();
+                webBuilder.UseUrls("http://0.0.0.0:8080"); // Ensure the application listens on all network interfaces
+            });
     }
 }
