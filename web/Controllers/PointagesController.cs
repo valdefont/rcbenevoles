@@ -136,29 +136,37 @@ namespace web.Controllers
                 return NotFound();
 
             var adresse = benevole.GetAdresseFromDate(date);
-            var centre = adresse.Centre;
-            var userCentreId = GetCurrentUser().CentreID;
-
-            var pointage = await _context.Pointages
-                .SingleOrDefaultAsync(p => p.BenevoleID == id && p.Date == date);
-
-            ViewBag.DisabledForCenter = (userCentreId != null && centre.ID != userCentreId);
-
-            if (pointage == null)
+            if(adresse !=null && adresse.Centre != null)
             {
-                pointage = new dal.models.Pointage
+                var centre = adresse.Centre;
+                var userCentreId = GetCurrentUser().CentreID;
+
+                var pointage = await _context.Pointages
+                    .SingleOrDefaultAsync(p => p.BenevoleID == id && p.Date == date);
+
+                ViewBag.DisabledForCenter = (userCentreId != null && centre.ID != userCentreId);
+
+                if (pointage == null)
                 {
-                    BenevoleID = id,
-                    AdresseID = adresse.ID,
-                    Date = date,
-                    NbDemiJournees = 1,
-                };
+                    pointage = new dal.models.Pointage
+                    {
+                        BenevoleID = id,
+                        AdresseID = adresse.ID,
+                        Date = date,
+                        NbDemiJournees = 1,
+                    };
 
-                pointage.Benevole = benevole;
-                pointage.Adresse = adresse;
+                    pointage.Benevole = benevole;
+                    pointage.Adresse = adresse;
+                }
+
+                return PartialView(pointage);
             }
-
-            return PartialView(pointage);
+            else
+            {
+                return NotFound();
+            }
+            
         }
 
         [HttpPost("Pointages/Benevole/{id}/editcreate")]

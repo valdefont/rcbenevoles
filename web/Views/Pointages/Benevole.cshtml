@@ -32,6 +32,12 @@
         </div>
     </div>
 </div>
+</br>
+<div id="alert" class="alert alert-warning" style="display: none;">
+    <p>
+        Attention : Vérifier les dates pour l'adresse et le véhicule pour ce bénévole !</strong>
+    </p>
+</div>
 
 @section scripts {
 
@@ -64,24 +70,36 @@
     }
 
     function displayDetailPanel() {
-
+        document.getElementById('alert').style.display = 'none';
+        
+        $('#detailPanel').hide();
         $.ajax({
             url: '@Url.Action("BenevoleEditOrCreate", new { id = Model.Benevole.ID })' + '?id=@Model.Benevole.ID&date=' + encodeURIComponent($("#calendar").attr("data-selected-date")),
             type: 'GET',
             cache: false,
             success: function (data) {
-                $('#detailPanel').replaceWith(data);
-                $('#detailPanel').show();
-                $('input[name=RadioNbDemiJournees][value=' + $("#NbDemiJournees").val() + ']').prop('checked', true);
+                if(data){
+                    $('#detailPanel').replaceWith(data);
+                    $('#detailPanel').show();
+                    $('input[name=RadioNbDemiJournees][value=' + $("#NbDemiJournees").val() + ']').prop('checked', true);
+                }else{
+                    alert("Aucune donnée trouvée");
+                }
+                
             },
-            error: function (data) {
-                alert('Une erreur est apparue pendant le chargement');
+             error: function (xhr, status, error) {
+                
+                if (xhr.status === 404) {
+                    document.getElementById('alert').style.display = 'block';
+                } else {
+                    alert('An error occurred while loading the details.');
+                }
             }
         });
     }
 
     function editOrCreate() {
-
+        document.getElementById('alert').style.display = 'none';
         var nbDemiJournees = $('input[name=RadioNbDemiJournees]:checked').val();
 
         var date = $("#calendar").attr("data-selected-date");
@@ -105,12 +123,22 @@
             type: 'POST',
             cache: false,
             success: function (data) {
-                $selectedTd.attr("data-id", data.id);
-                $("#calendar").attr("data-selected-id", data.id);
-                refreshDate(date, nbDemiJournees);
+                if(data){
+                    $selectedTd.attr("data-id", data.id);
+                    $("#calendar").attr("data-selected-id", data.id);
+                    refreshDate(date, nbDemiJournees);
+                }else{
+                    alert("Aucune donnée trouvée");
+                }                
             },
-            error: function (data) {
-                alert('Une erreur est apparue pendant la mise à jour du pointage');
+
+            error: function (xhr, status, error) {
+               
+                if (xhr.status === 404) {
+                     document.getElementById('alert').style.display = 'block';
+                } else {
+                    alert('Une erreur est apparue.');
+                }
             }
         });
     }
