@@ -76,15 +76,17 @@ namespace web
             }
 
             app.UseStaticFiles();
+
+            // Apply localization settings before routing
+            app.UseRequestLocalization(BuildLocalizationOptions());
+
             app.UseRouting();
 
             // Pour que l'authentification soit bien gérée depuis un reverse-proxy. A appeler avant app.UseAuthentication():
 			app.UseForwardedHeaders(new ForwardedHeadersOptions
 			{
 				   ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-			});
-
-            app.UseRequestLocalization(BuildLocalizationOptions());
+			});            
             
             app.UseAuthentication();
             app.UseAuthorization();
@@ -111,8 +113,8 @@ namespace web
             };
  
             var options = new RequestLocalizationOptions {
-                //DefaultRequestCulture = new RequestCulture("fr-FR"),
-                DefaultRequestCulture = new RequestCulture("en-US"),
+                DefaultRequestCulture = new RequestCulture("fr-FR"),
+                //DefaultRequestCulture = new RequestCulture("en-US"),
                 SupportedCultures = supportedCultures,
                 SupportedUICultures = supportedCultures
             };

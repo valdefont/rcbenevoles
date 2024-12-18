@@ -8,9 +8,9 @@
 
 @if(!string.IsNullOrEmpty(ViewBag.ErrorMessage))
 {
-<div class="alert alert-danger">
-    @ViewBag.ErrorMessage
-</div>
+    <div class="alert alert-danger" id="alertMain">
+        @ViewBag.ErrorMessage
+    </div>
 }
 
 
@@ -18,18 +18,28 @@
 
     @if (Model.ListYears != null)
     {
-        <label>Sélectionner une année :</label>
-        <select id="selectYear" name="selectYear" class="form-control" style="max-width:300px;">
-            <option></option>
-        @foreach (var year in Model.ListYears)
-        {
-            <option value="@year">@year</option>
-        }
-        </select>
-        <hr />
-    }
+        <div class="alert alert-warning" id="warningMessage" style="display:none;">
+            <p id="warningText">Myalertmessage</p>
+            <br />
+        </div>
 
-        <div id="TblRates"></div>           
+        <div style="display: flex; align-items: center;">
+            <label for="selectYear" style="margin-right: 10px;">Sélectionner une année :</label>
+            <select id="selectYear" name="selectYear" class="form-control" style="max-width:300px; margin-right: 10px;">
+                <option></option>
+                @foreach (var year in Model.ListYears)
+                {
+                    <option value="@year">@year</option>
+                }
+            </select>
+            <div id="modifierButton" style="display:none;">
+                <button type="button" class="btn btn-primary" onclick="validateForm()"><i class="glyphicon glyphicon-save"></i> Modifier</button>
+            </div>
+        </div>
+        <hr />
+    }  
+   
+    <div id="TblRates"></div>
 </form>
 
 @section scripts
@@ -40,8 +50,13 @@
 
             $('#selectYear').on('change', function () {
                 var sel = $('select#selectYear option:selected').val();
-                if (sel !== undefined) {
+                $(".alert-success").hide();
+                
+                if (sel !== "") {
                     getRates(sel);
+                    $('#modifierButton').show();
+                } else {
+                    $('#modifierButton').hide();
                 }
                 
             });
@@ -51,19 +66,55 @@
 
         function getRates(Year) {
 
-           
             $.ajax({
                 url: '@Url.Action("GetRates")',
-                data: { year: Year },                
-                type: 'POST',               
+                data: { year: Year },
+                type: 'POST',
                 success: function (data) {
                     $('#TblRates').html(data);
-                    $('.alert').remove();
+                    document.getElementById('alertMain').remove();
                 },
                 error: function (data) {
                     alert('Une erreur est apparue pendant le chargement des bénévoles');
                 }
             });
+        
+        }
+        function validateForm() {
+            let isValid = true;
+            let warningMessage = "";
+             document.getElementById('warningMessage').style.display = 'block';
+
+             const pourcentageVehiculeElectrique = document.getElementById('PourcentageVehiculeElectrique').value;
+            if (pourcentageVehiculeElectrique === "" || pourcentageVehiculeElectrique < 0 || pourcentageVehiculeElectrique > 100) {
+                isValid = false;
+                warningMessage += "Le champ 'Pourcentage Véhicule Electrique' doit être rempli et compris entre 0 et 100.<br>";
+            }
+           
+            document.querySelectorAll('input[id^="coef_"]').forEach(function(input) {
+                if (input.value === "") {
+                    isValid = false;
+                    warningMessage += "Le champ Coefficient doit être rempli pour toutes les lignes.<br>";
+                }else if(input.value.includes(".")){
+                    isValid = false;
+                    warningMessage += "Le champ Coefficient doit contenir une virgule au lieu d'un point.<br>";
+                }
+            });
+
+            document.querySelectorAll('input[id^="ajout_"]').forEach(function(input) {
+                if (!Number.isInteger(Number(input.value))) {
+                    isValid = false;
+                    warningMessage += "Le champ 'Ajout' doit être un entier.<br>";
+                }
+            });
+
+            if (!isValid) {
+                document.getElementById('warningText').innerHTML = warningMessage;
+                document.getElementById('warningMessage').style.display = 'block';
+            } else {
+                document.getElementById('warningMessage').style.display = 'none';               
+                document.getElementById('formBareme').submit();
+            }
         }
     </script>
 }

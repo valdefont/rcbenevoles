@@ -99,12 +99,12 @@ namespace web.Controllers
                     PourcentageVehiculeElectrique = PourcentageElec,
                     TauxKilometrique = 0
                 };
+                _context.Frais.AddRange(lnFrais);
             }
             else
             {
                 lnFrais.PourcentageVehiculeElectrique = PourcentageElec;
             }
-
            
             _context.SaveChanges();
 
@@ -153,8 +153,8 @@ namespace web.Controllers
 
         private List<int> GetAllYearsPlusOne()
         {
-            var list = new List<int>(_context.BaremeFiscalLignes.OrderBy(s => s.Annee).Select(x => x.Annee).Distinct());
-            if(list!=null && list.Count() > 0)
+            var list = new List<int>(_context.BaremeFiscalLignes.Select(x => x.Annee).Distinct().OrderBy(s => s));
+            if (list!=null && list.Count() > 0)
             {
                 var maxAnnee = _context.BaremeFiscalLignes.Max(f => f.Annee);
                 list.Add(maxAnnee + 1);
