@@ -12,6 +12,7 @@ using dal.models;
 using System.Diagnostics.Eventing.Reader;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
+using System.Globalization;
 
 namespace web.Controllers
 {
@@ -114,13 +115,11 @@ namespace web.Controllers
 
                 string[] formStr = key.Split("_");
                 int nbchevaux = Convert.ToInt16(formStr[1]);
-                int limitekm = Convert.ToInt32(formStr[2]);
+                int limitekm = Convert.ToInt32(formStr[2]);               
 
                 string coef_val = formdata["coef_" + formStr[1].ToString() + "_" + formStr[2].ToString()].ToString();
-                coef_val = coef_val.Replace('.', ',');
 
-
-                if (!decimal.TryParse(coef_val, out decimal coef) || coef < 0 || coef == 0)
+                if (!decimal.TryParse(coef_val, NumberStyles.Any, new CultureInfo("fr-FR"), out decimal coef) || coef < 0 || coef == 0)
                 {
                     haserror = true;
                 }

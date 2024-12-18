@@ -1,6 +1,6 @@
 {
   // PROD
-  /*"iisSettings": {
+  "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
@@ -17,10 +17,10 @@
       },
       "applicationUrl": "http://141.94.203.88:80"
     }
-  }*/
+  }
 
   // DEV
-  
+  /*
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
@@ -45,5 +45,5 @@
       },
       "applicationUrl": "http://localhost:50190/"
     }
-  }
+  }*/
 }

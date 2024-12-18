@@ -1,4 +1,5 @@
 ﻿@model dal.models.ViewModelBaremeFiscalLigne
+@using System.Globalization
 
 
 <div class="form-group">
@@ -38,7 +39,7 @@
                     <td> @item.NbChevaux   </td>
                     <td> @item.LimiteKm   </td>
                     <td>
-                        <input type="text" id="coef_@id" name="coef_@id" value="@item.Coef" class="form-control" />
+                        <input type="text" id="coef_@id" name="coef_@id" value="@item.Coef.ToString("N", new CultureInfo("fr-FR"))" class="form-control" />
                     </td>
                     <td>
                         <input type="text" id="ajout_@id" name="ajout_@id" value="@item.Ajout" class="form-control" />

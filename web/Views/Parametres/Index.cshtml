@@ -1,4 +1,9 @@
 ﻿@model dal.models.ViewModelBaremeFiscalLigne
+@using System.Globalization
+@{
+    CultureInfo.CurrentCulture = new CultureInfo("fr-FR");
+    CultureInfo.CurrentUICulture = new CultureInfo("fr-FR");
+}
 
 @{
     ViewData["Title"] = "Taux kilométriques";
