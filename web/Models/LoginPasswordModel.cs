@@ -17,5 +17,19 @@ namespace web.Models
         public string Password { get; set; }
 
         public string ReturnUrl { get; set; }
+    
+
+        public void TrimProperties()
+        {
+            if (!string.IsNullOrEmpty(Login))
+            {
+                Login = Login.Trim();
+            }
+
+            if (!string.IsNullOrEmpty(Password))
+            {
+                Password = Password.Trim();
+            }
+        }
     }
 }

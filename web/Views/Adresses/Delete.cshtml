@@ -68,8 +68,9 @@
     </dl>
     
     <form asp-action="Delete">
+        <a asp-action="Index" asp-route-idbenevole="@Model.BenevoleID" class="btn btn-link">Retourner à la liste des adresses</a>
         <input type="hidden" asp-for="ID" />
         <input type="submit" value="Supprimer" class="btn btn-danger" />
-        <a asp-action="Index" asp-route-idbenevole="@Model.BenevoleID" class="btn btn-link">Retourner à la liste des adresses</a>
+       
     </form>
 </div>

@@ -19,7 +19,7 @@ namespace dal
 
         public static string GetConnectionString()
         {
-            var servername = Environment.GetEnvironmentVariable("APP_DB_SERVER") ?? "localhost";//"host.docker.internal";//
+            var servername = Environment.GetEnvironmentVariable("APP_DB_SERVER") ?? "localhost";//"141.94.203.88";//"host.docker.internal";//
             var passwordname = Environment.GetEnvironmentVariable("APP_DB_PASSWORD") ?? "jw8s0F5";
             var port = Environment.GetEnvironmentVariable("APP_DB_PORT") ?? "5432";
 

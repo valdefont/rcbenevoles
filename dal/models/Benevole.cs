@@ -70,9 +70,9 @@ namespace dal.models
             result.TryAdd(periodStart, null);
 
             bool periodStartSet = false;
-            Adresse currentAddress = null;
+            Adresse currentAddress = this.Adresses.Where(a => a.IsCurrent == true).FirstOrDefault();
 
-            foreach(var date in result.Keys.OrderBy(d => d))
+            foreach (var date in result.Keys.OrderBy(d => d))
             {
                 var addr = result[date];
 

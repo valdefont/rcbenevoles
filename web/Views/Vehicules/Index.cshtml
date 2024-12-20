@@ -9,7 +9,9 @@
 <h3>Véhicules de @Model.Benevole.Nom @Model.Benevole.Prenom</h3>
 
 <p>
+    <a asp-action="Details" asp-controller="Benevoles" asp-route-id="@Model.Benevole.ID" style="margin-right: 20px;">Retourner à la fiche du bénévole</a>
     <a asp-action="ChangeVehicule" asp-controller="Benevoles" asp-route-id="@Model.Benevole.ID">Enregistrer un nouveau véhicule</a>
+    
 </p>
 <table class="table table-bordered table-striped">
     <thead>

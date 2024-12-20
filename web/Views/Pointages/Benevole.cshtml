@@ -15,6 +15,8 @@
 
 <h2>Pointages de @Model.Benevole.Prenom @Model.Benevole.Nom</h2>
 <p>
+
+    <a asp-action="Index" asp-controller="Benevoles"  class="btn btn-link">Retourner à la liste</a>
     <a asp-action="PrintIndex" asp-route-id="@Model.Benevole.ID"><i class="glyphicon glyphicon-print"></i> Editer une fiche</a>
 </p>
 <div class="row">

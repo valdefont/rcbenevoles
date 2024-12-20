@@ -38,7 +38,8 @@ namespace web.Controllers
             if (benevole == null)
                 return NotFound();
 
-            var centreGere = GetCurrentUser().Centre;
+            var currentUser = GetCurrentUser();
+            var centreGere = currentUser.Centre;
 
             if (centreGere != null && !benevole.Adresses.Any(a => a.CentreID == centreGere.ID))
                 return Forbid();
@@ -96,20 +97,24 @@ namespace web.Controllers
                             nextChangeAddressDate = null;
                     }
 
-                    var item = new CalendarItem
+                    if(adresses!= null && adresses.Count()>0 && adresses[addressIndex] != null)
                     {
-                        Date = currentDate,
-                        Pointage = pointages.GetValueOrDefault(currentDate),
-                        IsCurrentMonth = (currentDate.Month == month && currentDate.Year == year),
-                        RowIndex = r,
-                        ColumnIndex = i,
-                        Distance = adresses[addressIndex].DistanceCentre,
-                    };
+                        var item = new CalendarItem
+                        {
+                            Date = currentDate,
+                            Pointage = pointages.GetValueOrDefault(currentDate),
+                            IsCurrentMonth = (currentDate.Month == month && currentDate.Year == year),
+                            RowIndex = r,
+                            ColumnIndex = i,
+                            Distance = adresses[addressIndex].DistanceCentre,
+                        };
 
-                    if (centreGere != null && adresses[addressIndex].CentreID != centreGere.ID)
-                        item.DisabledByCenter = true;
+                        if (centreGere != null && adresses[addressIndex].CentreID != centreGere.ID)
+                            item.DisabledByCenter = true;
 
-                    row.Items.Add(item);
+                        row.Items.Add(item);
+                    }
+                    
 
                     currentDate = currentDate.AddDays(1);
                 }
@@ -284,7 +289,7 @@ namespace web.Controllers
                 SelectedYear = yearstring,
                 Periods = GetListPeriodsForYear(yearstring,benevole)
             };
-            return View(mymodel);
+            return PartialView("GetPeriods",mymodel);
 
         }
 

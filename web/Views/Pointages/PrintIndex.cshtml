@@ -5,6 +5,9 @@
 }
 
 <h2>Edition des fiches d'abandon pour @Model.Benevole.Prenom @Model.Benevole.Nom</h2>
+<p>
+    <a asp-action="Index" asp-controller="Benevoles" class="btn btn-link">Retourner à la liste</a>
+</p>
 
 <form asp-action="Index" id="formBareme">
 
@@ -35,7 +38,14 @@
                 var sel = $('select#selectYear option:selected').val();
                 var benID = $('input#BenevoleID').val();
                 if (sel !== undefined) {
-                    getPeriods(sel,benID);
+                    if(sel !==""){
+                        getPeriods(sel,benID);
+                    }else{
+                        $('#TblPeriods').html("");
+                    }
+                    
+                }else{
+                    alert('Une erreur est apparue pendant le chargement des périodes');
                 }
 
             });
@@ -44,14 +54,13 @@
         });
 
         function getPeriods(Year,benevoleID) {
-
-
-            console.log(benevoleID);
+            
             $.ajax({
                 url: '@Url.Action("GetPeriods")',
                 data: { year: Year, benevoleID: benevoleID },
                 type: 'POST',
                 success: function (data) {
+                    console.log(data);
                     $('#TblPeriods').html(data);
                     $('.alert').remove();
                 },

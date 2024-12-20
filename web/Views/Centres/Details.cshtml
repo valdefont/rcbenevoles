@@ -8,9 +8,7 @@
 
 <h3>Détail du centre</h3>
 
-<p>
-    <a asp-action="PrintPresenceHoursIndex" asp-controller="Centres" asp-route-id="@Model.ID"><i class="glyphicon glyphicon-print"></i> Editer une fiche de présence</a>
-</p>
+
 <div>
     <hr />
     <dl class="dl-horizontal">
@@ -29,6 +27,7 @@
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.ID"><i class="glyphicon glyphicon-edit"></i> Modifier</a>
     <a asp-action="Index" class="btn btn-link">Retourner à la liste</a>
+    <a asp-action="Edit" asp-route-id="@Model.ID"><i class="glyphicon glyphicon-edit"></i> Modifier</a>
+    
 </div>

@@ -9,6 +9,8 @@
 <h3>Adresses de @Model.Benevole.Nom @Model.Benevole.Prenom</h3>
 
 <p>
+
+    <a asp-action="Details" asp-controller="Benevoles" asp-route-id="@Model.Benevole.ID" class="btn btn-link" style="margin-right: 20px;">Retourner à la fiche du bénévole</a>
     <a asp-action="ChangeAddress" asp-controller="Benevoles" asp-route-id="@Model.Benevole.ID">Enregistrer une nouvelle adresse</a>
 </p>
 <table class="table table-bordered table-striped">

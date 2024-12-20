@@ -39,9 +39,8 @@ namespace web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(LoginPasswordModel model)
         {
-            LogInfo("[LOGIN-TRY:{UserLogin}] Tentative de connexion de {UserLogin}", model.Login);
-
-           
+            model.TrimProperties();
+            LogInfo("[LOGIN-TRY:{UserLogin}] Tentative de connexion de {UserLogin}", model.Login);           
 
             if (!ModelState.IsValid)
             {
