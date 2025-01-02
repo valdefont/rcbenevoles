@@ -1,6 +1,5 @@
 {
   // PROD
-  
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
