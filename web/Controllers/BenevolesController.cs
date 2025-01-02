@@ -11,6 +11,9 @@ using web.Models;
 using web.Filters;
 using Microsoft.AspNetCore.Authorization;
 using System.Globalization;
+using OfficeOpenXml;
+using System.IO;
+using static System.Net.WebRequestMethods;
 
 namespace web.Controllers
 {
@@ -22,9 +25,25 @@ namespace web.Controllers
         {
             _context = context;
         }
+        
 
         // GET: Benevoles
         public IActionResult Index()
+        {
+            /*var model = new BenevoleFilterModel
+            {
+                Term = string.Empty
+            };
+
+            if (User.IsInRole("SuperAdmin"))
+                model.Centres = _context.Centres;
+            else
+                model.CentreID = GetCurrentUser().CentreID;*/
+
+            return View(GetFilter());
+        }
+
+        private BenevoleFilterModel GetFilter()
         {
             var model = new BenevoleFilterModel
             {
@@ -36,12 +55,62 @@ namespace web.Controllers
             else
                 model.CentreID = GetCurrentUser().CentreID;
 
-            return View(model);
+            return model;
         }
 
         // AJAX : Benevoles/Filter
         public IActionResult Filter(BenevoleFilterModel filter)
         {
+            /* if (filter.Term == null)
+                 filter.Term = string.Empty;
+
+             bool bCurrentCentreOnly = true;
+
+             if (!User.IsInRole("SuperAdmin"))
+             {
+                 filter.CentreID = GetCurrentUser().CentreID;
+                 bCurrentCentreOnly = false;
+             }
+
+             var query = _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre).Include(a=>a.Vehicules.Where(s=>s.IsCurrent==true)).AsQueryable();
+
+             if (filter.CentreID > 0)
+             {
+                 if(!bCurrentCentreOnly)
+                     query = query.Where(b => b.Adresses.Any(a => a.CentreID == filter.CentreID));
+                 else
+                     query = query.Where(b => b.Adresses.SingleOrDefault(a => a.IsCurrent).CentreID == filter.CentreID);
+             }
+
+
+             if (!string.IsNullOrEmpty(filter.Term))
+                 query = query.Where(b => b.Nom.ToLower().StartsWith(filter.Term.Trim().ToLower()));
+
+             query = query.OrderBy(b => b.Adresses.SingleOrDefault(a => a.IsCurrent).Centre.Nom)
+                 .ThenBy(b => b.Nom)
+                 .ThenBy(b => b.Prenom);
+
+             var model = query.Select(b => new BenevolePointageListItemModel
+             {
+                 BenevoleID = b.ID,
+                 BenevoleNom = b.Nom,
+                 BenevolePrenom = b.Prenom,
+                 BenevoleCentre = b.Adresses.SingleOrDefault(a => a.IsCurrent).Centre.Nom,
+                 NbChevaux = (b.Vehicules==null) ? null : b.Vehicules.FirstOrDefault(a=>a.IsCurrent).NbChevaux,
+                 ChevauxFiscauxNonRenseignes = (b.CurrentVehicule==null || b.CurrentVehicule.NbChevaux == 0),
+                 ShowAddressWarning = b.Adresses.Any(a => a.CentreID == filter.CentreID && a.IsCurrent)
+             }).AsEnumerable();*/
+
+            IEnumerable<BenevolePointageListItemModel> model = GetBenevolesFromCentre(filter);
+
+            return View(model);
+        }
+
+        private IEnumerable<BenevolePointageListItemModel> GetBenevolesFromCentre(BenevoleFilterModel filter)
+        {
+
+            /*filter = (filter == null) ? GetFilter() : filter;            
+
             if (filter.Term == null)
                 filter.Term = string.Empty;
 
@@ -53,36 +122,66 @@ namespace web.Controllers
                 bCurrentCentreOnly = false;
             }
 
-            var query = _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre).Include(a=>a.Vehicules.Where(s=>s.IsCurrent==true)).AsQueryable();
+            var query = _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre).Include(a => a.Vehicules.Where(s => s.IsCurrent == true)).AsQueryable();
 
             if (filter.CentreID > 0)
             {
-                if(!bCurrentCentreOnly)
+                if (!bCurrentCentreOnly)
                     query = query.Where(b => b.Adresses.Any(a => a.CentreID == filter.CentreID));
                 else
                     query = query.Where(b => b.Adresses.SingleOrDefault(a => a.IsCurrent).CentreID == filter.CentreID);
             }
-                      
+
 
             if (!string.IsNullOrEmpty(filter.Term))
                 query = query.Where(b => b.Nom.ToLower().StartsWith(filter.Term.Trim().ToLower()));
 
             query = query.OrderBy(b => b.Adresses.SingleOrDefault(a => a.IsCurrent).Centre.Nom)
                 .ThenBy(b => b.Nom)
-                .ThenBy(b => b.Prenom);
-
-            var model = query.Select(b => new BenevolePointageListItemModel
+                .ThenBy(b => b.Prenom);*/
+            List<Benevole> query = GetListBenevoles(filter);
+            return query.Select(b => new BenevolePointageListItemModel
             {
                 BenevoleID = b.ID,
                 BenevoleNom = b.Nom,
                 BenevolePrenom = b.Prenom,
                 BenevoleCentre = b.Adresses.SingleOrDefault(a => a.IsCurrent).Centre.Nom,
-                NbChevaux = (b.Vehicules==null) ? null : b.Vehicules.FirstOrDefault(a=>a.IsCurrent).NbChevaux,
-                ChevauxFiscauxNonRenseignes = (b.CurrentVehicule==null || b.CurrentVehicule.NbChevaux == 0),
+                NbChevaux = (b.Vehicules == null) ? null : b.Vehicules.FirstOrDefault(a => a.IsCurrent).NbChevaux,
+                ChevauxFiscauxNonRenseignes = (b.CurrentVehicule == null || b.CurrentVehicule.NbChevaux == 0),
                 ShowAddressWarning = b.Adresses.Any(a => a.CentreID == filter.CentreID && a.IsCurrent)
             }).AsEnumerable();
+        }
 
-            return View(model);
+        private List<Benevole> GetListBenevoles(BenevoleFilterModel filter)
+        {
+            filter = (filter == null) ? GetFilter() : filter;
+            bool bCurrentCentreOnly = true;
+
+            if (!User.IsInRole("SuperAdmin"))
+            {
+                filter.CentreID = GetCurrentUser().CentreID;
+                bCurrentCentreOnly = false;
+            }
+
+            List<Benevole> query = _context.Benevoles.Include(b => b.Adresses).ThenInclude(a => a.Centre).Include(a => a.Vehicules.Where(s => s.IsCurrent == true)).ToList();
+
+            if (filter.CentreID > 0)
+            {
+                if (!bCurrentCentreOnly)
+                    query = query.Where(b => b.Adresses.Any(a => a.CentreID == filter.CentreID)).ToList();
+                else
+                    query = query.Where(b => b.Adresses.SingleOrDefault(a => a.IsCurrent).CentreID == filter.CentreID).ToList();
+            }
+
+
+            if (!string.IsNullOrEmpty(filter.Term))
+                query = query.Where(b => b.Nom.ToLower().StartsWith(filter.Term.Trim().ToLower())).ToList(); ;
+
+            query = query.OrderBy(b => b.Adresses.SingleOrDefault(a => a.IsCurrent).Centre.Nom)
+                .ThenBy(b => b.Nom)
+                .ThenBy(b => b.Prenom).ToList(); 
+
+            return query;
         }
 
         [HttpPost]
@@ -516,5 +615,48 @@ namespace web.Controllers
                     .AsEnumerable();
             }
         }
+        public ActionResult ExportToExcel()
+        {
+            List<Benevole> benevoles = GetListBenevoles(null);
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            using (ExcelPackage pck = new ExcelPackage())
+            {
+                ExcelWorksheet ws = pck.Workbook.Worksheets.Add("Benevoles");
+                ws.Cells["A1"].Value = "Nom";
+                ws.Cells["B1"].Value = "Prénom";
+                ws.Cells["C1"].Value = "Adresse";
+                ws.Cells["D1"].Value = "Code Postal";
+                ws.Cells["E1"].Value = "Ville";
+                ws.Cells["F1"].Value = "Téléphone";
+                ws.Cells["G1"].Value = "Adresse du Lieu De Mission";
+                ws.Cells["H1"].Value = "Distance A/R en km";
+                ws.Cells["I1"].Value = "VMT Puissance Fiscale en CV";
+                ws.Cells["J1"].Value = "VE Puissance Fiscale en CV";
+
+                int rowStart = 2;
+                foreach (var benevole in benevoles)
+                {
+                    ws.Cells[string.Format("A{0}", rowStart)].Value = benevole.Nom;
+                    ws.Cells[string.Format("B{0}", rowStart)].Value = benevole.Prenom;
+                    ws.Cells[string.Format("C{0}", rowStart)].Value = benevole.CurrentAdresse?.AdresseLigne1; 
+                    ws.Cells[string.Format("D{0}", rowStart)].Value = benevole.CurrentAdresse?.CodePostal; 
+                    ws.Cells[string.Format("E{0}", rowStart)].Value = benevole.CurrentAdresse?.Ville; 
+                    ws.Cells[string.Format("F{0}", rowStart)].Value = benevole.Telephone;
+                    ws.Cells[string.Format("G{0}", rowStart)].Value = benevole.CurrentAdresse?.Centre.Adresse;
+                    ws.Cells[string.Format("H{0}", rowStart)].Value = benevole.CurrentAdresse?.DistanceCentre; 
+                    ws.Cells[string.Format("I{0}", rowStart)].Value = (!benevole.CurrentVehicule.IsElectric) ? benevole.CurrentVehicule?.NbChevaux : "";
+                    ws.Cells[string.Format("J{0}", rowStart)].Value = (benevole.CurrentVehicule.IsElectric) ? benevole.CurrentVehicule?.NbChevaux : ""; 
+                    rowStart++;
+                }
+
+                ws.Cells["A:AZ"].AutoFitColumns();
+                var stream = new MemoryStream(pck.GetAsByteArray());
+                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Benevoles.xlsx");
+            }
+        }
+
+       
     }
+
+
 }
