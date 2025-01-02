@@ -537,141 +537,11 @@ namespace web.Controllers
             }
 
             return Periods;
-        }
-
-
-        /* [HttpGet("Pointages/Benevole/{id}/printindex")]
-         public async Task<IActionResult> GetListPeriodsForYear(int id)
-         {
-
-
-             var benevole = await _context.Benevoles
-                 .Include(b => b.Adresses).ThenInclude(a => a.Centre)
-                 .Include(b => b.Pointages)
-                 .SingleOrDefaultAsync(b => b.ID == id);
-
-             if (benevole == null)
-                 return NotFound("Bénévole non trouvé");
-
-             var model = new PrintIndexModel
-             {
-                 Benevole = benevole,
-             };
-
-             var userCentreId = GetCurrentUser().CentreID;
-
-             // début : début de période à partir du premier pointage du bénévole
-             int startPeriodId;
-
-             IQueryable<Pointage> ptgs = benevole.Pointages.AsQueryable();
-
-             if (userCentreId != null)
-                 ptgs = ptgs.Where(p => p.Adresse.CentreID == userCentreId);
-
-             var dates = ptgs
-                 .OrderBy(p => p.Date)
-                 .Select(p => p.Date);
-
-             var start = dates.FirstOrDefault();
-
-             if (start == DateTime.MinValue)
-                 return View(model);
-             else
-             {
-                 if (start.Month >= 5)
-                 {
-                     start = new DateTime(start.Year, 5, 1);
-                     startPeriodId = 2;
-                 }
-                 else
-                 {
-                     start = new DateTime(start.Year, 1, 1);
-                     startPeriodId = 1;
-                 }
-             }
-
-             // fin : fin de période à partir du dernier pointage du bénévole
-             var end = dates.LastOrDefault();
-
-             if (end.Month >= 5)
-                 end = new DateTime(end.Year + 1, 1, 1);
-             else
-                 end = new DateTime(end.Year, 5, 1);
-
-             // calcul des périodes
-             DateTime periodStart;
-             DateTime periodEnd;
-
-             for (int year = start.Year; year <= end.AddDays(-1).Year; year++)
-             {
-                 if (year >= 2022)
-                 {
-                     var period = new PrintIndexPeriod
-                     {
-                         PeriodId = -1,
-                         Start = new DateTime(year, 1, 1),
-                         End = new DateTime(year + 1, 1, 1),
-                     };
-
-                     model.Periods.Add(period);
-                 }
-                 else
-                 {
-
-                     for (int periodId = startPeriodId; periodId <= 2; periodId++)
-                     {
-                         switch (periodId)
-                         {
-                             case 1:
-                                 {
-                                     periodStart = new DateTime(year, 1, 1);
-                                     periodEnd = new DateTime(year, 5, 1);
-                                 }
-                                 break;
-                             case 2:
-                                 {
-                                     periodStart = new DateTime(year, 5, 1);
-                                     periodEnd = new DateTime(year + 1, 1, 1);
-                                 }
-                                 break;
-                             default:
-                                 return BadRequest("Période invalide");
-                         }
-
-                         if (periodStart >= end)
-                             break;
-
-                         var adressesWithDates = benevole.GetAdressesInPeriod(periodStart, periodEnd, excludeEnd: true);
-
-                         var period = new PrintIndexPeriod
-                         {
-                             PeriodId = periodId,
-                             Start = periodStart,
-                             End = periodEnd,
-                         };
-
-                         foreach (var adrDate in adressesWithDates.Keys.OrderBy(k => k))
-                         {
-                             var adr = adressesWithDates[adrDate];
-
-                             if (GetCurrentUser().CentreID == null || adr.CentreID == GetCurrentUser().CentreID)
-                                 period.Adresses.Add(adr);
-
-                         }
-
-                         if (period.Adresses.Count() > 0)
-                             model.Periods.Add(period);
-                     }
-                     startPeriodId = 1;
-                 }
-             }
-
-             return View(model);
-         }*/
+        }       
 
         private List<int> GetAllYears()
         {
-            var list = new List<int>(_context.Pointages.OrderBy(s => s.Date).Select(x => x.Date.Year).Distinct());           
+            var list = new List<int>(_context.Pointages.Select(x => x.Date.Year).Distinct().OrderBy(year => year));           
             return list;
 
         }
@@ -768,12 +638,23 @@ namespace web.Controllers
             if (GetCurrentUser().Centre != null && centre != GetCurrentUser().Centre)
                 return Forbid();
 
+            int monthCount = 0;
+            if (startPeriod.Year == endPeriod.Year)
+            {
+                monthCount = endPeriod.Month - startPeriod.Month;
+            }
+            else
+            {
+                monthCount = endPeriod.Month + 12 - startPeriod.Month;
+            }
+                
+
             PrintFraisKmModel model = new PrintFraisKmModel
             {
                 PeriodStart = startPeriod,
                 PeriodEnd = endPeriod.AddDays(-1),
                 Benevole = benevole,
-                MonthCount = 12, //!!!!!!!!!!!!!!! to review
+                MonthCount = monthCount, 
             };
 
             
