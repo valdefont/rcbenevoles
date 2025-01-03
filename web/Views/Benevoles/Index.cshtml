@@ -88,11 +88,17 @@
 {
 <script type="text/javascript">
 
-    $(document).ready(function () {
+        $(document).ready(function () {     
 
-        filter();
+            var storedValue = sessionStorage.getItem("selectedCentreID");
+            console.log("Stored value:", storedValue);
+            if (storedValue) {
+                console.log("Stored value found:", storedValue);
+                $("#CentreID").val(storedValue);
+            }
 
-    });
+            filter();
+        });
 
        
     function exportToExcel() {
@@ -100,7 +106,10 @@
     }
    
 
-    function filter() {
+    function filter() {       
+
+        
+
         $.ajax({
             url: '@Url.Action("Filter")',
             data:
@@ -114,6 +123,9 @@
             cache: false,
             success: function (data) {
                 $('#updateBody').replaceWith(data);
+                var selectedValue =  $("#CentreID").val();
+                sessionStorage.setItem("selectedCentreID", selectedValue);
+                console.log("Selected value changed:", selectedValue);
             },
             error: function (data) {
                 alert('Une erreur est apparue pendant le chargement des bénévoles');

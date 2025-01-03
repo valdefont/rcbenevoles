@@ -34,7 +34,7 @@
                     <div class="col-md-8">
                         <div class="form-group">
                             <label asp-for="Vehicule.DateChangement" class="control-label required"></label>
-                            <input asp-for="Vehicule.DateChangement" class="form-control" />
+                            <input asp-for="Vehicule.DateChangement" id="dateChangement" class="form-control" type="date" />
                             <span asp-validation-for="Vehicule.DateChangement" class="text-danger"></span>
                         </div>
                         <hr />
@@ -65,8 +65,7 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 
-    <script type="text/javascript">       
-
+    <script type="text/javascript">
        
 
     </script>

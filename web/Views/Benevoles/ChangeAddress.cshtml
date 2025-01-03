@@ -34,8 +34,8 @@
                     <div class="col-md-8">
                         <div class="form-group">
                             <label asp-for="Adresse.DateChangement" class="control-label required"></label>
-                            <input asp-for="Adresse.DateChangement" class="form-control" />
-                            <span asp-validation-for="Adresse.DateChangement" class="text-danger"></span>
+                            <input asp-for="Adresse.DateChangement" id="dateChangement" class="form-control" type="date" />
+                            <span asp-validation-for="Adresse.DateChangement" class="text-danger" type="date"></span>
                         </div>
                         <hr />
                         <fieldset>
@@ -81,7 +81,7 @@
 
                                 <div class="alert alert-warning">
                                     <p>
-                                        <span>Si le bénévole ne prend pas son véhicule ou n'a pas le droit de déclarer ses frais en dons, veuillez renseigner la valeur 0,00.</span>
+                                        <span>Si le bénévole ne prend pas son véhicule, veuillez renseigner la valeur 0,00.</span>
                                     </p>
                                 </div>
                                 <div class="alert alert-info">
@@ -110,7 +110,8 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 
-    <script type="text/javascript">
+    <script type="text/javascript">      
+
 
         function setMappyUrl(elem) {
             //https://fr.mappy.com/#/4/M2/TItinerary/IFRRue%20de%20Copenhague%2C%2067300%20Schiltigheim|TOPlace%20des%20Halles%2C%2067000%20Strasbourg|MOvoiture|PRcar

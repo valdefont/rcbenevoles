@@ -51,7 +51,7 @@
                     <div class="col-md-8">
                         <div class="form-group">
                             <label asp-for="DateChangement" class="control-label required"></label>
-                            <input asp-for="DateChangement" class="form-control" />
+                            <input asp-for="DateChangement" id="dateChangement" class="form-control" type="date" />
                             <span asp-validation-for="DateChangement" class="text-danger"></span>
                             <div>
                                 <div class="alert alert-warning">
@@ -118,7 +118,7 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 
-    <script type="text/javascript">
+    <script type="text/javascript">        
 
         function validateDistance() {
 
