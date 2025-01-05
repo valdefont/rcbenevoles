@@ -253,6 +253,12 @@ namespace web.Controllers
             benevoleWithAddress.Adresse.IsCurrent = true;
             benevoleWithAddress.Adresse.Benevole = benevoleWithAddress.Benevole;
 
+            // Set default date if not provided
+            if (benevoleWithAddress.Adresse.DateChangement == DateTime.MinValue)
+            {
+                benevoleWithAddress.Adresse.DateChangement = new DateTime(2001, 1, 1);
+            }
+
             benevoleWithAddress.Vehicule.IsCurrent = true;
             benevoleWithAddress.Vehicule.Benevole = benevoleWithAddress.Benevole;
 

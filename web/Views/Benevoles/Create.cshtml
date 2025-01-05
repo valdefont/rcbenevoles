@@ -199,40 +199,36 @@
 
     }
 
-    function isValidDate(dateString) {
-        // Check if the date format is yyyy-mm-ddTHH:MM
-        var regex = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/;
-        if (!regex.test(dateString)) {
-            return false;
-        }
+     function isValidDate(dateString) {
+            // Check if the date format is yyyy-mm-dd
+            var regex = /^(\d{4})-(\d{2})-(\d{2})$/;
+            if (!regex.test(dateString)) {
+                return false;
+            }
 
-        // Parse the date parts to integers
-        var parts = dateString.split(/[-T:]/);
-        var year = parseInt(parts[0], 10);
-        var month = parseInt(parts[1], 10) - 1; // Months are 0-based in JavaScript
-        var day = parseInt(parts[2], 10);
-        var hours = parseInt(parts[3], 10);
-        var minutes = parseInt(parts[4], 10);
+            // Parse the date parts to integers
+            var parts = dateString.split('-');
+            var year = parseInt(parts[0], 10);
+            var month = parseInt(parts[1], 10) - 1; // Months are 0-based in JavaScript
+            var day = parseInt(parts[2], 10);
 
-        // Check if the date is valid
-        var date = new Date(year, month, day, hours, minutes);
-        var dateCheck = date.getFullYear();
-        var monthCheck = date.getMonth();
-        var dayCheck = date.getDate();
+            // Check if the date is valid
+            var date = new Date(year, month, day);
+            var dateCheck = date.getFullYear();
+            var monthCheck = date.getMonth();
+            var dayCheck = date.getDate();
 
-        // Additional check to ensure the year is not too far in the past
-        if (year < 1901) {
-            return false;
-        }
+            // Additional check to ensure the year is not too far in the past
+            if (year < 1901) {
+                return false;
+            }
 
-        if (dateCheck !== year || monthCheck !== month || dayCheck !== day) {
-            return false;
-        }
+            if (dateCheck !== year || monthCheck !== month || dayCheck !== day) {
+                return false;
+            }
 
-       
-
-        return true;
-    }
+            return true;
+     }
 
     function submit() {
 
