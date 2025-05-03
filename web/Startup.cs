@@ -14,6 +14,7 @@ using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using web.Filters;
 using Microsoft.Extensions.Hosting;
+using web.Utils;
 
 namespace web
 {
@@ -31,7 +32,8 @@ namespace web
         {
             string connectionString = dal.RCBenevoleContextFactory.GetConnectionString();
 
-           
+            services.Configure<AppSettings>(Configuration);
+
             services.AddDbContext<dal.RCBenevoleContext>(options =>
                 options.UseNpgsql(connectionString));
 

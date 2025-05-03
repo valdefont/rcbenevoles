@@ -9,15 +9,21 @@ using dal;
 using dal.models;
 using web.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Options;
+using web.Utils;
 
 namespace web.Controllers
 {
     [Authorize]
     public class PointagesController : RCBenevoleController
     {
-        public PointagesController(RCBenevoleContext context)
+
+        private readonly AppSettings _appSettings;
+        
+        public PointagesController(RCBenevoleContext context, IOptions<AppSettings> appSettings)
         {
             _context = context;
+            _appSettings = appSettings.Value;
         }
 
         // GET: Pointages/Details/5
@@ -437,6 +443,7 @@ namespace web.Controllers
                     {
                         if (GetCurrentUser().CentreID == null || adr.CentreID == GetCurrentUser().CentreID)
                         {
+                            DateTime premiereDateChangement = _appSettings.PremiereDateChangement.Date;
                             Period.printIndexPeriods.Add(new PrintIndexPeriod
                             {
                                 PeriodId = Period.PeriodId,
@@ -446,7 +453,8 @@ namespace web.Controllers
                                 Vehicule = null,
                                 Remark = "Adresse : " + adressesWithDates[adrDates[i]].AdresseLigne1
                                           + " " + adressesWithDates[adrDates[i]].CodePostal
-                                          + " " + adressesWithDates[adrDates[i]].Ville + " ( Changement le " + adr.DateChangement.ToString("d MMMM yyyy") + " )",
+                                          + " " + adressesWithDates[adrDates[i]].Ville
+                                          + (adr.DateChangement.Date > premiereDateChangement ? " ( Changement le " + adr.DateChangement.ToString("d MMMM yyyy") + " )" : ""),
                                 PointagesPeriod = benevole.Pointages.Where(s => s.Date >= newStart && s.Date < newEnd).ToList(),
                                 printIndexPeriods = new List<PrintIndexPeriod>()
                             });
@@ -515,7 +523,7 @@ namespace web.Controllers
 
                         if (pointages.Count > 0)
                         {
-
+                            DateTime premiereDateChangement = _appSettings.PremiereDateChangement.Date;
                             PeriodAdresse.printIndexPeriods.Add(new PrintIndexPeriod
                             {
                                 PeriodId = PeriodAdresse.PeriodId,
@@ -523,8 +531,8 @@ namespace web.Controllers
                                 End = newEnd,
                                 Adresse = PeriodAdresse.Adresse,
                                 Vehicule = veh,
-                                Remark = "Véhicule " + (i + 1).ToString() + " ( " + veh.NbChevaux + " chevaux " + (veh.IsElectric ? " / Electrique " : "") 
-                                            + " - Changement le "+ veh.DateChangement.ToString("d MMMM yyyy") + " )" ,
+                                Remark = "Véhicule " + (i + 1).ToString() + " ( " + veh.NbChevaux + " chevaux " + (veh.IsElectric ? " / Electrique " : "")
+                                           + (veh.DateChangement.Date > premiereDateChangement ? " - Changement le " + veh.DateChangement.ToString("d MMMM yyyy") + " )" : " )"),
                                 PointagesPeriod = benevole.Pointages.Where(s => s.Date >= newStart && s.Date < newEnd).ToList(),
                                 printIndexPeriods = null
                             });

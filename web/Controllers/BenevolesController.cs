@@ -14,6 +14,8 @@ using System.Globalization;
 using OfficeOpenXml;
 using System.IO;
 using static System.Net.WebRequestMethods;
+using web.Utils;
+using Microsoft.Extensions.Options;
 
 namespace web.Controllers
 {
@@ -21,9 +23,11 @@ namespace web.Controllers
     [Authorize]
     public class BenevolesController : RCBenevoleController
     {
-        public BenevolesController(RCBenevoleContext context)
+        private readonly AppSettings _appSettings;
+        public BenevolesController(RCBenevoleContext context, IOptions<AppSettings> appSettings)
         {
             _context = context;
+            _appSettings = appSettings.Value;
         }
         
 
@@ -256,7 +260,8 @@ namespace web.Controllers
             // Set default date if not provided
             if (benevoleWithAddress.Adresse.DateChangement == DateTime.MinValue)
             {
-                benevoleWithAddress.Adresse.DateChangement = new DateTime(2001, 1, 1);
+                benevoleWithAddress.Adresse.DateChangement = _appSettings.PremiereDateChangement;
+                
             }
 
             benevoleWithAddress.Vehicule.IsCurrent = true;
