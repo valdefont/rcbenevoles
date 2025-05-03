@@ -692,19 +692,26 @@ namespace web.Controllers
             
             
             // Barème impots revenus
-            List<BaremeFiscalLigne> baremesAnnee = await _context.BaremeFiscalLignes.Where(bf => bf.Annee == startPeriod.Year).ToListAsync();            
-           
+            List<BaremeFiscalLigne> baremesAnnee = await _context.BaremeFiscalLignes.Where(bf => bf.Annee == startPeriod.Year).ToListAsync();
+
+            int minChevaux = baremesAnnee.Min(bf => bf.NbChevaux);
+            int maxChevaux = baremesAnnee.Max(bf => bf.NbChevaux);
+
+            int nbChevaux = Math.Max(minChevaux, Math.Min(maxChevaux, vehicule.NbChevaux));
 
             BaremeFiscalLigne bareme = baremesAnnee
-             .Where(bf => bf.NbChevaux == vehicule.NbChevaux && bf.LimiteKm > model.DistanceTotale)
-             .OrderBy(bf => bf.LimiteKm)
-             .FirstOrDefault();
+                .Where(bf => bf.NbChevaux == nbChevaux && bf.LimiteKm > model.DistanceTotale)
+                .OrderBy(bf => bf.LimiteKm)
+                .FirstOrDefault();
 
             if (bareme == null)
             {
-                int maxLimiteKm = baremesAnnee.Max(bf => bf.LimiteKm);
+                int maxLimiteKm = baremesAnnee
+                    .Where(bf => bf.NbChevaux == nbChevaux)
+                    .Max(bf => bf.LimiteKm);
+
                 bareme = baremesAnnee
-                    .Where(bf => bf.NbChevaux == vehicule.NbChevaux && bf.LimiteKm == maxLimiteKm)
+                    .Where(bf => bf.NbChevaux == nbChevaux && bf.LimiteKm == maxLimiteKm)
                     .FirstOrDefault();
             }
 
@@ -715,13 +722,13 @@ namespace web.Controllers
                     .ThenByDescending(bf => bf.LimiteKm)
                     .FirstOrDefault();
             }
-           
 
-            model.FormuleBareme = $"({model.DistanceTotale} * {bareme.Coef}) + {bareme.Ajout}";
+            decimal majoration = vehicule.IsElectric ? 1.2m : 1m;
+            model.FormuleBareme = $"(({model.DistanceTotale} * {bareme.Coef}) + {bareme.Ajout}) * {majoration}";
 
-            LogDebug($"Bareme appliqué : {bareme.NbChevaux} ch, {bareme.LimiteKm} km => {model.FormuleBareme}");
+            LogDebug($"Bareme appliqué : {bareme.NbChevaux} ch, {bareme.LimiteKm} km => {model.FormuleBareme}, Majoration => {majoration}");
 
-            model.FraisTotaux = model.DistanceTotale * bareme.Coef + bareme.Ajout;
+            model.FraisTotaux = (model.DistanceTotale * bareme.Coef + bareme.Ajout) * majoration;
 
             return View(model);
         }

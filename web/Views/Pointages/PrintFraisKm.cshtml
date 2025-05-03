@@ -107,7 +107,15 @@
                 </span>
             </div>
             <div class="border_double" style="padding:0.2cm">
-                <b>Véhicule Personnel (<span>@Model.Benevole.CurrentVehicule.NbChevaux</span> chevaux ) :</b>
+                <b>
+                    Véhicule Personnel (
+                    <span>
+                        @Model.Benevole.CurrentVehicule.NbChevaux
+                        @(Model.Benevole.CurrentVehicule.NbChevaux == 1 ? " cheval fiscal" : " chevaux fiscaux")
+                        @(Model.Benevole.CurrentVehicule.IsElectric ? " électrique" : "")
+                    </span>
+                    ) :
+                </b>
                 <table style="width:100%">
                     
                     <tbody>
