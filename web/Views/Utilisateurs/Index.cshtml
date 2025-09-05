@@ -1,8 +1,20 @@
 ﻿@model IEnumerable<dal.models.Utilisateur>
 
+@using Microsoft.AspNetCore.Http
 @{
+
+    if (Context.Session.GetString("AppActive") == "Livraison")
+    {
+        Layout = "~/Views/Shared/_BonLivraisonLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+
     ViewData["Title"] = "Index";
 }
+
 
 <h2>Gestion des utilisateurs</h2>
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using dal.models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -25,6 +26,8 @@ namespace web.Models
         public string FormuleBareme { get; set; }
         
         public decimal FraisTotaux { get; set; }
+
+        public Adresse AdresseFiche { get; set; }
 
         public string FormatPhoneNumber()
         {

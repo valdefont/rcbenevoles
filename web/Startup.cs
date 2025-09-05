@@ -54,6 +54,16 @@ namespace web
                 });
 
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
+
+
+            // Ajout du service de session
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30); // durée de vie de la session
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -92,6 +102,7 @@ namespace web
             
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseSession();
 
             app.UseEndpoints(endpoints => {
                 endpoints.MapControllers();

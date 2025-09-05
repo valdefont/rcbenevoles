@@ -24,6 +24,14 @@ namespace dal.models
         [Display(Name = "Centre géré")]
         public Centre Centre { get; set; }
 
+
+        [Display(Name = "Pointages des bénévoles")]
+        public bool app_pointage_benevoles { get; set; }
+
+        [Display(Name = "Bon de livraison")]
+        public bool app_bon_livraison { get; set; }
+
+
         public bool TestPassword(string password)
         {
             return EncryptPassword(password, GetSalt()) == this.Password;

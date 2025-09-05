@@ -1,0 +1,39 @@
+﻿@{
+    Layout = "~/Views/Shared/_ChooseAppLayout.cshtml"; // Optional custom layout
+    ViewData["Title"] = "Choix de l'application";
+}
+
+<h2 style="text-align:center; margin-bottom: 40px;">Choisissez une application</h2>
+
+<div style="display: flex; justify-content: center; gap: 50px;">
+    <form asp-action="LaunchPointage" method="post">
+        <button type="submit" style="
+            padding: 40px 60px;
+            font-size: 24px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        ">
+            Pointages des bénévoles
+        </button>
+    </form>
+
+    <form asp-action="LaunchBonLivraison" method="post">
+        <button type="submit" style="
+            padding: 40px 60px;
+            font-size: 24px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        ">
+            Bon de Livraison
+        </button>
+    </form>
+</div>
+

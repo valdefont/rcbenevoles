@@ -1,7 +1,18 @@
 ﻿@model dal.models.Utilisateur
 
+@using Microsoft.AspNetCore.Http
 @{
-    ViewData["Title"] = "Mon compte";
+
+    if (Context.Session.GetString("AppActive") == "Livraison")
+    {
+        Layout = "~/Views/Shared/_BonLivraisonLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+
+    ViewData["Title"] = "Mon Compte";
 }
 
 <h2>Mon compte</h2>

@@ -1,0 +1,26 @@
+﻿@model IEnumerable<dal.models.BonLivraison>
+
+<tbody id="updateBody">
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.NumBulletin</td>
+            <td>@item.Centre?.Nom</td>
+            <td>@item.DateLivraison.ToString("dd/MM/yyyy")</td>
+            <td>@item.Poids</td>
+            <td>@item.DateCreation</td>
+            <td>@item.Utilisateur?.Login</td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.ID">Modifier</a> |              
+                <a asp-action="Delete" asp-route-id="@item.ID">Supprimer</a> |
+                <a asp-action="createPDF" asp-route-id="@item.ID">PDF</a>
+            </td>
+        </tr>
+    }
+    @if (!Model.Any())
+    {
+        <tr>
+            <td colspan="5"><em>Aucun résultat trouvé.</em></td>
+        </tr>
+    }
+</tbody>

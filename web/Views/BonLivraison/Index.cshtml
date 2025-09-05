@@ -1,0 +1,132 @@
+﻿@model BonLivraisonFilterModel
+
+@{
+    Layout = "~/Views/Shared/_BonLivraisonLayout.cshtml";
+    ViewData["Title"] = "Index";
+}
+
+<h2>Bienvenue dans l'application Bon de Livraison</h2>
+<p>Utilisez le formulaire ci-dessous pour rechercher des bons de livraison.</p>
+
+<!-- Search Form -->
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Rechercher un Bon de Livraison</h3>
+    </div>
+    <div class="panel-body">
+        <form id="searchForm" method="get">
+            <div class="form-group row">
+                <label class="col-sm-2 control-label">Centre :</label>
+                <div class="col-sm-4">
+                    <select id="CentreID" class="form-control">
+                        <option value="0">- Tous les centres -</option>
+                        @foreach (var centre in Model.Centres)
+                        {
+                            <option value="@centre.ID">@centre.Nom</option>
+                        }
+                    </select>
+                </div>
+
+                <label class="col-sm-2 control-label">Numéro de bulletin :</label>
+                <div class="col-sm-4">
+                    <input type="text" id="NumBulletin" class="form-control" placeholder="Numéro de bulletin..." />
+                </div>
+            </div>
+
+            <div class="form-group row" style="margin-top:10px;">
+                <label class="col-sm-2 control-label">Date début :</label>
+                <div class="col-sm-4">
+                    <input type="date" id="DateDebut" class="form-control" />
+                </div>
+
+                <label class="col-sm-2 control-label">Date fin :</label>
+                <div class="col-sm-4">
+                    <input type="date" id="DateFin" class="form-control" />
+                </div>
+            </div>
+
+            <div class="form-group row" style="margin-top:10px;">
+                <div class="col-sm-12 text-right">
+                    <button class="btn btn-primary" onclick="filter(); return false;">Filtrer</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row" style="margin-top:20px;">
+    <div class="col-md-6">
+        <a asp-action="Create" class="btn btn-success">Créer un nouveau Bon de Livraison</a>
+    </div>
+    <div class="col-md-6 text-right">
+        <form asp-action="ExportExcel" method="get" id="exportForm">
+            <input type="hidden" name="CentreID" id="ExportCentreID" />
+            <input type="hidden" name="NumBulletin" id="ExportNumBulletin" />
+            <input type="hidden" name="DateDebut" id="ExportDateDebut" />
+            <input type="hidden" name="DateFin" id="ExportDateFin" />
+            <button type="submit" class="btn btn-info">Export Excel</button>
+        </form>
+    </div>
+</div>
+
+
+<!-- Results Table -->
+<div style="margin-top:20px;">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Numéro</th>
+                <th>Centre</th>
+                <th>Date</th>
+                <th>Poids</th>
+                <th>Crée le</th>
+                <th>Crée Par</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="updateBody">
+            <tr>
+                <td colspan="5"><em>Veuillez lancer une recherche...</em></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            filter();
+        });
+
+        function filter() {
+            $.ajax({
+                url: '@Url.Action("Filter")',
+                data: {
+                    CentreID: $("#CentreID").val(),
+                    NumBulletin: $("#NumBulletin").val(),
+                    DateDebut: $("#DateDebut").val(),
+                    DateFin: $("#DateFin").val()
+                },
+                type: 'GET',
+                success: function (data) {
+                    $('#updateBody').replaceWith(data);
+                },
+                error: function () {
+                    alert("Erreur lors du chargement des bons de livraison.");
+                }
+            });
+        }
+
+        function syncExportFilters() {
+            $("#ExportCentreID").val($("#CentreID").val());
+            $("#ExportNumBulletin").val($("#NumBulletin").val());
+            $("#ExportDateDebut").val($("#DateDebut").val());
+            $("#ExportDateFin").val($("#DateFin").val());
+        }
+
+        $("#exportForm").on("submit", function () {
+            syncExportFilters();
+        });
+
+    </script>
+}

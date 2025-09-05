@@ -9,6 +9,7 @@ using dal;
 using dal.models;
 using Microsoft.AspNetCore.Authorization;
 using web.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace web.Controllers
 {
@@ -23,7 +24,26 @@ namespace web.Controllers
         // GET: Utilisateurs
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Utilisateurs.Include(u => u.Centre).ToListAsync());
+            List<Utilisateur> users = null;
+            if (HttpContext.Session.GetString("AppActive") != null)
+            {
+
+                if (HttpContext.Session.GetString("AppActive") == "Pointage")
+                {
+                    users = await _context.Utilisateurs.Include(u => u.Centre).Where(s=>s.app_pointage_benevoles==true).ToListAsync();
+                }
+                else if (HttpContext.Session.GetString("AppActive") == "Livraison")
+                {
+                    users = await _context.Utilisateurs.Include(u => u.Centre).Where(s => s.app_bon_livraison == true).ToListAsync();
+                }
+                
+            }
+            else
+            {
+                users = await _context.Utilisateurs.Include(u => u.Centre).ToListAsync();
+            }          
+
+            return View(users);
         }
 
         // GET: Utilisateurs/Details/5
@@ -68,6 +88,11 @@ namespace web.Controllers
                     ModelState.AddModelError("PasswordConfirm", "Les mots de passe ne correspondent pas");
                     return View(model);
                 }
+
+                var appActive = HttpContext.Session.GetString("AppActive") ?? "Pointage";
+
+                model.Utilisateur.app_pointage_benevoles = appActive == "Pointage";
+                model.Utilisateur.app_bon_livraison = appActive == "Livraison";
 
                 model.Utilisateur.SetPassword(model.Utilisateur.Password);
                 _context.Add(model.Utilisateur);

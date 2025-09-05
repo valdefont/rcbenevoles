@@ -1,6 +1,16 @@
 ﻿@model IEnumerable<dal.models.Centre>
-
+@using Microsoft.AspNetCore.Http
 @{
+
+    if (Context.Session.GetString("AppActive") == "Livraison")
+    {
+        Layout = "~/Views/Shared/_BonLivraisonLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+
     ViewData["Title"] = "Liste";
 }
 

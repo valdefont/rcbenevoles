@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using dal;
 using dal.models;
+using Microsoft.AspNetCore.Http;
 
 namespace web.Controllers
 {
@@ -32,7 +33,23 @@ namespace web.Controllers
             if(!string.IsNullOrEmpty(ReturnUrl))
                 ViewData["ReturnUrl"] = ReturnUrl;
 
-            return View();
+            if(HttpContext.Session.GetString("AppActive") != null)
+            {
+                if (HttpContext.Session.GetString("AppActive") == "Pointage")
+                {
+                    return View();
+                }
+                else
+                {
+                    return LaunchBonLivraison();
+                }
+            }
+            else
+            {
+                return View();
+            }
+                
+            
         }
 
         [HttpPost]
@@ -40,7 +57,7 @@ namespace web.Controllers
         public async Task<IActionResult> Index(LoginPasswordModel model)
         {
             model.TrimProperties();
-            LogInfo("[LOGIN-TRY:{UserLogin}] Tentative de connexion de {UserLogin}", model.Login);           
+            LogInfo("[LOGIN-TRY:{UserLogin}] Tentative de connexion de {UserLogin}", model.Login);
 
             if (!ModelState.IsValid)
             {
@@ -48,19 +65,21 @@ namespace web.Controllers
                 return View();
             }
 
-            var dbuser = _context.Utilisateurs.Include(u => u.Centre).Where(u => u.Login == model.Login).SingleOrDefault();
-           
+            var dbuser = _context.Utilisateurs
+                .Include(u => u.Centre)
+                .SingleOrDefault(u => u.Login == model.Login);
+
             if (dbuser == null)
             {
                 LogWarning("[LOGIN-FAIL:{UserLogin}] Echec de connexion de {UserLogin} : Utilisateur inconnu", model.Login);
-                ModelState.AddModelError("", "Echec de la connexion. Vérifier votre login et votre mot de passe");
+                ModelState.AddModelError("", "Échec de la connexion. Vérifiez votre login et votre mot de passe.");
                 return View();
             }
 
-            if(!dbuser.TestPassword(model.Password))
+            if (!dbuser.TestPassword(model.Password))
             {
                 LogWarning("[LOGIN-FAIL:{UserLogin}] Echec de connexion de {UserLogin} : Mot de passe invalide", model.Login);
-                ModelState.AddModelError("", "Echec de la connexion. Vérifier votre login et votre mot de passe");
+                ModelState.AddModelError("", "Échec de la connexion. Vérifiez votre login et votre mot de passe.");
                 return View();
             }
 
@@ -81,24 +100,74 @@ namespace web.Controllers
 
             LogInfo("[LOGIN-SUCCESS:{UserLogin}] Succès de la connexion de {UserLogin}", model.Login);
 
-            string returnUrl = null;
-
-            if(!string.IsNullOrEmpty(model.ReturnUrl))
+            // Handle ReturnUrl if it's valid
+            if (!string.IsNullOrEmpty(model.ReturnUrl))
             {
-                if(Uri.TryCreate(model.ReturnUrl, UriKind.Relative, out Uri uri) && !uri.IsAbsoluteUri)
-                    returnUrl = model.ReturnUrl;
+                if (Uri.TryCreate(model.ReturnUrl, UriKind.Relative, out Uri uri) && !uri.IsAbsoluteUri)
+                {
+                    return Redirect(model.ReturnUrl);
+                }
             }
 
-            if(!string.IsNullOrEmpty(returnUrl))
-                return Redirect(returnUrl);
-            else
+            // Redirect based on app access
+            if (dbuser.app_pointage_benevoles && dbuser.app_bon_livraison)
+            {
+                HttpContext.Session.SetString("UserHasAccessToAllApps", "true");
+                return RedirectToAction("ChooseApp", "Home");
+            }
+            else if (dbuser.app_pointage_benevoles)
+            {
                 return RedirectToAction(nameof(Index));
+            }
+            else if (dbuser.app_bon_livraison)
+            {
+                return RedirectToAction("Index", "BonLivraison");
+            }
+            else
+            {
+                LogWarning("[LOGIN-FAIL:{UserLogin}] Aucun accès autorisé pour {UserLogin}", model.Login);
+                ModelState.AddModelError("", "Aucune application n'est disponible pour votre compte.");
+                return View();
+            }
         }
+
 
         public IActionResult Legal()
         {
             return View();
         }
+
+
+        /*public IActionResult BonLivraison()
+        {
+            return View();
+        }*/
+
+        public IActionResult ChooseApp()
+        {
+            return View();
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult LaunchPointage()
+        {
+
+            HttpContext.Session.SetString("AppActive", "Pointage");
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult LaunchBonLivraison()
+        {
+
+            HttpContext.Session.SetString("AppActive", "Livraison");
+            return RedirectToAction("Index", "BonLivraison"); 
+        }
+
+
 
         public IActionResult Error()
         {

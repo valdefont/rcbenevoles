@@ -115,6 +115,7 @@ namespace dal
 		public DbSet<BaremeFiscalLigne> BaremeFiscalLignes { get; set; }
         public DbSet<BaremeFiscalDefault> BaremeFiscalDefault { get; set; }
         public DbSet<Vehicule> Vehicule { get; set; }
+        public DbSet<BonLivraison> BonLivraison { get; set; }
 
         public void SeedData()
         {

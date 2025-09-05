@@ -1,0 +1,32 @@
+﻿
+
+ALTER TABLE "Utilisateurs"
+ADD COLUMN app_pointage_benevoles BOOLEAN,
+ADD COLUMN app_bon_livraison BOOLEAN;
+
+
+UPDATE "Utilisateurs"
+SET app_pointage_benevoles = TRUE,
+    app_bon_livraison = FALSE;
+
+CREATE INDEX idx_app_pointage_benevoles ON "Utilisateurs" (app_pointage_benevoles);
+CREATE INDEX idx_app_bon_livraison ON "Utilisateurs" (app_bon_livraison);
+CREATE INDEX idx_app_pointage_benevoles_login ON "Utilisateurs" (app_pointage_benevoles, "Login");
+CREATE INDEX idx_app_bon_livraison_login ON "Utilisateurs" (app_bon_livraison, "Login");
+
+UPDATE "Utilisateurs" SET app_bon_livraison = TRUE WHERE "Login"='testadmin';
+
+
+CREATE TABLE "BonLivraison" (
+    "ID" SERIAL PRIMARY KEY,
+    "NumBulletin" VARCHAR NOT NULL,
+    "CentreID" INTEGER NOT NULL,
+    "DateLivraison" DATE NOT NULL,
+    "Poids" INTEGER NOT NULL,
+    "UtilisateurID" INTEGER,
+    "DateCreation" DATE NOT NULL
+);
+
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE "BonLivraison" TO rcbenevoles;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO rcbenevoles;

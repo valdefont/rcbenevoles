@@ -663,6 +663,7 @@ namespace web.Controllers
                 PeriodEnd = endPeriod.AddDays(-1),
                 Benevole = benevole,
                 MonthCount = monthCount, 
+                AdresseFiche= adresse
             };
 
             
