@@ -59,7 +59,13 @@
                     @Html.DisplayNameFor(model => model.Nom)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Adresse)
+                    @Html.DisplayNameFor(model => model.Rue)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.CodePostal)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Commune)
                 </th>
             <th></th>
         </tr>
@@ -70,10 +76,16 @@
                     <td width="20%">
                         @Html.DisplayFor(modelItem => item.Nom)
                     </td>
-                    <td width="50%">
-                        @Html.DisplayFor(modelItem => item.Adresse)
-                    </td>
                     <td width="30%">
+                        @Html.DisplayFor(modelItem => item.Rue)
+                    </td>
+                    <td width="10%">
+                        @Html.DisplayFor(modelItem => item.CodePostal)
+                    </td>
+                    <td width="20%">
+                        @Html.DisplayFor(modelItem => item.Commune)
+                    </td>
+                    <td width="20%">
                         <a asp-action="Details" asp-route-id="@item.ID">Détails</a> |
                         <a asp-action="Edit" asp-route-id="@item.ID"><i class="glyphicon glyphicon-edit"></i> Modifier</a> |
                         <a asp-action="Delete" asp-route-id="@item.ID"><i class="glyphicon glyphicon-trash"></i> Supprimer</a>

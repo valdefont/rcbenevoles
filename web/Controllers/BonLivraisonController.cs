@@ -373,7 +373,12 @@ namespace web.Controllers
                     b.DateCreation,
                     CentreId = b.CentreID,
                     CentreNom = b.Centre.Nom,
-                    CentreAdresse = b.Centre.Adresse
+                    CentreRue = b.Centre.Rue,
+                    CentreCodePostal = b.Centre.CodePostal,
+                    CentreCommune = b.Centre.Commune,
+                    CentreTelephone = b.Centre.Telephone,
+                    CentreEmail = b.Centre.EMail
+
                 })
                 .FirstOrDefault();
 
@@ -503,7 +508,8 @@ namespace web.Controllers
                 expCell.Padding = 8f;
                 expDestTable.AddCell(expCell);
 
-                PdfPCell destCell = new PdfPCell(new Phrase($"Destinataire :\n{bon.CentreNom}\n{bon.CentreAdresse}\n68300 SAINT-LOUIS\nTéléphone: 03 89 69 76 90\nE-mail: ad68.stlouis@restosducoeur.org", normal));
+                PdfPCell destCell = new PdfPCell(new Phrase($"Destinataire :\nCentre de {bon.CentreNom}\n{bon.CentreRue}\n{bon.CentreCodePostal} {bon.CentreCommune}\nTéléphone: {bon.CentreTelephone}\nE-mail: {bon.CentreEmail}", normal));
+
                 destCell.Border = Rectangle.BOX;
                 destCell.BorderColor = BaseColor.BLACK;
                 destCell.Padding = 8f;
@@ -534,10 +540,41 @@ namespace web.Controllers
                     table.AddCell(cell);
                 }
 
+                // Add 4 lines with Values:
+                string[] descriptions = { "Protidiques", "Accompagnements", "Laitiers", "Desserts" };
+                BaseColor yellow = new BaseColor(255, 255, 153); // light yellow
+                foreach (var desc in descriptions)
+                {
+                    for (int col = 0; col < 5; col++)
+                    {
+                        Phrase phrase = col == 1 ? new Phrase(desc, normal) : new Phrase("", normal);
+                        PdfPCell cell = new PdfPCell(phrase)
+                        {
+                            Padding = 8f,
+                            BorderColor = BaseColor.BLACK,
+                            BorderWidthBottom = 0.5f,
+                            Border = Rectangle.LEFT_BORDER | Rectangle.RIGHT_BORDER | Rectangle.BOTTOM_BORDER
+                        };
+
+                        // Apply yellow background to "Quantité livrée" (index 3) and "Observations" (index 4)
+                        if (col == 3 || col == 4)
+                        {
+                            cell.BackgroundColor = yellow;
+                        }
+
+                        // Apply dotted bottom border
+                        cell.CellEvent = new DottedBorderCellEvent();
+
+                        table.AddCell(cell);
+                    }
+                }
+
+
+
                 // Add empty rows to reach a reasonable height (3 rows)
                 int rowCount = 3;
                 float pageHeight = doc.PageSize.Height - doc.TopMargin - doc.BottomMargin;
-                float targetTableHeight = (pageHeight * 0.5f); // further reduced height
+                float targetTableHeight = (pageHeight * 0.4f); // further reduced height
                 for (int i = 0; i < rowCount; i++)
                 {
                     for (int j = 0; j < 5; j++)
@@ -580,7 +617,7 @@ namespace web.Controllers
                 sigCell.PaddingTop = 5f;
                 sigCell.PaddingBottom = 40f;
                 leftSig.AddCell(sigCell);
-                Paragraph instr = new Paragraph("MERCI DE PROCEDER AU TRI ET AU PESAGE DES PRODUITS FIGURANT\n SUR CE BL ET D'ENREGISTRER LEURS POIDS DANS \nLES RAMASSES AAIDA", smallBold);
+                Paragraph instr = new Paragraph("MERCI DE PROCEDER AU TRI ET AU PESAGE DES PRODUITS\nFIGURANT SUR CE BL ET D'ENREGISTRER LEURS POIDS\nDANS LES RAMASSES AAIDA", smallBold);
                 instr.Alignment = Element.ALIGN_LEFT;
                 PdfPCell instrCell = new PdfPCell();
                 instrCell.Border = Rectangle.NO_BORDER;
@@ -610,7 +647,7 @@ namespace web.Controllers
                 nbColisHeader.Border = Rectangle.BOX;
                 nbColisHeader.BorderColor = BaseColor.BLACK;
                 colisTable.AddCell(nbColisHeader);
-                PdfPCell poidsHeader = new PdfPCell(new Phrase("Poids", bold)) { Padding = 5f, BackgroundColor = new BaseColor(220, 230, 241), HorizontalAlignment = Element.ALIGN_CENTER };
+                PdfPCell poidsHeader = new PdfPCell(new Phrase("Poids (Kg)", bold)) { Padding = 5f, BackgroundColor = new BaseColor(220, 230, 241), HorizontalAlignment = Element.ALIGN_CENTER };
                 poidsHeader.Border = Rectangle.BOX;
                 poidsHeader.BorderColor = BaseColor.BLACK;
                 colisTable.AddCell(poidsHeader);
@@ -622,11 +659,12 @@ namespace web.Controllers
                 PdfPCell nbColisCell = new PdfPCell(new Phrase("", normal)) { Padding = 5f };
                 nbColisCell.Border = Rectangle.BOX;
                 nbColisCell.BorderColor = BaseColor.BLACK;
+                nbColisCell.BackgroundColor = yellow;
                 colisTable.AddCell(nbColisCell);
                 PdfPCell poidsCell = new PdfPCell(new Phrase($"{bon.Poids}", normal)) { Padding = 5f };
                 poidsCell.Border = Rectangle.BOX;
                 poidsCell.BorderColor = BaseColor.BLACK;
-                poidsCell.BackgroundColor= new BaseColor(255, 255, 0);
+                poidsCell.BackgroundColor = yellow;
                 poidsCell.HorizontalAlignment = Element.ALIGN_CENTER;
                 colisTable.AddCell(poidsCell);
                 PdfPCell emptyCell = new PdfPCell(new Phrase("", normal)) { Padding = 5f };
@@ -657,6 +695,20 @@ namespace web.Controllers
         PdfContentByte cb = canvases[PdfPTable.BACKGROUNDCANVAS];
         cb.RoundRectangle(position.Left, position.Bottom, position.Width, position.Height, 8);
         cb.SetLineWidth(1);
+        cb.Stroke();
+    }
+}
+
+
+public class DottedBorderCellEvent : IPdfPCellEvent
+{
+    public void CellLayout(PdfPCell cell, Rectangle position, PdfContentByte[] canvases)
+    {
+        PdfContentByte cb = canvases[PdfPTable.LINECANVAS];
+        cb.SetLineDash(1f, 2f); // Dotted line: 1pt dash, 2pt gap
+        cb.SetLineWidth(0.5f);
+        cb.MoveTo(position.Left, position.Bottom);
+        cb.LineTo(position.Right, position.Bottom);
         cb.Stroke();
     }
 }

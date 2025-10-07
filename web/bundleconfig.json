@@ -34,5 +34,16 @@
     },
     // Optionally generate .map file
     "sourceMap": false
+  },
+  {
+    "outputFileName": "wwwroot/js/centre-edit.min.js",
+    "inputFiles": [
+      "wwwroot/js/centre-edit.js"
+    ],
+    "minify": {
+      "enabled": true
+    },
+    "sourceMap": false
   }
+
 ]

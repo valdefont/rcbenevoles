@@ -92,7 +92,7 @@
                                 <span>Centre :</span>
                             </td>
                             <td class="formfield">
-                                <span><b>@Model.Benevole.CurrentAdresse.Centre.Nom</b><br/> @Model.Benevole.CurrentAdresse.Centre.Adresse</span>
+                                <span><b>@Model.Benevole.CurrentAdresse.Centre.Nom</b><br /> @Model.Benevole.CurrentAdresse.Centre.Rue @Model.Benevole.CurrentAdresse.Centre.CodePostal @Model.Benevole.CurrentAdresse.Centre.Commune</span>
                             </td>
                         </tr>
                     </tbody>
@@ -293,7 +293,7 @@
                     {
                         <li style="list-style-type: decimal;">
                             <span><strong>@centre.Nom</strong> - </span>
-                            <span>@centre.Adresse</span>
+                            <span>@centre.Rue @centre.CodePostal @centre.Commune</span>
                         </li>
                     }
                 </ol>

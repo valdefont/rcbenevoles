@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using dal;
@@ -11,9 +12,11 @@ using dal;
 namespace dal.Migrations
 {
     [DbContext(typeof(RCBenevoleContext))]
-    partial class RCBenevoleContextModelSnapshot : ModelSnapshot
+    [Migration("20250911143630_dbChangeForBonLivraison")]
+    partial class dbChangeForBonLivraison
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -187,28 +190,16 @@ namespace dal.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
-                    b.Property<string>("CodePostal")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Commune")
-                        .HasColumnType("text");
-
-                    b.Property<string>("EMail")
+                    b.Property<string>("Adresse")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Nom")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Rue")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<int>("SiegeID")
                         .HasColumnType("integer");
-
-                    b.Property<string>("Telephone")
-                        .HasColumnType("text");
 
                     b.HasKey("ID");
 
@@ -218,46 +209,6 @@ namespace dal.Migrations
                     b.HasIndex("SiegeID");
 
                     b.ToTable("Centres");
-                });
-
-            modelBuilder.Entity("dal.models.CodeCommune", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<int>("CodeCommuneINSEE")
-                        .HasColumnType("integer")
-                        .HasColumnName("Code_commune_INSEE");
-
-                    b.Property<string>("CodePostal")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)")
-                        .HasColumnName("Code_postal");
-
-                    b.Property<string>("LibelleAcheminement")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("Libelle_acheminement");
-
-                    b.Property<string>("NomDeLaCommune")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("Nom_Commune");
-
-                    b.Property<string>("SousLocalite")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("SousCommune");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("ID")
-                        .IsUnique();
-
-                    b.ToTable("CodeCommune");
                 });
 
             modelBuilder.Entity("dal.models.Frais", b =>

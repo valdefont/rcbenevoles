@@ -13,7 +13,15 @@ namespace dal.models
         public string Nom { get; set; }
 
         [Required]
-        public string Adresse { get; set; }
+        public string Rue { get; set; }
+     
+        public string CodePostal { get; set; }
+       
+        public string Commune { get; set; }
+
+        public string Telephone { get; set; }
+
+        public string EMail { get; set; }
 
         public int SiegeID { get; set; }
 

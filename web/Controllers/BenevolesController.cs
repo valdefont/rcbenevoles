@@ -653,7 +653,7 @@ namespace web.Controllers
                     ws.Cells[string.Format("D{0}", rowStart)].Value = benevole.CurrentAdresse?.CodePostal; 
                     ws.Cells[string.Format("E{0}", rowStart)].Value = benevole.CurrentAdresse?.Ville; 
                     ws.Cells[string.Format("F{0}", rowStart)].Value = benevole.Telephone;
-                    ws.Cells[string.Format("G{0}", rowStart)].Value = benevole.CurrentAdresse?.Centre.Adresse;
+                    ws.Cells[string.Format("G{0}", rowStart)].Value = benevole.CurrentAdresse?.Centre.Rue + " " + benevole.CurrentAdresse?.Centre.CodePostal +" " + benevole.CurrentAdresse?.Centre.Commune;
                     ws.Cells[string.Format("H{0}", rowStart)].Value = benevole.CurrentAdresse?.DistanceCentre; 
                     ws.Cells[string.Format("I{0}", rowStart)].Value = (!benevole.CurrentVehicule.IsElectric) ? benevole.CurrentVehicule?.NbChevaux : "";
                     ws.Cells[string.Format("J{0}", rowStart)].Value = (benevole.CurrentVehicule.IsElectric) ? benevole.CurrentVehicule?.NbChevaux : ""; 

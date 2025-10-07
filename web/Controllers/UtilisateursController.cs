@@ -81,27 +81,63 @@ namespace web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(UtilisateurModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return View(model);
+
+            if (model.Utilisateur.Password != model.PasswordConfirm)
             {
-                if (model.Utilisateur.Password != model.PasswordConfirm)
-                {
-                    ModelState.AddModelError("PasswordConfirm", "Les mots de passe ne correspondent pas");
-                    return View(model);
-                }
+                ModelState.AddModelError("PasswordConfirm", "Les mots de passe ne correspondent pas");
+                return View(model);
+            }
 
-                var appActive = HttpContext.Session.GetString("AppActive") ?? "Pointage";
+            var existingUser = await _context.Utilisateurs
+                .FirstOrDefaultAsync(u => u.Login == model.Utilisateur.Login);
 
-                model.Utilisateur.app_pointage_benevoles = appActive == "Pointage";
-                model.Utilisateur.app_bon_livraison = appActive == "Livraison";
+            var appActive = HttpContext.Session.GetString("AppActive") ?? "Pointage";
 
-                model.Utilisateur.SetPassword(model.Utilisateur.Password);
-                _context.Add(model.Utilisateur);
-                await _context.SaveChangesAsync();
-                SetGlobalMessage("L'utilisateur a été créé avec succès", EGlobalMessageType.Success);
+            if (existingUser != null)
+            {
+                // Store the existing user and appActive in TempData or ViewData for the popup
+                TempData["ExistingUserId"] = existingUser.ID;
+                TempData["AppActive"] = appActive;
+                TempData["ShowAssignPopup"] = true;
+                return View(model); // Return to view with popup
+            }
+
+            model.Utilisateur.app_pointage_benevoles = appActive == "Pointage";
+            model.Utilisateur.app_bon_livraison = appActive == "Livraison";
+
+            model.Utilisateur.SetPassword(model.Utilisateur.Password);
+            _context.Add(model.Utilisateur);
+            await _context.SaveChangesAsync();
+
+            SetGlobalMessage("L'utilisateur a été créé avec succès", EGlobalMessageType.Success);
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignToApp(int userId)
+        {
+            var user = await _context.Utilisateurs.FindAsync(userId);
+            if (user == null)
+            {
+                SetGlobalMessage("Utilisateur introuvable", EGlobalMessageType.Error);
                 return RedirectToAction(nameof(Index));
             }
-            return View(model);
+
+            var appActive = HttpContext.Session.GetString("AppActive") ?? "Pointage";
+
+            if (appActive == "Pointage")
+                user.app_pointage_benevoles = true;
+            else if (appActive == "Livraison")
+                user.app_bon_livraison = true;
+
+            await _context.SaveChangesAsync();
+            SetGlobalMessage("L'utilisateur a été assigné à l'application", EGlobalMessageType.Success);
+            return RedirectToAction(nameof(Index));
         }
+
 
         // GET: Utilisateurs/Edit/5
         public async Task<IActionResult> Edit(int? id)

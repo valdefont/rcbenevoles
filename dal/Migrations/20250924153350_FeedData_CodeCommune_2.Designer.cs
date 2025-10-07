@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using dal;
@@ -11,9 +12,11 @@ using dal;
 namespace dal.Migrations
 {
     [DbContext(typeof(RCBenevoleContext))]
-    partial class RCBenevoleContextModelSnapshot : ModelSnapshot
+    [Migration("20250924153350_FeedData_CodeCommune_2")]
+    partial class FeedDataCodeCommune2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

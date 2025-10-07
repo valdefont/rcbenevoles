@@ -25,7 +25,7 @@ namespace web.Controllers
         [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Centres.Include(s=>s.Siege).ToListAsync());
+            return View(await _context.Centres.Include(s=>s.Siege).OrderBy(s=>s.Nom).ToListAsync());
         }
 
         [Authorize(Roles = "BasicAdmin")]
@@ -68,7 +68,7 @@ namespace web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin")]
-        public async Task<IActionResult> Create([Bind("ID,Nom,Adresse,SiegeID")] Centre centre)
+        public async Task<IActionResult> Create([Bind("ID,Nom,Rue,CodePostal,Commune,Telephone,EMail,SiegeID")] Centre centre)
         {
             if (ModelState.IsValid)
             {
@@ -122,7 +122,7 @@ namespace web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin")]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Nom,Adresse,SiegeID")] Centre centre)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Nom,Rue,CodePostal,Commune,Telephone,EMail,SiegeID")] Centre centre)
         {
             if (id != centre.ID)
             {
@@ -360,6 +360,19 @@ namespace web.Controllers
         private bool CentreExists(int id)
         {
             return _context.Centres.Any(e => e.ID == id);
+        }
+
+        [HttpPost]
+        public JsonResult GetCommunesByCodePostal(string codePostal)
+        {
+            // Replace with your actual data access logic
+           var communes = _context.CodeCommune
+                .Where(c => c.CodePostal.StartsWith(codePostal))
+                .Select(c => new { c.NomCommune, c.CodePostal })
+                .Distinct()
+                .ToList();
+
+         return Json(communes);
         }
     }
 }

@@ -102,6 +102,10 @@ namespace dal
                 .HasIndex(b => b.id)
 				.IsUnique(true);
 
+            //CodeCommune
+            modelBuilder.Entity<CodeCommune>()
+               .HasIndex(b => b.ID)
+               .IsUnique(true);
 
         }
 
@@ -116,6 +120,8 @@ namespace dal
         public DbSet<BaremeFiscalDefault> BaremeFiscalDefault { get; set; }
         public DbSet<Vehicule> Vehicule { get; set; }
         public DbSet<BonLivraison> BonLivraison { get; set; }
+        public DbSet<CodeCommune> CodeCommune { get; set; }
+
 
         public void SeedData()
         {
@@ -142,7 +148,9 @@ namespace dal
 		            var centre_paris = new Centre
 		            {
 		                Nom = "Paris",
-		                Adresse = "5 rue de Paris 75000 PARIS",
+		                Rue = "5 rue de Paris",
+                        CodePostal ="75000",
+                        Commune = "PARIS",
 		                Siege = siege75,
 		            };
 
@@ -150,9 +158,11 @@ namespace dal
 
 		            var centre = new Centre
 		            {
-		                Nom = "Lyon",
-		                Adresse = "5 rue de Lyon 69000 Lyon",
-		                Siege = siege75,
+		                Nom = "Lyon",		                
+                        Rue = "5 rue de Lyon",
+                        CodePostal = "69000",
+                        Commune = "Lyon",
+                        Siege = siege75,
 		            };
 
 		            this.Centres.Add(centre);
