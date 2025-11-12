@@ -574,7 +574,7 @@ namespace web.Controllers
                 // Add empty rows to reach a reasonable height (3 rows)
                 int rowCount = 3;
                 float pageHeight = doc.PageSize.Height - doc.TopMargin - doc.BottomMargin;
-                float targetTableHeight = (pageHeight * 0.4f); // further reduced height
+                float targetTableHeight = (pageHeight * 0.35f); // further reduced height
                 for (int i = 0; i < rowCount; i++)
                 {
                     for (int j = 0; j < 5; j++)
@@ -601,8 +601,12 @@ namespace web.Controllers
 
                 doc.Add(table);
 
-                // Add one line space before Colisage
-                doc.Add(new Paragraph(" "));
+                // Add instruction paragraph below the table and above signature                
+                var instructionFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 11, BaseColor.BLACK); // Increased font size
+                Paragraph instr = new Paragraph("MERCI DE PROCEDER AU TRI ET AU PESAGE DES PRODUITS FIGURANT SUR CE BL\n ET D'ENREGISTRER LEURS POIDS DANS LES RAMASSES AAIDA", instructionFont);
+                instr.Alignment = Element.ALIGN_CENTER;
+                instr.SpacingAfter =15f;
+                doc.Add(instr);
 
                 // Signature and Colisage section
                 PdfPTable sigColisTable = new PdfPTable(2);
@@ -617,12 +621,6 @@ namespace web.Controllers
                 sigCell.PaddingTop = 5f;
                 sigCell.PaddingBottom = 40f;
                 leftSig.AddCell(sigCell);
-                Paragraph instr = new Paragraph("MERCI DE PROCEDER AU TRI ET AU PESAGE DES PRODUITS\nFIGURANT SUR CE BL ET D'ENREGISTRER LEURS POIDS\nDANS LES RAMASSES AAIDA", smallBold);
-                instr.Alignment = Element.ALIGN_LEFT;
-                PdfPCell instrCell = new PdfPCell();
-                instrCell.Border = Rectangle.NO_BORDER;
-                instrCell.AddElement(instr);
-                leftSig.AddCell(instrCell);
                 sigColisTable.AddCell(new PdfPCell(leftSig) { Border = Rectangle.NO_BORDER });
 
                 // Right: Colisage
@@ -682,6 +680,7 @@ namespace web.Controllers
                 return File(content, "application/pdf", $"BonLivraison_{bon.NumBulletin}.pdf");
             }
         }
+
 
     }
 }
