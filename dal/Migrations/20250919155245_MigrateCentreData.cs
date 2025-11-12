@@ -12,12 +12,12 @@ namespace dal.Migrations
         {
 
             migrationBuilder.Sql(@"
-        UPDATE ""Centre""
-        SET 
-            ""CodePostal"" = SUBSTRING(""Rue"" FROM '68[0-9]{3}'),
-            ""Commune"" = TRIM(SUBSTRING(""Rue"" FROM '68[0-9]{3}\s+(.*)'))
-        WHERE ""Rue"" ~ '68[0-9]{3}';
-    ");
+                                    UPDATE ""Centres""
+                                    SET 
+                                        ""CodePostal"" = SUBSTRING(""Rue"" FROM '68[0-9]{3}'),
+                                        ""Commune"" = TRIM(SUBSTRING(""Rue"" FROM '68[0-9]{3}\s+(.*)'))
+                                    WHERE ""Rue"" ~ '68[0-9]{3}';
+                                ");
 
         }
 
