@@ -117,11 +117,13 @@ namespace web.Controllers
             }
             else if (dbuser.app_pointage_benevoles)
             {
+                HttpContext.Session.SetString("AppActive", "Pointage");
                 return RedirectToAction(nameof(Index));
             }
             else if (dbuser.app_bon_livraison)
             {
-                return RedirectToAction("Index", "BonLivraison");
+                HttpContext.Session.SetString("AppActive", "Livraison");
+                return RedirectToAction("Index", "BonLivraison"); 
             }
             else
             {
