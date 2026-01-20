@@ -11,7 +11,7 @@ namespace dal.models
         public int ID { get; set; }
 
         [Column("Code_commune_INSEE")]
-        public int CodeCommuneINSEE { get; set; }
+        public string CodeCommuneINSEE { get; set; }
 
         [Column("Nom_Commune")]
         [MaxLength(255)]

@@ -1,0 +1,61 @@
+﻿@model dal.models.EnseigneDetail
+
+@{
+    ViewData["Title"] = "Supprimer";
+}
+
+<h2>Gestion des enseignes</h2>
+
+<h3>Confirmez-vous la suppression de l'enseigne suivante ?</h3>
+
+<div>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayName("Enseigne")
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Enseigne.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayName("Commune")
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.CodeCommune.NomCommune)
+        </dd>
+
+        <dt>
+            @Html.DisplayName("Centre")
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Centre.Nom)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Adresse)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Adresse)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.EstActif)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.EstActif)
+        </dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="ID" />
+
+        <button type="submit" class="btn btn-danger">
+            Supprimer
+        </button>
+
+        <a asp-action="Index" class="btn btn-secondary">
+            Annuler
+        </a>
+    </form>
+</div>

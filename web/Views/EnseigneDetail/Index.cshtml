@@ -1,0 +1,84 @@
+﻿@model IEnumerable<dal.models.EnseigneDetail>
+@using Microsoft.AspNetCore.Http
+
+@{
+    if (Context.Session.GetString("AppActive") == "Collecte")
+    {
+        Layout = "~/Views/Shared/_CollecteLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+
+    ViewData["Title"] = "Liste des enseignes";
+}
+
+<h2>Gestion des Enseignes</h2>
+
+
+
+<div class="btn-toolbar" role="toolbar" style="margin-top:10px;">
+    <!-- Aller à la liste des enseignes (CRUD complet) -->
+    <a asp-controller="Enseigne" asp-action="Index" class="btn btn-primary">
+        <i class="glyphicon glyphicon-list"></i> Gérer les noms d'enseignes
+    </a>   
+</div>
+
+
+
+<p>
+    <a asp-action="Create">Créer une nouvelle entrée</a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>
+                Enseigne
+            </th>
+            <th>
+                Commune
+            </th>
+            <th>
+                Centre
+            </th>
+            <th>
+                Adresse
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td width="20%">
+                    @Html.DisplayFor(modelItem => item.Enseigne.Name)
+                </td>
+
+                <td width="20%">
+                    @Html.DisplayFor(modelItem => item.CodeCommune.NomCommune)
+                </td>
+
+                <td width="20%">
+                    @Html.DisplayFor(modelItem => item.Centre.Nom)
+                </td>
+
+                <td width="25%">
+                    @Html.DisplayFor(modelItem => item.Adresse)
+                </td>
+
+                <td width="15%">
+                    <a asp-action="Edit" asp-route-id="@item.ID">
+                        <i class="glyphicon glyphicon-edit"></i> Modifier
+                    </a> |
+                    <a asp-action="Delete" asp-route-id="@item.ID">
+                        <i class="glyphicon glyphicon-trash"></i> Supprimer
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

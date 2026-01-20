@@ -1,0 +1,29 @@
+﻿@model IEnumerable<dal.models.Collecte>
+
+<tbody id="updateBody">
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.ID</td>
+            <td>@item.EnseigneDetail.Enseigne.Name - @item.EnseigneDetail.CodeCommune.NomCommune</td>
+            <td>@item.EnseigneDetail.Centre?.Nom</td>           
+            <td>@item.Poids</td>
+            <td>@item.DateCreation</td>
+            <td>@item.Utilisateur?.Login</td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.ID">Modifier</a> &#124;
+                @if (User.IsInRole("SuperAdmin"))
+                {
+                    <a asp-action="Delete" asp-route-id="@item.ID">Supprimer</a><span> &#124;</span>
+                }
+                
+            </td>
+        </tr>
+    }
+    @if (!Model.Any())
+    {
+        <tr>
+            <td colspan="5"><em>Aucun résultat trouvé.</em></td>
+        </tr>
+    }
+</tbody>

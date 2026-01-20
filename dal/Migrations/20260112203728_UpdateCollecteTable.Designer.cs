@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using dal;
@@ -11,9 +12,11 @@ using dal;
 namespace dal.Migrations
 {
     [DbContext(typeof(RCBenevoleContext))]
-    partial class RCBenevoleContextModelSnapshot : ModelSnapshot
+    [Migration("20260112203728_UpdateCollecteTable")]
+    partial class UpdateCollecteTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -460,9 +463,6 @@ namespace dal.Migrations
                         .HasColumnType("text");
 
                     b.Property<bool>("app_bon_livraison")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("app_collecte")
                         .HasColumnType("boolean");
 
                     b.Property<bool>("app_pointage_benevoles")

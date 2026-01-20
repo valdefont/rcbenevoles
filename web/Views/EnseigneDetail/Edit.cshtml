@@ -1,0 +1,112 @@
+﻿@model dal.models.EnseigneDetail
+
+@{
+    ViewData["Title"] = "Modifier";
+}
+
+<h2>Gestion des enseignes</h2>
+
+<h3>Modifier le détail d’enseigne</h3>
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+
+        <form asp-action="Edit">
+
+            <!-- ENSEIGNE -->
+            <div class="form-group">
+                <label asp-for="EnseigneID" class="control-label required"></label>
+                <select asp-for="EnseigneID"
+                        asp-items="ViewBag.EnseigneID"
+                        class="form-control">
+                </select>
+                <span asp-validation-for="EnseigneID" class="text-danger"></span>
+            </div>
+
+            <!-- CODE COMMUNE -->
+            <div class="form-group">
+                <label asp-for="CodeCommuneID" class="control-label required"></label>
+
+                <!-- Visible autocomplete text box -->
+                <input type="text"
+                       id="CommuneSearch"
+                       class="form-control"
+                       value="@Model.CodeCommune?.NomCommune"
+                       placeholder="Commencez à taper..." />
+
+                <!-- Hidden field storing selected ID -->
+                <input type="hidden" asp-for="CodeCommuneID" id="CodeCommuneID" />
+
+                <span asp-validation-for="CodeCommuneID" class="text-danger"></span>
+            </div>
+
+
+            <!-- Adresse (optional) -->
+            <div class="form-group">
+                <label asp-for="Adresse" class="control-label"></label>
+                <input asp-for="Adresse" class="form-control" />
+                <span asp-validation-for="Adresse" class="text-danger"></span>
+            </div>
+
+            <!-- Centre -->
+            <div class="form-group">
+                <label asp-for="CentreID" class="control-label required"></label>
+                <select asp-for="CentreID" asp-items="ViewBag.CentreID" class="form-control"></select>
+                <span asp-validation-for="CentreID" class="text-danger"></span>
+            </div>
+
+            <!-- Actif -->
+            <div class="form-group">
+                <label asp-for="EstActif" class="control-label"></label><br />
+                <input asp-for="EstActif" />
+                <span asp-validation-for="EstActif" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <a asp-action="Index" class="btn btn-link">Retourner à la liste</a>
+                <input type="submit" value="Modifier" class="btn btn-success" />
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(function () {
+
+            $("#CommuneSearch").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/EnseigneDetail/SearchCommune",
+                        data: { term: request.term },
+                        success: function (data) {
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 3,
+                select: function (event, ui) {
+                    $("#CommuneSearch").val(ui.item.label);
+                    $("#CodeCommuneID").val(ui.item.id).trigger("change");
+                    return false;
+                }
+            });
+
+            // If user edits manually → reset ID
+            $("#CommuneSearch").on("input", function () {
+                $("#CodeCommuneID").val("").trigger("change");
+            });
+
+        });
+    </script>
+
+}
+

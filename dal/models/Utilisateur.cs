@@ -31,6 +31,9 @@ namespace dal.models
         [Display(Name = "Bon de livraison")]
         public bool app_bon_livraison { get; set; }
 
+        [Display(Name = "Collecte")]
+        public bool app_collecte { get; set; }
+
 
         public bool TestPassword(string password)
         {

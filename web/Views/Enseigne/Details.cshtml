@@ -1,0 +1,60 @@
+﻿@model dal.models.Enseigne
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h2>Gestion des enseignes</h2>
+
+<h3>Détail de l’enseigne</h3>
+
+<div>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>@Html.DisplayNameFor(m => m.Name)</dt>
+        <dd>@Html.DisplayFor(m => m.Name)</dd>
+    </dl>
+</div>
+
+<h4>Détails liés</h4>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Commune</th>
+            <th>Centre</th>
+            <th>Adresse</th>
+            <th>Actif</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Details != null)
+        {
+            foreach (var d in Model.Details)
+            {
+                <tr>
+                    <td>@d.CodeCommune?.NomCommune</td>
+                    <td>@d.Centre?.Nom</td>
+                    <td>@d.Adresse</td>
+                    <td>@d.EstActif</td>
+                    <td>
+                        <a asp-controller="EnseigneDetails" asp-action="Edit" asp-route-id="@d.ID">
+                            <i class="glyphicon glyphicon-edit"></i> Modifier le détail
+                        </a>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<div class="btn-toolbar" role="toolbar">
+    <a asp-action="Index" class="btn btn-link">Retourner à la liste</a>
+    <a asp-action="Edit" asp-route-id="@Model.ID" class="btn btn-default">
+        <i class="glyphicon glyphicon-edit"></i> Modifier
+    </a>
+    <a asp-controller="EnseigneDetails" asp-action="Index" class="btn btn-primary">
+        Gérer les détails d’enseignes
+    </a>
+</div>

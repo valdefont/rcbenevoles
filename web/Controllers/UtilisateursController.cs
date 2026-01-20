@@ -36,7 +36,10 @@ namespace web.Controllers
                 {
                     users = await _context.Utilisateurs.Include(u => u.Centre).Where(s => s.app_bon_livraison == true).ToListAsync();
                 }
-                
+                else if (HttpContext.Session.GetString("AppActive") == "Collecte")
+                {
+                    users = await _context.Utilisateurs.Include(u => u.Centre).Where(s => s.app_collecte == true).ToListAsync();
+                }
             }
             else
             {
@@ -106,6 +109,7 @@ namespace web.Controllers
 
             model.Utilisateur.app_pointage_benevoles = appActive == "Pointage";
             model.Utilisateur.app_bon_livraison = appActive == "Livraison";
+            model.Utilisateur.app_collecte = appActive == "Collecte";
 
             model.Utilisateur.SetPassword(model.Utilisateur.Password);
             _context.Add(model.Utilisateur);
@@ -132,6 +136,8 @@ namespace web.Controllers
                 user.app_pointage_benevoles = true;
             else if (appActive == "Livraison")
                 user.app_bon_livraison = true;
+            else if (appActive == "Collecte")
+                user.app_collecte = true;
 
             await _context.SaveChangesAsync();
             SetGlobalMessage("L'utilisateur a été assigné à l'application", EGlobalMessageType.Success);

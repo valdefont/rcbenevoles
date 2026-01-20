@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using dal;
@@ -11,9 +12,11 @@ using dal;
 namespace dal.Migrations
 {
     [DbContext(typeof(RCBenevoleContext))]
-    partial class RCBenevoleContextModelSnapshot : ModelSnapshot
+    [Migration("20260112203113_CreateEnseigneTables")]
+    partial class CreateEnseigneTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -279,7 +282,6 @@ namespace dal.Migrations
                         .HasColumnType("decimal(10,2)");
 
                     b.Property<int?>("UtilisateurID")
-                        .IsRequired()
                         .HasColumnType("integer");
 
                     b.HasKey("ID");
@@ -462,9 +464,6 @@ namespace dal.Migrations
                     b.Property<bool>("app_bon_livraison")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("app_collecte")
-                        .HasColumnType("boolean");
-
                     b.Property<bool>("app_pointage_benevoles")
                         .HasColumnType("boolean");
 
@@ -569,8 +568,7 @@ namespace dal.Migrations
                     b.HasOne("dal.models.Utilisateur", "Utilisateur")
                         .WithMany()
                         .HasForeignKey("UtilisateurID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("EnseigneDetail");
 

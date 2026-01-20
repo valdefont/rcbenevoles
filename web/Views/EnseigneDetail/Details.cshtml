@@ -1,0 +1,73 @@
+﻿@model dal.models.EnseigneDetail
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h2>Gestion des enseignes</h2>
+
+<h3>Détail de l'enseigne</h3>
+
+<div>
+    <hr />
+    <dl class="dl-horizontal">
+
+        <dt>
+            @Html.DisplayName("Enseigne")
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Enseigne.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayName("Commune")
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.CodeCommune.NomCommune)
+        </dd>
+
+        <dt>
+            @Html.DisplayName("Centre")
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Centre.Nom)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Adresse)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Adresse)
+        </dd>
+
+        <dt>
+            @Html.DisplayName("Bénévole responsable")
+        </dt>
+        <dd>
+            @if (Model.Benevole != null)
+            {
+                @Html.DisplayFor(model => model.Benevole.Nom)
+            }
+            else
+            {
+                <em>Aucun</em>
+            }
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.EstActif)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.EstActif)
+        </dd>
+
+    </dl>
+</div>
+
+<div>
+    IndexRetourner à la liste</a>
+
+    Edit
+    <i class="glyphicon glyphicon-edit"></i> Modifier
+    </a>
+</div>

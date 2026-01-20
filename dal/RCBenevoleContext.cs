@@ -107,6 +107,75 @@ namespace dal
                .HasIndex(b => b.ID)
                .IsUnique(true);
 
+
+            modelBuilder.Entity<Enseigne>()
+                    .HasIndex(e => e.Name)
+                    .IsUnique(false); // Name can repeat unless you want uniqueness
+
+            // *** ENSEIGNE DETAIL
+            modelBuilder.Entity<EnseigneDetail>()
+                .HasIndex(ed => ed.Adresse)
+                .IsUnique(false);
+
+            modelBuilder.Entity<EnseigneDetail>()
+                .HasOne(ed => ed.Enseigne)
+                .WithMany(e => e.Details)
+                .HasForeignKey(ed => ed.EnseigneID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EnseigneDetail>()
+                .HasOne(ed => ed.CodeCommune)
+                .WithMany()
+                .HasForeignKey(ed => ed.CodeCommuneID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EnseigneDetail>()
+                .HasOne(ed => ed.Centre)
+                .WithMany()
+                .HasForeignKey(ed => ed.CentreID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EnseigneDetail>()
+                .HasOne(ed => ed.Benevole)
+                .WithMany()
+                .HasForeignKey(ed => ed.BenevoleID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Add indexes for filtering
+            modelBuilder.Entity<EnseigneDetail>()
+                .HasIndex(ed => ed.EnseigneID);
+            modelBuilder.Entity<EnseigneDetail>()
+                .HasIndex(ed => ed.CodeCommuneID);
+            modelBuilder.Entity<EnseigneDetail>()
+                .HasIndex(ed => ed.CentreID);
+            modelBuilder.Entity<EnseigneDetail>()
+                .HasIndex(ed => ed.BenevoleID);
+            modelBuilder.Entity<EnseigneDetail>()
+                .HasIndex(ed => ed.EstActif);
+
+            // *** COLLECTE
+            modelBuilder.Entity<Collecte>()
+                .HasOne(c => c.EnseigneDetail)
+                .WithMany()
+                .HasForeignKey(c => c.EnseigneDetailID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Collecte>()
+                .HasOne(c => c.Utilisateur)
+                .WithMany()
+                .HasForeignKey(c => c.UtilisateurID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure Poids precision for Collecte
+            modelBuilder.Entity<Collecte>()
+                .Property(c => c.Poids)
+                .HasColumnType("decimal(10,2)");
+
+            // Optional: Index for Collecte by EnseigneDetailID and DateCreation
+            modelBuilder.Entity<Collecte>()
+                .HasIndex(c => new { c.EnseigneDetailID, c.DateCreation });
+
+
         }
 
         public DbSet<Utilisateur> Utilisateurs { get; set; }
@@ -121,6 +190,12 @@ namespace dal
         public DbSet<Vehicule> Vehicule { get; set; }
         public DbSet<BonLivraison> BonLivraison { get; set; }
         public DbSet<CodeCommune> CodeCommune { get; set; }
+
+        public DbSet<Collecte> Collecte { get; set; }
+
+        public DbSet<Enseigne> Enseigne { get; set; }
+
+        public DbSet<EnseigneDetail> EnseigneDetail { get; set; }
 
 
         public void SeedData()

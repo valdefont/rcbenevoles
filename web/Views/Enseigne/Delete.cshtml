@@ -1,0 +1,26 @@
+﻿@model dal.models.Enseigne
+
+@{
+    ViewData["Title"] = "Supprimer";
+}
+
+<h2>Gestion des enseignes</h2>
+
+<h3>Confirmez-vous la suppression de l’enseigne suivante ?</h3>
+
+<div>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>@Html.DisplayNameFor(m => m.Name)</dt>
+        <dd>@Html.DisplayFor(m => m.Name)</dd>
+
+        <dt>Nombre de détails liés</dt>
+        <dd>@(Model.Details?.Count ?? 0)</dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="ID" />
+        <button type="submit" class="btn btn-danger">Supprimer</button>
+        <a asp-action="Index" class="btn btn-secondary">Annuler</a>
+    </form>
+</div>

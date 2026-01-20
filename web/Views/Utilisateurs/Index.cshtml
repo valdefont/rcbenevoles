@@ -7,7 +7,11 @@
     {
         Layout = "~/Views/Shared/_BonLivraisonLayout.cshtml";
     }
-    else
+    else if (Context.Session.GetString("AppActive") == "Collecte")
+    {
+        Layout = "~/Views/Shared/_CollecteLayout.cshtml";
+    }
+    else if (Context.Session.GetString("AppActive") == "Pointage")
     {
         Layout = "~/Views/Shared/_Layout.cshtml";
     }

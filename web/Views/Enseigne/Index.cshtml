@@ -1,0 +1,51 @@
+﻿@model IEnumerable<dal.models.Enseigne>
+@using Microsoft.AspNetCore.Http
+
+@{
+    if (Context.Session.GetString("AppActive") == "Collecte")
+    {
+        Layout = "~/Views/Shared/_CollecteLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+
+    ViewData["Title"] = "Liste";
+}
+
+<h2>Gestion des enseignes</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-success">
+        <i class="glyphicon glyphicon-plus"></i> Créer une nouvelle enseigne
+    </a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Nom de l’enseigne</th>
+            <th>Nb. de détails</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var e in Model)
+        {
+            <tr>
+                <td width="55%">
+                    @Html.DisplayFor(_ => e.Name)
+                </td>
+                <td width="15%">
+                    @(e.Details?.Count ?? 0)
+                </td>
+                <td width="30%">
+                    <a asp-action="Details" asp-route-id="@e.ID">Détails</a> |
+                    <a asp-action="Edit" asp-route-id="@e.ID"><i class="glyphicon glyphicon-edit"></i> Modifier</a> |
+                    <a asp-action="Delete" asp-route-id="@e.ID"><i class="glyphicon glyphicon-trash"></i> Supprimer</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
