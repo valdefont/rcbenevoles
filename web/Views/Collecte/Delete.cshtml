@@ -1,0 +1,46 @@
+﻿@model dal.models.Collecte
+
+@{
+    ViewData["Title"] = "Supprimer une collecte";
+}
+
+<h2>Supprimer une collecte</h2>
+
+<div class="alert alert-danger">
+    <strong>Attention :</strong> Cette opération supprimera définitivement cette collecte.
+</div>
+
+<table class="table table-bordered">
+    <tr>
+        <th>ID</th>
+        <td>@Model.ID</td>
+    </tr>
+    <tr>
+        <th>Enseigne</th>
+        <td>
+            @Model.EnseigneDetail?.Enseigne?.Name
+            - @Model.EnseigneDetail?.CodeCommune?.NomCommune
+        </td>
+    </tr>
+    <tr>
+        <th>Poids</th>
+        <td>@Model.Poids</td>
+    </tr>
+    <tr>
+        <th>Créé le</th>
+        <td>@Model.DateCreation.ToShortDateString()</td>
+    </tr>
+    <tr>
+        <th>Créé par</th>
+        <td>@Model.Utilisateur?.Login</td>
+    </tr>
+</table>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="ID" />
+
+    <div class="form-group mt-3">
+        IndexAnnuler</a>
+        <button type="submit" class="btn btn-danger">Supprimer</button>
+    </div>
+</form>

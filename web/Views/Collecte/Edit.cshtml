@@ -1,0 +1,40 @@
+﻿@model dal.models.Collecte
+
+@{
+    ViewData["Title"] = "Modifier une collecte";
+}
+
+<h2>Modifier une collecte</h2>
+
+<form asp-action="Edit" method="post">
+
+    <input type="hidden" asp-for="ID" />
+
+    <div class="form-group">
+        <label asp-for="EnseigneDetailID"></label>
+        <select asp-for="EnseigneDetailID"
+                class="form-control"
+                asp-items="@(ViewBag.EnseigneDetailItems)">
+            <option value="">-- Sélectionner une enseigne --</option>
+        </select>
+        <span asp-validation-for="EnseigneDetailID" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Poids"></label>
+        <input asp-for="Poids" class="form-control" />
+        <span asp-validation-for="Poids" class="text-danger"></span>
+    </div>
+
+    <div class="form-group text-right" style="margin-top:15px;">
+        <a asp-action="Index" class="btn btn-secondary">Annuler</a>
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+    </div>
+
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

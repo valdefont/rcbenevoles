@@ -101,7 +101,7 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            //filter();
+            filter();
         });
 
         function filter() {
@@ -109,7 +109,7 @@
                 url: '@Url.Action("Filter")',
                 data: {
                     CentreID: $("#CentreID").val(),
-                    NumBulletin: $("#EnseigneDetailID").val(),
+                    EnseigneDetailID: $("#EnseigneDetailID").val(),
                     DateDebut: $("#DateDebut").val(),
                     DateFin: $("#DateFin").val()
                 },
@@ -125,7 +125,7 @@
 
         function syncExportFilters() {
             $("#ExportCentreID").val($("#CentreID").val());
-            $("#ExportNumBulletin").val($("#EnseigneDetailID").val());
+            $("#ExportEnseigneDetailID").val($("#EnseigneDetailID").val());
             $("#ExportDateDebut").val($("#DateDebut").val());
             $("#ExportDateFin").val($("#DateFin").val());
         }

@@ -11,10 +11,11 @@
             <td>@item.DateCreation</td>
             <td>@item.Utilisateur?.Login</td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.ID">Modifier</a> &#124;
+                <a asp-controller="Collecte" asp-action="Edit" asp-route-id="@item.ID">Modifier</a>
                 @if (User.IsInRole("SuperAdmin"))
                 {
-                    <a asp-action="Delete" asp-route-id="@item.ID">Supprimer</a><span> &#124;</span>
+                    <span> &#124;</span> <a asp-action="Delete" asp-route-id="@item.ID">Supprimer</a>
+                    
                 }
                 
             </td>
