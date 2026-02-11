@@ -95,6 +95,7 @@ namespace web.Controllers
             {
                 new Claim(ClaimTypes.Name, model.Login),
                 new Claim(ClaimTypes.Authentication, "true"),
+                new Claim("UtilisateurID", dbuser.ID.ToString(), ClaimValueTypes.Integer32),
             };
 
             if (dbuser.Centre != null)

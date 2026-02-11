@@ -34,19 +34,13 @@ namespace dal.Migrations
                     EnseigneID = table.Column<int>(type: "integer", nullable: false),
                     CodeCommuneID = table.Column<int>(type: "integer", nullable: false),
                     CentreID = table.Column<int>(type: "integer", nullable: false),
-                    Adresse = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    BenevoleID = table.Column<int>(type: "integer", nullable: true),
+                    Adresse = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),                    
                     EstActif = table.Column<bool>(type: "boolean", nullable: false ,defaultValue: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_EnseigneDetail", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_EnseigneDetail_Benevoles_BenevoleID",
-                        column: x => x.BenevoleID,
-                        principalTable: "Benevoles",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
+                   
                     table.ForeignKey(
                         name: "FK_EnseigneDetail_Centres_CentreID",
                         column: x => x.CentreID,
@@ -118,12 +112,7 @@ namespace dal.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_EnseigneDetail_Adresse",
                 table: "EnseigneDetail",
-                column: "Adresse");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_EnseigneDetail_BenevoleID",
-                table: "EnseigneDetail",
-                column: "BenevoleID");
+                column: "Adresse");          
 
             migrationBuilder.CreateIndex(
                 name: "IX_EnseigneDetail_CentreID",

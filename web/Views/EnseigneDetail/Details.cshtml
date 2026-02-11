@@ -12,53 +12,39 @@
     <hr />
     <dl class="dl-horizontal">
 
-        <dt>
-            @Html.DisplayName("Enseigne")
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Enseigne.Name)
-        </dd>
+        <dt>Enseigne</dt>
+        <dd>@Html.DisplayFor(model => model.Enseigne.Name)</dd>
 
-        <dt>
-            @Html.DisplayName("Commune")
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.CodeCommune.NomCommune)
-        </dd>
+        <dt>Commune</dt>
+        <dd>@Html.DisplayFor(model => model.CodeCommune.NomCommune)</dd>
 
-        <dt>
-            @Html.DisplayName("Centre")
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Centre.Nom)
-        </dd>
+        <dt>Centre</dt>
+        <dd>@Html.DisplayFor(model => model.Centre.Nom)</dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Adresse)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Adresse)
-        </dd>
+        <dt>@Html.DisplayNameFor(model => model.Adresse)</dt>
+        <dd>@Html.DisplayFor(model => model.Adresse)</dd>
 
-        <dt>
-            @Html.DisplayName("Bénévole responsable")
-        </dt>
+        <dt>@Html.DisplayNameFor(model => model.EstActif)</dt>
+        <dd>@Html.DisplayFor(model => model.EstActif)</dd>
+
+        <!-- ✅ UTILISATEURS -->
+        <dt>Utilisateurs associés</dt>
         <dd>
-            @if (Model.Benevole != null)
+            @if (Model.EnseigneDetailUtilisateurs != null &&
+            Model.EnseigneDetailUtilisateurs.Any())
             {
-                @Html.DisplayFor(model => model.Benevole.Nom)
+                <ul class="mb-0">
+                    @foreach (var link in Model.EnseigneDetailUtilisateurs
+                   .OrderBy(x => x.Utilisateur.Login))
+                    {
+                        <li>@link.Utilisateur?.Login</li>
+                    }
+                </ul>
             }
             else
             {
-                <em>Aucun</em>
+                <span class="text-muted">Aucun utilisateur associé</span>
             }
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.EstActif)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.EstActif)
         </dd>
 
     </dl>

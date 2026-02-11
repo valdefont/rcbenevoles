@@ -1,7 +1,21 @@
-﻿@model dal.models.EnseigneDetail
+﻿@model dal.models.EnseigneDetailFormVm
 
 @{
     ViewData["Title"] = "Modifier";
+}
+
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using System.Linq
+
+@{
+    var enseignes = ViewData["EnseigneID"] as IEnumerable<SelectListItem>
+                    ?? Enumerable.Empty<SelectListItem>();
+
+    var centres = ViewData["CentreID"] as IEnumerable<SelectListItem>
+                  ?? Enumerable.Empty<SelectListItem>();
+
+    var utilisateurs = ViewData["Utilisateurs"] as IEnumerable<SelectListItem>
+                       ?? Enumerable.Empty<SelectListItem>();
 }
 
 <h2>Gestion des enseignes</h2>
@@ -12,55 +26,78 @@
 <div class="row">
     <div class="col-md-4">
 
-        <form asp-action="Edit">
+        <form asp-action="Edit" asp-route-id="@Model.Detail.ID" method="post">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <!-- Hidden ID (important for binding) -->
+            <input type="hidden" asp-for="Detail.ID" />
 
             <!-- ENSEIGNE -->
             <div class="form-group">
-                <label asp-for="EnseigneID" class="control-label required"></label>
-                <select asp-for="EnseigneID"
-                        asp-items="ViewBag.EnseigneID"
+                <label asp-for="Detail.EnseigneID" class="control-label required"></label>
+                <select asp-for="Detail.EnseigneID"
+                        asp-items="enseignes"
                         class="form-control">
                 </select>
-                <span asp-validation-for="EnseigneID" class="text-danger"></span>
+                <span asp-validation-for="Detail.EnseigneID" class="text-danger"></span>
             </div>
 
             <!-- CODE COMMUNE -->
             <div class="form-group">
-                <label asp-for="CodeCommuneID" class="control-label required"></label>
+                <label asp-for="Detail.CodeCommuneID" class="control-label required"></label>
 
                 <!-- Visible autocomplete text box -->
                 <input type="text"
                        id="CommuneSearch"
                        class="form-control"
-                       value="@Model.CodeCommune?.NomCommune"
+                       value="@Model.Detail.CodeCommune?.NomCommune"
                        placeholder="Commencez à taper..." />
 
                 <!-- Hidden field storing selected ID -->
-                <input type="hidden" asp-for="CodeCommuneID" id="CodeCommuneID" />
+                <input type="hidden" asp-for="Detail.CodeCommuneID" id="CodeCommuneID" />
 
-                <span asp-validation-for="CodeCommuneID" class="text-danger"></span>
+                <span asp-validation-for="Detail.CodeCommuneID" class="text-danger"></span>
             </div>
 
-
-            <!-- Adresse (optional) -->
+            <!-- ADRESSE -->
             <div class="form-group">
-                <label asp-for="Adresse" class="control-label"></label>
-                <input asp-for="Adresse" class="form-control" />
-                <span asp-validation-for="Adresse" class="text-danger"></span>
+                <label asp-for="Detail.Adresse" class="control-label"></label>
+                <input asp-for="Detail.Adresse" class="form-control" />
+                <span asp-validation-for="Detail.Adresse" class="text-danger"></span>
             </div>
 
-            <!-- Centre -->
+            <!-- CENTRE -->
             <div class="form-group">
-                <label asp-for="CentreID" class="control-label required"></label>
-                <select asp-for="CentreID" asp-items="ViewBag.CentreID" class="form-control"></select>
-                <span asp-validation-for="CentreID" class="text-danger"></span>
+                <label asp-for="Detail.CentreID" class="control-label required"></label>
+                <select asp-for="Detail.CentreID"
+                        asp-items="centres"
+                        class="form-control">
+                </select>
+                <span asp-validation-for="Detail.CentreID" class="text-danger"></span>
             </div>
 
-            <!-- Actif -->
+            <!-- UTILISATEURS -->
             <div class="form-group">
-                <label asp-for="EstActif" class="control-label"></label><br />
-                <input asp-for="EstActif" />
-                <span asp-validation-for="EstActif" class="text-danger"></span>
+                <label asp-for="UtilisateurIds" class="control-label"></label>
+                <select asp-for="UtilisateurIds"
+                        asp-items="utilisateurs"
+                        class="form-control"
+                        multiple="multiple"
+                        size="8">
+                </select>
+                <span asp-validation-for="UtilisateurIds" class="text-danger"></span>
+                <small class="form-text text-muted">
+                    Maintenez Ctrl (Windows) / Cmd (Mac) pour sélectionner plusieurs utilisateurs.
+                </small>
+            </div>
+
+            <!-- ACTIF -->
+            <div class="form-group">
+                <label asp-for="Detail.EstActif" class="control-label"></label><br />
+                <input asp-for="Detail.EstActif" />
+                <span asp-validation-for="Detail.EstActif" class="text-danger"></span>
             </div>
 
             <div class="form-group">
@@ -75,9 +112,7 @@
 
 @section Scripts {
 
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 
     <script>
         $(function () {
@@ -107,6 +142,4 @@
 
         });
     </script>
-
 }
-

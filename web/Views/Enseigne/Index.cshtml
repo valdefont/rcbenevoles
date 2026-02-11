@@ -40,8 +40,7 @@
                 <td width="15%">
                     @(e.Details?.Count ?? 0)
                 </td>
-                <td width="30%">
-                    <a asp-action="Details" asp-route-id="@e.ID">Détails</a> |
+                <td width="30%">                   
                     <a asp-action="Edit" asp-route-id="@e.ID"><i class="glyphicon glyphicon-edit"></i> Modifier</a> |
                     <a asp-action="Delete" asp-route-id="@e.ID"><i class="glyphicon glyphicon-trash"></i> Supprimer</a>
                 </td>

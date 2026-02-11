@@ -31,6 +31,25 @@
         <dd>
             @Html.DisplayFor(model => model.Centre.Nom)
         </dd>
+        
+        <dt>
+            @Html.DisplayName("Utilisateurs")
+        </dt>
+        <dd>
+            @if (Model.EnseigneDetailUtilisateurs != null && Model.EnseigneDetailUtilisateurs.Any())
+            {
+                <ul class="mb-0">
+                    @foreach (var link in Model.EnseigneDetailUtilisateurs.OrderBy(x => x.Utilisateur.Login))
+                    {
+                        <li>@link.Utilisateur?.Login</li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <span class="text-muted">Aucun utilisateur associé</span>
+            }
+        </dd>
 
         <dt>
             @Html.DisplayNameFor(model => model.Adresse)

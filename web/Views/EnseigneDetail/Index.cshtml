@@ -19,17 +19,21 @@
 
 
 <div class="btn-toolbar" role="toolbar" style="margin-top:10px;">
-    <!-- Aller à la liste des enseignes (CRUD complet) -->
-    <a asp-controller="Enseigne" asp-action="Index" class="btn btn-primary">
-        <i class="glyphicon glyphicon-list"></i> Gérer les noms d'enseignes
-    </a>   
+
+    <div class="btn-group" role="group">
+        <a asp-controller="Enseigne" asp-action="Index" class="btn btn-primary">
+            <i class="glyphicon glyphicon-list"></i> Gérer les noms d'enseignes
+        </a>
+    </div>
+
+    <div class="btn-group" role="group" style="margin-left:10px;">
+        <a asp-action="Create" class="btn btn-success">
+            <i class="glyphicon glyphicon-plus"></i> Créer une nouvelle entrée
+        </a>
+    </div>
+
 </div>
-
-
-
-<p>
-    <a asp-action="Create">Créer une nouvelle entrée</a>
-</p>
+</br></br>
 
 <table class="table table-bordered table-striped">
     <thead>

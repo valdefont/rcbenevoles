@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -8,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using dal;
 using dal.models;
 using web.Models;
+using System.Collections.Generic;
 
 namespace web.Controllers
 {
@@ -44,7 +46,8 @@ namespace web.Controllers
                 .Include(e => e.Enseigne)
                 .Include(e => e.CodeCommune)
                 .Include(e => e.Centre)
-                .Include(e => e.Benevole)
+                .Include(e => e.EnseigneDetailUtilisateurs)
+                    .ThenInclude(link => link.Utilisateur)
                 .SingleOrDefaultAsync(e => e.ID == id);
 
             if (detail == null)
@@ -53,97 +56,167 @@ namespace web.Controllers
             return View(detail);
         }
 
-        // GET: EnseigneDetails/Create
         [Authorize(Roles = "SuperAdmin")]
         public IActionResult Create()
         {
-            LoadDropdowns();
+            var vm = new EnseigneDetailFormVm(); // Detail.EstActif = true by default
 
-            var model = new EnseigneDetail
-            {
-                EstActif = true   // <-- ensure checkbox is checked by default
-            };
-
-            return View(model);
+            LoadDropdowns(vm);
+            return View(vm);
         }
 
-        // POST: EnseigneDetails/Create
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin")]
-        public async Task<IActionResult> Create([Bind("ID,EnseigneID,CodeCommuneID,CentreID,Adresse,BenevoleID,EstActif")]
-                                               EnseigneDetail detail)
+        public async Task<IActionResult> Create(EnseigneDetailFormVm vm)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Add(detail);
-                await _context.SaveChangesAsync();
-                LogInfo("EnseigneDetail #{DetailID} créé", detail.ID);
-                SetGlobalMessage("Le détail enseigne a été créé avec succès", EGlobalMessageType.Success);
-
-                return RedirectToAction(nameof(Index));
+                LoadDropdowns(vm);
+                return View(vm);
             }
 
-            LoadDropdowns(detail);
-            return View(detail);
+            var detail = vm.Detail;
+
+            _context.Add(detail);
+            await _context.SaveChangesAsync(); // need detail.ID
+
+            if (vm.UtilisateurIds != null && vm.UtilisateurIds.Count > 0)
+            {
+                var links = vm.UtilisateurIds
+                    .Distinct()
+                    .Select(uid => new EnseigneDetailUtilisateurs
+                    {
+                        EnseigneDetailID = detail.ID,
+                        UtilisateurID = uid,
+                        EstActif = true,
+                        CreeLe = DateTime.UtcNow
+                    });
+
+                _context.EnseigneDetailUtilisateurs.AddRange(links);
+                await _context.SaveChangesAsync();
+            }
+
+            LogInfo("EnseigneDetail #{DetailID} créé", detail.ID);
+            SetGlobalMessage("Le détail enseigne a été créé avec succès", EGlobalMessageType.Success);
+
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: EnseigneDetails/Edit/5
-        [Authorize(Roles = "SuperAdmin")]
+
+
+        private void LoadDropdowns(EnseigneDetailFormVm vm)
+        {
+            ViewData["EnseigneID"] = new SelectList(
+                _context.Enseigne.AsNoTracking(),
+                "ID",
+                "Name", 
+                vm.Detail.EnseigneID
+            );
+
+            ViewData["CentreID"] = new SelectList(
+                _context.Centres.AsNoTracking(),
+                "ID",
+                "Nom",
+                vm.Detail.CentreID
+            );
+
+            var users = _context.Utilisateurs
+                .AsNoTracking()
+                .OrderBy(u => u.Login)
+                .Select(u => new { u.ID, Label = u.Login })
+                .ToList();
+
+            ViewData["Utilisateurs"] = new MultiSelectList(users, "ID", "Label", vm.UtilisateurIds);
+        }
+
+
+
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-                return NotFound();
-
+            if (id == null) return NotFound();
 
             var detail = await _context.EnseigneDetail
-                    .Include(e => e.CodeCommune)   // IMPORTANT
-                    .FirstOrDefaultAsync(e => e.ID == id);
+                .Include(e => e.CodeCommune)
+                .FirstOrDefaultAsync(e => e.ID == id);
 
+            if (detail == null) return NotFound();
 
-            if (detail == null)
-                return NotFound();
+            var selectedUserIds = await _context.EnseigneDetailUtilisateurs
+                .Where(x => x.EnseigneDetailID == detail.ID)
+                .Select(x => x.UtilisateurID)
+                .ToListAsync();
 
-            LoadDropdowns(detail);
-            return View(detail);
+            var vm = new EnseigneDetailFormVm
+            {
+                Detail = detail,
+                UtilisateurIds = selectedUserIds
+            };
+
+            LoadDropdowns(vm);            
+            return View(vm);
         }
 
-        // POST: EnseigneDetails/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin")]
-        public async Task<IActionResult> Edit(int id,
-            [Bind("ID,EnseigneID,CodeCommuneID,CentreID,Adresse,BenevoleID,EstActif")]
-            EnseigneDetail detail)
+        public async Task<IActionResult> Edit(int id, EnseigneDetailFormVm vm)
         {
-            if (id != detail.ID)
-                return NotFound();
+            if (id != vm.Detail.ID) return NotFound();
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(detail);
-                    await _context.SaveChangesAsync();
-
-                    LogInfo("EnseigneDetail #{DetailID} modifié", detail.ID);
-                    SetGlobalMessage("Le détail enseigne a été modifié avec succès", EGlobalMessageType.Success);
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!DetailExists(detail.ID))
-                        return NotFound();
-                    else
-                        throw;
-                }
-
-                return RedirectToAction(nameof(Index));
+                LoadDropdowns(vm);
+                return View(vm);
             }
 
-            LoadDropdowns(detail);
-            return View(detail);
+            // Update main entity
+            _context.Update(vm.Detail);
+            await _context.SaveChangesAsync();
+
+            // Sync links
+            var existingUserIds = await _context.EnseigneDetailUtilisateurs
+                .Where(x => x.EnseigneDetailID == vm.Detail.ID)
+                .Select(x => x.UtilisateurID)
+                .ToListAsync();
+
+            var newUserIds = (vm.UtilisateurIds ?? new List<int>()).Distinct().ToList();
+
+            var toAdd = newUserIds.Except(existingUserIds).ToList();
+            var toRemove = existingUserIds.Except(newUserIds).ToList();
+
+            if (toAdd.Count > 0)
+            {
+                var newLinks = toAdd.Select(uid => new EnseigneDetailUtilisateurs
+                {
+                    EnseigneDetailID = vm.Detail.ID,
+                    UtilisateurID = uid,
+                    EstActif = true,
+                    CreeLe = DateTime.UtcNow
+                });
+                _context.EnseigneDetailUtilisateurs.AddRange(newLinks);
+            }
+
+            if (toRemove.Count > 0)
+            {
+                var linksToRemove = await _context.EnseigneDetailUtilisateurs
+                    .Where(x => x.EnseigneDetailID == vm.Detail.ID && toRemove.Contains(x.UtilisateurID))
+                    .ToListAsync();
+
+                _context.EnseigneDetailUtilisateurs.RemoveRange(linksToRemove);
+            }
+
+            if (toAdd.Count > 0 || toRemove.Count > 0)
+                await _context.SaveChangesAsync();
+
+            LogInfo("EnseigneDetail #{DetailID} modifié", vm.Detail.ID);
+            SetGlobalMessage("Le détail enseigne a été modifié avec succès", EGlobalMessageType.Success);
+
+            return RedirectToAction(nameof(Index));
         }
 
+        // GET: EnseigneDetails/Delete/5
         // GET: EnseigneDetails/Delete/5
         [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> Delete(int? id)
@@ -155,7 +228,9 @@ namespace web.Controllers
                 .Include(e => e.Enseigne)
                 .Include(e => e.CodeCommune)
                 .Include(e => e.Centre)
-                .Include(e => e.Benevole)
+                // load links + utilisateur
+                .Include(e => e.EnseigneDetailUtilisateurs)
+                    .ThenInclude(link => link.Utilisateur)
                 .SingleOrDefaultAsync(e => e.ID == id);
 
             if (detail == null)
@@ -164,46 +239,72 @@ namespace web.Controllers
             return View(detail);
         }
 
-        // POST: EnseigneDetails/Delete/5
-        [Authorize(Roles = "SuperAdmin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var detail = await _context.EnseigneDetail.SingleOrDefaultAsync(e => e.ID == id);
+            var detail = await _context.EnseigneDetail
+                .AsNoTracking()
+                .SingleOrDefaultAsync(d => d.ID == id);
 
             if (detail == null)
                 return NotFound();
 
-            _context.EnseigneDetail.Remove(detail);
-            await _context.SaveChangesAsync();
+            // 1️⃣ Block: if ANY Collecte uses this EnseigneDetail → do NOT delete
+            bool hasCollectes = await _context.Collecte
+                .AsNoTracking()
+                .AnyAsync(c => c.EnseigneDetailID == id);
 
-            LogInfo("EnseigneDetail #{DetailID} supprimé", detail.ID);
-            SetGlobalMessage("Le détail enseigne a été supprimé avec succès", EGlobalMessageType.Success);
+            if (hasCollectes)
+            {
+                SetGlobalMessage(
+                    "Impossible de supprimer : des collectes existent pour ce détail d'enseigne.",
+                    EGlobalMessageType.Error
+                );
 
-            return RedirectToAction(nameof(Index));
+                return RedirectToAction("Delete", new { id });
+            }
+
+            // 2️⃣ Block if assignments exist (optional, depending on your FK behavior)
+            bool hasAssignments = await _context.EnseigneDetailUtilisateurs
+                .AsNoTracking()
+                .AnyAsync(a => a.EnseigneDetailID == id);
+
+            if (hasAssignments)
+            {
+                SetGlobalMessage(
+                    "Impossible de supprimer : ce détail d'enseigne possède des affectations utilisateurs.",
+                    EGlobalMessageType.Error
+                );
+
+                return RedirectToAction("Delete", new { id });
+            }
+
+            // 3️⃣ Safe delete
+            _context.EnseigneDetail.Remove(new EnseigneDetail { ID = id });
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                SetGlobalMessage("Le détail d'enseigne a été supprimé avec succès.", EGlobalMessageType.Success);
+                return RedirectToAction("Index");
+            }
+            catch (DbUpdateException)
+            {
+                SetGlobalMessage(
+                    "Impossible de supprimer : des enregistrements liés existent.",
+                    EGlobalMessageType.Error
+                );
+                return RedirectToAction("Delete", new { id });
+            }
         }
 
         private bool DetailExists(int id)
         {
             return _context.EnseigneDetail.Any(e => e.ID == id);
         }
-
-        private void LoadDropdowns(EnseigneDetail selected = null)
-        {
-            ViewBag.EnseigneID = new SelectList(_context.Enseigne.OrderBy(e => e.Name),
-                                                "ID", "Name", selected?.EnseigneID);
-
-            ViewBag.CodeCommuneID = new SelectList(_context.CodeCommune.OrderBy(c => c.NomCommune),
-                                                   "ID", "NomCommune", selected?.CodeCommuneID);
-
-            ViewBag.CentreID = new SelectList(_context.Centres.OrderBy(c => c.Nom),
-                                              "ID", "Nom", selected?.CentreID);
-
-            ViewBag.BenevoleID = new SelectList(_context.Benevoles.OrderBy(b => b.Nom),
-                                                "ID", "Nom", selected?.BenevoleID);
-        }
-
+            
 
         [HttpGet]
         public async Task<IActionResult> SearchCommune(string term)

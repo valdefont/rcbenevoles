@@ -8,6 +8,13 @@
 <h2>Bienvenue dans l'application Collecte</h2>
 <p>Utilisez le formulaire ci-dessous pour rechercher des enregistrements de collecte.</p>
 
+@if (!User.IsInRole("SuperAdmin"))
+{
+    <div class="alert alert-info">
+        Vous voyez uniquement les collectes des enseignes qui vous sont attribuées.
+    </div>
+}
+
 <!-- Search Form -->
 <div class="panel panel-default">
     <div class="panel-heading">
@@ -65,7 +72,7 @@
         <a asp-action="Create" class="btn btn-success">Créer un nouvel enregistrement</a>
     </div>
     <div class="col-md-6 text-right">
-        <form asp-action="ExportExcel" method="get" id="exportForm">
+        <form asp-action="ExportExcelCollecte" method="get" id="exportForm">
             <input type="hidden" name="CentreID" id="ExportCentreID" />
             <input type="hidden" name="EnseigneDetailID" id="ExportEnseigneDetailID" />
             <input type="hidden" name="DateDebut" id="ExportDateDebut" />

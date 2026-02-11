@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography;
 using System.Text;
@@ -33,6 +34,9 @@ namespace dal.models
 
         [Display(Name = "Collecte")]
         public bool app_collecte { get; set; }
+
+        public ICollection<EnseigneDetailUtilisateurs> EnseigneDetailUtilisateurs { get; set; } = new List<EnseigneDetailUtilisateurs>();
+
 
 
         public bool TestPassword(string password)

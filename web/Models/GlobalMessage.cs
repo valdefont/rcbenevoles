@@ -23,19 +23,22 @@ namespace web.Models
 
         public string GetCssClass()
         {
-            switch(this.Type)
+            // Always include the base "alert" class
+            const string baseClass = "alert ";
+
+            switch (this.Type)
             {
                 case EGlobalMessageType.Info:
-                    return "alert-info";
+                    return baseClass + "alert-info";
                 case EGlobalMessageType.Warning:
-                    return "alert-warning";
+                    return baseClass + "alert-warning";
                 case EGlobalMessageType.Error:
-                    return "alert-error";
+                    return baseClass + "alert-danger"; // <-- was alert-error
                 case EGlobalMessageType.Success:
-                    return "alert-success";
+                    return baseClass + "alert-success";
+                default:
+                    return baseClass + "alert-secondary"; // for Bootstrap 4/5 fallback
             }
-
-            return string.Empty;
         }
     }
 }

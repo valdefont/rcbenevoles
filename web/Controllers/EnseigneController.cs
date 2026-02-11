@@ -135,26 +135,76 @@ namespace web.Controllers
         [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            // Check existence (don’t load graph)
             var enseigne = await _context.Enseigne
-                .Include(e => e.Details)
+                .AsNoTracking()
                 .SingleOrDefaultAsync(e => e.ID == id);
 
-            if (enseigne == null) return NotFound();
+            if (enseigne == null)
+                return NotFound();
 
-            // Option: Bloquer la suppression si des détails existent
-            // if (enseigne.Details?.Any() == true)
-            // {
-            //     SetGlobalMessage("Impossible de supprimer : des détails existent pour cette enseigne.", EGlobalMessageType.Error);
-            //     return RedirectToAction(nameof(Delete), new { id });
-            // }
+            // 1) Block if ANY Collecte exists for ANY detail of this enseigne
+            var hasCollectes = await (
+                from c in _context.Collecte.AsNoTracking()
+                join ed in _context.EnseigneDetail.AsNoTracking()
+                    on c.EnseigneDetailID equals ed.ID
+                where ed.EnseigneID == id
+                select 1
+            ).AnyAsync();
 
-            _context.Enseigne.Remove(enseigne);
-            await _context.SaveChangesAsync();
+            if (hasCollectes)
+            {
+                SetGlobalMessage(
+                    "Impossible de supprimer : des collectes existent pour cette enseigne.",
+                    EGlobalMessageType.Error
+                );
 
-            LogInfo("Enseigne #{EnseigneID} ({Name}) supprimée", enseigne.ID, enseigne.Name);
-            SetGlobalMessage("L’enseigne a été supprimée avec succès", EGlobalMessageType.Success);
+                // Important: return immediately to avoid calling SaveChanges
+                return RedirectToAction(nameof(Delete), new { id });
+            }
 
-            return RedirectToAction(nameof(Index));
+            // 2) Block if ANY EnseigneDetail exists (even if there are no collectes)
+            var hasDetails = await _context.EnseigneDetail
+                .AsNoTracking()
+                .AnyAsync(d => d.EnseigneID == id);
+
+            if (hasDetails)
+            {
+                SetGlobalMessage(
+                    "Impossible de supprimer : des détails existent pour cette enseigne.",
+                    EGlobalMessageType.Error
+                );
+
+                // Important: return immediately
+                return RedirectToAction(nameof(Delete), new { id });
+            }
+
+            // 3) Safe to delete (no details, no collectes)
+            // Use a stub entity to avoid loading the graph
+            _context.Enseigne.Remove(new Enseigne { ID = id });
+
+            try
+            {
+                await _context.SaveChangesAsync();
+
+                LogInfo("Enseigne #{EnseigneID} ({Name}) supprimée", enseigne.ID, enseigne.Name);
+                SetGlobalMessage("L’enseigne a été supprimée avec succès", EGlobalMessageType.Success);
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException ex)
+            {
+                // Use string-first logging signature to avoid your CS1503 error
+                LogError("Erreur lors de la suppression de l'enseigne #{EnseigneID}. Exception: {Exception}", id, ex);
+
+                SetGlobalMessage(
+                    "Suppression impossible : des enregistrements liés existent.",
+                    EGlobalMessageType.Error
+                );
+                return RedirectToAction(nameof(Delete), new { id });
+            }
         }
+
+
     }
 }

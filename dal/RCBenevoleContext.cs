@@ -133,13 +133,7 @@ namespace dal
                 .HasOne(ed => ed.Centre)
                 .WithMany()
                 .HasForeignKey(ed => ed.CentreID)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<EnseigneDetail>()
-                .HasOne(ed => ed.Benevole)
-                .WithMany()
-                .HasForeignKey(ed => ed.BenevoleID)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict);            
 
             // Add indexes for filtering
             modelBuilder.Entity<EnseigneDetail>()
@@ -147,11 +141,42 @@ namespace dal
             modelBuilder.Entity<EnseigneDetail>()
                 .HasIndex(ed => ed.CodeCommuneID);
             modelBuilder.Entity<EnseigneDetail>()
-                .HasIndex(ed => ed.CentreID);
-            modelBuilder.Entity<EnseigneDetail>()
-                .HasIndex(ed => ed.BenevoleID);
+                .HasIndex(ed => ed.CentreID);           
             modelBuilder.Entity<EnseigneDetail>()
                 .HasIndex(ed => ed.EstActif);
+
+            // *** ENSEIGNE DETAIL UTILISATEURS (junction table)
+            modelBuilder.Entity<EnseigneDetailUtilisateurs>()
+                .ToTable("EnseigneDetailUtilisateurs");
+
+            // Composite primary key
+            modelBuilder.Entity<EnseigneDetailUtilisateurs>()
+                .HasKey(edu => new { edu.EnseigneDetailID, edu.UtilisateurID });
+
+            // Relationships
+            modelBuilder.Entity<EnseigneDetailUtilisateurs>()
+                .HasOne(edu => edu.EnseigneDetail)
+                .WithMany(ed => ed.EnseigneDetailUtilisateurs) // or .WithMany() if you did not add collection
+                .HasForeignKey(edu => edu.EnseigneDetailID)
+                .OnDelete(DeleteBehavior.Cascade); // delete links when EnseigneDetail is deleted
+
+            modelBuilder.Entity<EnseigneDetailUtilisateurs>()
+                .HasOne(edu => edu.Utilisateur)
+                .WithMany(u => u.EnseigneDetailUtilisateurs) // or .WithMany() if you did not add collection
+                .HasForeignKey(edu => edu.UtilisateurID)
+                .OnDelete(DeleteBehavior.Restrict); // prevent deleting user if linked
+
+            // Indexes for filtering / performance
+            modelBuilder.Entity<EnseigneDetailUtilisateurs>()
+                .HasIndex(edu => edu.EnseigneDetailID);
+
+            modelBuilder.Entity<EnseigneDetailUtilisateurs>()
+                .HasIndex(edu => edu.UtilisateurID);
+
+            // Optional: if you commonly filter on EstActif
+            modelBuilder.Entity<EnseigneDetailUtilisateurs>()
+                .HasIndex(edu => edu.EstActif);
+
 
             // *** COLLECTE
             modelBuilder.Entity<Collecte>()
@@ -196,6 +221,8 @@ namespace dal
         public DbSet<Enseigne> Enseigne { get; set; }
 
         public DbSet<EnseigneDetail> EnseigneDetail { get; set; }
+
+        public DbSet<EnseigneDetailUtilisateurs> EnseigneDetailUtilisateurs { get; set; }
 
 
         public void SeedData()

@@ -1,4 +1,5 @@
 ﻿
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -34,16 +35,13 @@ namespace dal.models
         
         [MaxLength(500)]
         [Display(Name = "Adresse")]
-        public string Adresse { get; set; }
+        public string Adresse { get; set; }       
 
-        [Display(Name = "Bénévole")]
-        public int? BenevoleID { get; set; }
-
-        [Display(Name = "Bénévole")]
-        public Benevole Benevole { get; set; }
 
         [Required]
         [Display(Name = "Actif")]
         public bool EstActif { get; set; } = true;
+
+        public ICollection<EnseigneDetailUtilisateurs> EnseigneDetailUtilisateurs { get; set; } = new List<EnseigneDetailUtilisateurs>();
     }
 }
