@@ -251,7 +251,7 @@ namespace web.Controllers
             if (detail == null)
                 return NotFound();
 
-            // 1️⃣ Block: if ANY Collecte uses this EnseigneDetail → do NOT delete
+            // 1️⃣ BLOCK if Collectes exist
             bool hasCollectes = await _context.Collecte
                 .AsNoTracking()
                 .AnyAsync(c => c.EnseigneDetailID == id);
@@ -262,32 +262,27 @@ namespace web.Controllers
                     "Impossible de supprimer : des collectes existent pour ce détail d'enseigne.",
                     EGlobalMessageType.Error
                 );
-
                 return RedirectToAction("Delete", new { id });
             }
 
-            // 2️⃣ Block if assignments exist (optional, depending on your FK behavior)
-            bool hasAssignments = await _context.EnseigneDetailUtilisateurs
-                .AsNoTracking()
-                .AnyAsync(a => a.EnseigneDetailID == id);
+            // 2️⃣ Remove assignments instead of blocking
+            var assignments = await _context.EnseigneDetailUtilisateurs
+                .Where(a => a.EnseigneDetailID == id)
+                .ToListAsync();
 
-            if (hasAssignments)
+            if (assignments.Any())
             {
-                SetGlobalMessage(
-                    "Impossible de supprimer : ce détail d'enseigne possède des affectations utilisateurs.",
-                    EGlobalMessageType.Error
-                );
-
-                return RedirectToAction("Delete", new { id });
+                _context.EnseigneDetailUtilisateurs.RemoveRange(assignments);
             }
 
-            // 3️⃣ Safe delete
+            // 3️⃣ Safe delete EnseigneDetail
             _context.EnseigneDetail.Remove(new EnseigneDetail { ID = id });
 
             try
             {
                 await _context.SaveChangesAsync();
-                SetGlobalMessage("Le détail d'enseigne a été supprimé avec succès.", EGlobalMessageType.Success);
+                SetGlobalMessage("Le détail d'enseigne et ses affectations ont été supprimés avec succès.",
+                                 EGlobalMessageType.Success);
                 return RedirectToAction("Index");
             }
             catch (DbUpdateException)

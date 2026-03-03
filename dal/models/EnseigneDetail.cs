@@ -19,10 +19,10 @@ namespace dal.models
         public Enseigne Enseigne { get; set; }
 
         [Required(ErrorMessage = "La commune est obligatoire.")]
-        [Display(Name = "Code Commune")]
+        [Display(Name = "Commune")]
         public int CodeCommuneID { get; set; }
 
-        [Display(Name = "Code Commune")]
+        [Display(Name = "Commune")]
         public CodeCommune CodeCommune { get; set; }
 
         [Required(ErrorMessage = "Le centre est obligatoire.")]

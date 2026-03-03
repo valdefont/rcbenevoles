@@ -279,16 +279,50 @@ namespace web.Controllers
         }
 
         // POST: Utilisateurs/Delete/5
+        // POST: Utilisateurs/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var utilisateur = await _context.Utilisateurs.SingleOrDefaultAsync(m => m.ID == id);
+            // Récupération de l'utilisateur
+            var utilisateur = await _context.Utilisateurs
+                .SingleOrDefaultAsync(m => m.ID == id);
+
+            if (utilisateur == null)
+            {
+                SetGlobalMessage("Utilisateur introuvable.", EGlobalMessageType.Error);
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Vérification du contexte Collecte
+            var appActive = HttpContext.Session.GetString("AppActive");
+            if (appActive == "Collecte")
+            {
+                // Si l'utilisateur est lié à au moins une enseigne de collecte active, on bloque
+                var hasActiveLinks = await _context.EnseigneDetailUtilisateurs
+                    .AsNoTracking()
+                    .AnyAsync(e => e.UtilisateurID == id && e.EstActif);
+
+                if (hasActiveLinks)
+                {
+                    SetGlobalMessage(
+                        "Impossible de supprimer cet utilisateur : il est associé à au moins une enseigne de collecte active.",
+                        EGlobalMessageType.Error
+                    );
+
+                    // Revenir sur l'écran de confirmation pour que l’admin voie l’avertissement et puisse annuler
+                    return RedirectToAction(nameof(Delete), new { id });
+                }
+            }
+
+            // Suppression autorisée
             _context.Utilisateurs.Remove(utilisateur);
             await _context.SaveChangesAsync();
+
             SetGlobalMessage("L'utilisateur a été supprimé avec succès", EGlobalMessageType.Success);
             return RedirectToAction(nameof(Index));
         }
+
 
         private bool UtilisateurExists(int id)
         {

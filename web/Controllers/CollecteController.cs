@@ -18,6 +18,7 @@ using iTextSharp.text.pdf;
 using iTextSharp.text;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Org.BouncyCastle.Utilities;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace web.Controllers
 {
@@ -43,7 +44,7 @@ namespace web.Controllers
 
             var model = new CollecteFilterModel
             {
-                Centres = _context.Centres.ToList(),
+                Centres = _context.Centres.OrderBy(c => c.Nom).ToList(),
                 EnseigneDetails = enseigneDetailsQuery
                     .OrderBy(e => e.Enseigne.Name)
                     .ThenBy(e => e.CodeCommune.NomCommune)
@@ -81,7 +82,10 @@ namespace web.Controllers
                 query = query.Where(b => b.DateCreation >= DateDebut.Value);
 
             if (DateFin.HasValue)
-                query = query.Where(b => b.DateCreation <= DateFin.Value);
+            {
+                var endOfDay = DateFin.Value.Date.AddDays(1).AddTicks(-1);
+                query = query.Where(b => b.DateCreation <= endOfDay);
+            }
 
             var results = query
                 .OrderByDescending(b => b.DateCreation)
@@ -132,126 +136,240 @@ namespace web.Controllers
 
 
 
-        // GET: Collecte/Create
         public IActionResult Create()
         {
-            var allowedIds = GetAllowedEnseigneDetailIdsForCurrentUser();
+            var allowedEnseigneIds = GetAllowedEnseigneDetailIdsForCurrentUser().ToList();
 
-            ViewBag.EnseigneDetailItems = BuildEnseigneDetailSelectItems(allowedIds);
+            // 1. Allowed centres for this user
+            var allowedCentreIds = _context.EnseigneDetail
+                .Where(ed => allowedEnseigneIds.Contains(ed.ID))
+                .Select(ed => ed.CentreID)
+                .Distinct()
+                .ToList();
 
-            var model = new Collecte();
-            return View(model);
+            // 2. Centre dropdown filtered
+            var centres = _context.Centres
+                .Where(c => allowedCentreIds.Contains(c.ID))
+                .OrderBy(c => c.Nom)
+                .Select(c => new SelectListItem
+                {
+                    Value = c.ID.ToString(),
+                    Text = c.Nom
+                })
+                .ToList();
+
+            return View(new CollecteFormViewModel
+            {
+                Centres = centres,
+                EnseignesDetail = new List<SelectListItem>()
+            });
         }
 
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Create(Collecte collecte)
+        [HttpGet]
+        public JsonResult GetEnseignesByCentre(int centreId)
         {
-            // We set the user server-side
-            ModelState.Remove("UtilisateurID");
+            var allowedIds = GetAllowedEnseigneDetailIdsForCurrentUser().ToList();
 
-            // Validate chosen EnseigneDetailID is in allowed set (unless SuperAdmin)
-            if (!User.IsInRole("SuperAdmin"))
-            {
-                var allowedIds = GetAllowedEnseigneDetailIdsForCurrentUser();
-                var isAllowed = allowedIds.Any(id => id == collecte.EnseigneDetailID);
-                if (!isAllowed)
+            var data = _context.EnseigneDetail
+                .Include(e => e.Enseigne)
+                .Include(e => e.CodeCommune)
+                .Where(ed => ed.CentreID == centreId && allowedIds.Contains(ed.ID))
+                .Select(ed => new
                 {
-                    ModelState.AddModelError("EnseigneDetailID",
-                        "Vous n'êtes pas autorisé à sélectionner cette enseigne.");
-                }
-            }
+                    id = ed.ID,
+                    nom = ed.Enseigne.Name + " - " + ed.CodeCommune.NomCommune
+                })
+                .ToList();
 
+            return Json(data);
+        }
+
+
+
+
+        [HttpPost]
+        public IActionResult Create(CollecteFormViewModel model)
+        {
             if (!ModelState.IsValid)
             {
-                var allowedIds = GetAllowedEnseigneDetailIdsForCurrentUser();
-                ViewBag.EnseigneDetailItems = BuildEnseigneDetailSelectItems(allowedIds);
-                return View(collecte);
+                var allowedIds = GetAllowedEnseigneDetailIdsForCurrentUser().ToList();
+
+                var allowedCentreIds = _context.EnseigneDetail
+                    .Where(ed => allowedIds.Contains(ed.ID))
+                    .Select(ed => ed.CentreID)
+                    .Distinct()
+                    .ToList();
+
+                model.Centres = _context.Centres
+                    .Where(c => allowedCentreIds.Contains(c.ID))
+                    .OrderBy(c => c.Nom)
+                    .Select(c => new SelectListItem
+                    {
+                        Value = c.ID.ToString(),
+                        Text = c.Nom
+                    });
+
+                model.EnseignesDetail =
+                    model.CentreID == null
+                    ? new List<SelectListItem>()
+                    : _context.EnseigneDetail
+                        .Where(ed => ed.CentreID == model.CentreID && allowedIds.Contains(ed.ID))
+                        .Select(ed => new SelectListItem
+                        {
+                            Value = ed.ID.ToString(),
+                            Text = ed.Enseigne.Name
+                        });
+
+                return View(model);
             }
 
-            collecte.UtilisateurID = GetCurrentUserId(); // your existing helper
-            collecte.DateCreation = DateTime.Now;
+
+            var collecte = new Collecte
+            {
+                EnseigneDetailID = model.EnseigneDetailID,
+                Poids = model.Poids ?? 0,
+                UtilisateurID = GetCurrentUserId(),
+                DateCreation = DateTime.Now
+            };
 
             _context.Collecte.Add(collecte);
             _context.SaveChanges();
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index");
         }
 
 
         public IActionResult Edit(int id)
         {
             var collecte = _context.Collecte
-                .Include(c => c.EnseigneDetail).ThenInclude(e => e.Enseigne)
-                .Include(c => c.EnseigneDetail).ThenInclude(e => e.CodeCommune)
+                .Include(c => c.EnseigneDetail)
                 .FirstOrDefault(c => c.ID == id);
 
             if (collecte == null)
                 return NotFound();
 
-            if (!User.IsInRole("SuperAdmin"))
+            // Allowed enseigne IDs
+            var allowedIds = GetAllowedEnseigneDetailIdsForCurrentUser().ToList();
+
+            // SECURITY: this collecte must be accessible
+            if (!User.IsInRole("SuperAdmin") &&
+                !allowedIds.Contains(collecte.EnseigneDetailID!.Value))
             {
-                var allowedIds = GetAllowedEnseigneDetailIdsForCurrentUser();
-                // If the collecte’s enseigne is not allowed, forbid access
-                bool canEdit = allowedIds.Any(x => x == collecte.EnseigneDetailID);
-                if (!canEdit)
-                    return Forbid(); // or return NotFound() if you prefer not to disclose existence
+                return Forbid();
             }
 
-            var allowedForDropdown = GetAllowedEnseigneDetailIdsForCurrentUser();
-            ViewBag.EnseigneDetailItems = BuildEnseigneDetailSelectItems(allowedForDropdown);
+            // Allowed centres = centres that contain at least one allowed enseigne
+            var allowedCentreIds = _context.EnseigneDetail
+                .Where(ed => allowedIds.Contains(ed.ID))
+                .Select(ed => ed.CentreID)
+                .Distinct()
+                .ToList();
 
-            return View(collecte);
+            // CENTRES DROPDOWN (filtered)
+            var centres = _context.Centres
+                .Where(c => allowedCentreIds.Contains(c.ID))
+                .OrderBy(c => c.Nom)
+                .Select(c => new SelectListItem
+                {
+                    Value = c.ID.ToString(),
+                    Text = c.Nom
+                })
+                .ToList();
+
+            // ENSEIGNES DROPDOWN (filtered)
+            var enseignes = _context.EnseigneDetail
+                .Where(ed => ed.CentreID == collecte.EnseigneDetail.CentreID &&
+                             allowedIds.Contains(ed.ID))
+                .Include(e => e.Enseigne)
+                .Include(e => e.CodeCommune)
+                .Select(ed => new SelectListItem
+                {
+                    Value = ed.ID.ToString(),
+                    Text = ed.Enseigne.Name + " - " + ed.CodeCommune.NomCommune
+                })
+                .ToList();
+
+            var vm = new CollecteFormViewModel
+            {
+                ID = collecte.ID,
+                CentreID = collecte.EnseigneDetail.CentreID,
+                EnseigneDetailID = collecte.EnseigneDetailID,
+                Poids = collecte.Poids,
+                Centres = centres,
+                EnseignesDetail = enseignes
+            };
+
+            return View(vm);
         }
+
 
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, Collecte input)
+        public IActionResult Edit(int id, CollecteFormViewModel model)
         {
-            if (id != input.ID)
+            if (id != model.ID)
                 return BadRequest();
 
-            // Load existing entity to verify original ownership & to update safely
-            var collecte = _context.Collecte
-                .FirstOrDefault(c => c.ID == id);
-
+            var collecte = _context.Collecte.FirstOrDefault(c => c.ID == id);
             if (collecte == null)
                 return NotFound();
 
-            if (!User.IsInRole("SuperAdmin"))
+            var allowedIds = GetAllowedEnseigneDetailIdsForCurrentUser().ToList();
+
+            // SECURITY: chosen enseigne must be allowed
+            if (!User.IsInRole("SuperAdmin") &&
+                !allowedIds.Contains(model.EnseigneDetailID ?? -1))
             {
-                var allowedIds = GetAllowedEnseigneDetailIdsForCurrentUser();
-
-                // Check user can see the existing collecte:
-                bool canEditExisting = allowedIds.Any(x => x == collecte.EnseigneDetailID);
-                if (!canEditExisting)
-                    return Forbid();
-
-                // Check the newly selected EnseigneDetailID is allowed
-                bool canSelectNew = allowedIds.Any(x => x == input.EnseigneDetailID);
-                if (!canSelectNew)
-                    ModelState.AddModelError("EnseigneDetailID", "Vous n'êtes pas autorisé à sélectionner cette enseigne.");
+                ModelState.AddModelError("EnseigneDetailID", "Enseigne non autorisée.");
             }
 
             if (!ModelState.IsValid)
             {
-                var allowedForDropdown = GetAllowedEnseigneDetailIdsForCurrentUser();
-                ViewBag.EnseigneDetailItems = BuildEnseigneDetailSelectItems(allowedForDropdown);
-                return View(input);
+                // Allowed centres
+                var allowedCentreIds = _context.EnseigneDetail
+                    .Where(ed => allowedIds.Contains(ed.ID))
+                    .Select(ed => ed.CentreID)
+                    .Distinct()
+                    .ToList();
+
+                // Repopulate centres
+                model.Centres = _context.Centres
+                    .Where(c => allowedCentreIds.Contains(c.ID))
+                    .OrderBy(c => c.Nom)
+                    .Select(c => new SelectListItem
+                    {
+                        Value = c.ID.ToString(),
+                        Text = c.Nom
+                    });
+
+                // Repopulate enseignes
+                model.EnseignesDetail =
+                    model.CentreID == null
+                    ? Enumerable.Empty<SelectListItem>()
+                    : _context.EnseigneDetail
+                    .Include(e => e.Enseigne)
+                    .Include(e => e.CodeCommune)
+                        .Where(ed => ed.CentreID == model.CentreID &&
+                                     allowedIds.Contains(ed.ID))
+                        .Select(ed => new SelectListItem
+                        {
+                            Value = ed.ID.ToString(),
+                            Text = ed.Enseigne.Name + " - " + ed.CodeCommune.NomCommune
+                        });
+
+                return View(model);
             }
 
-            // Update permitted fields
-            collecte.EnseigneDetailID = input.EnseigneDetailID;
-            collecte.Poids = input.Poids;
-            // (Keep UtilisateurID/DateCreation immutable, unless you have an audit policy)
+            // SAVE CHANGES
+            collecte.EnseigneDetailID = model.EnseigneDetailID!.Value;
+            collecte.Poids = model.Poids!.Value;
 
             _context.SaveChanges();
 
             return RedirectToAction(nameof(Index));
         }
-
 
 
 
@@ -310,7 +428,7 @@ namespace web.Controllers
             }
             else
             {
-                ViewBag.Centres = _context.Centres
+                ViewBag.Centres = _context.Centres.OrderBy(c => c.Nom)
                     .Where(c => c.ID == GetCurrentUser().CentreID)
                     .AsEnumerable();
             }
@@ -347,10 +465,13 @@ namespace web.Controllers
                 query = query.Where(c => c.EnseigneDetailID == EnseigneDetailID);
 
             if (DateDebut.HasValue)
-                query = query.Where(c => c.DateCreation >= DateDebut.Value);
+                query = query.Where(c => c.DateCreation >= DateDebut.Value);            
 
             if (DateFin.HasValue)
-                query = query.Where(c => c.DateCreation <= DateFin.Value);
+            {
+                var endOfDay = DateFin.Value.Date.AddDays(1).AddTicks(-1);
+                query = query.Where(b => b.DateCreation <= endOfDay);
+            }
 
             // It’s often useful to keep a stable order in exports
             var list = query

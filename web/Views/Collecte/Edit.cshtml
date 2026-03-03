@@ -1,4 +1,4 @@
-﻿@model dal.models.Collecte
+﻿@model web.Models.CollecteFormViewModel
 
 @{
     ViewData["Title"] = "Modifier une collecte";
@@ -8,24 +8,44 @@
 
 <form asp-action="Edit" method="post">
 
+    <!-- Keep ID for editing -->
     <input type="hidden" asp-for="ID" />
 
+    <!-- Validation Summary (hidden when empty) -->
+    <div asp-validation-summary="All" class="alert alert-warning"></div>
+
+    <!-- CENTRE -->
     <div class="form-group">
-        <label asp-for="EnseigneDetailID"></label>
-        <select asp-for="EnseigneDetailID"
+        <label asp-for="CentreID" class="control-label"></label>
+        <select asp-for="CentreID"
+                id="CentreID"
                 class="form-control"
-                asp-items="@(ViewBag.EnseigneDetailItems)">
+                asp-items="Model.Centres">
+            <option value="">-- Sélectionner un centre --</option>
+        </select>
+        <span asp-validation-for="CentreID" class="text-danger"></span>
+    </div>
+
+    <!-- ENSEIGNE DETAIL -->
+    <div class="form-group">
+        <label asp-for="EnseigneDetailID" class="control-label"></label>
+        <select asp-for="EnseigneDetailID"
+                id="EnseigneDetailID"
+                class="form-control"
+                asp-items="Model.EnseignesDetail">
             <option value="">-- Sélectionner une enseigne --</option>
         </select>
         <span asp-validation-for="EnseigneDetailID" class="text-danger"></span>
     </div>
 
+    <!-- POIDS -->
     <div class="form-group">
-        <label asp-for="Poids"></label>
+        <label asp-for="Poids" class="control-label"></label>
         <input asp-for="Poids" class="form-control" />
         <span asp-validation-for="Poids" class="text-danger"></span>
     </div>
 
+    <!-- BUTTONS -->
     <div class="form-group text-right" style="margin-top:15px;">
         <a asp-action="Index" class="btn btn-secondary">Annuler</a>
         <button type="submit" class="btn btn-primary">Enregistrer</button>
@@ -34,7 +54,36 @@
 </form>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script>
+        $("#CentreID").change(function () {
+
+            var centreId = $(this).val();
+            var ddl = $("#EnseigneDetailID");
+
+            ddl.empty();
+            ddl.append($("<option>").val("").text("-- Chargement... --"));
+
+            if (centreId !== "") {
+
+                $.ajax({
+                    url: '@Url.Action("GetEnseignesByCentre", "Collecte")',
+                    data: { centreId: centreId },
+                    success: function (data) {
+
+                        ddl.empty();
+                        ddl.append($("<option>").val("").text("-- Sélectionner une enseigne --"));
+
+                        $.each(data, function (i, item) {
+                            ddl.append($("<option>").val(item.id).text(item.nom));
+                        });
+                    }
+                });
+
+            } else {
+                ddl.empty().append($("<option>").val("").text("-- Sélectionner une enseigne --"));
+            }
+        });
+    </script>
 }

@@ -32,7 +32,7 @@ namespace web.Controllers
         {
             var model = new BonLivraisonFilterModel
             {
-                Centres = _context.Centres.ToList(),
+                Centres = _context.Centres.OrderBy(c=>c.Nom).ToList(),
                 Results = new List<BonLivraison>() 
             };
             return View(model);
@@ -110,7 +110,7 @@ namespace web.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewBag.Centres = _context.Centres.ToList();
+            ViewBag.Centres = _context.Centres.OrderBy(c => c.Nom).ToList();
             return View(bonLivraison);
         }
 
@@ -125,7 +125,7 @@ namespace web.Controllers
             if (bon == null)
                 return NotFound();
 
-            ViewBag.Centres = _context.Centres.ToList();
+            ViewBag.Centres = _context.Centres.OrderBy(c => c.Nom).ToList();
             return View(bon);
         }
 
@@ -151,7 +151,7 @@ namespace web.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewBag.Centres = _context.Centres.ToList();
+            ViewBag.Centres = _context.Centres.OrderBy(c => c.Nom).ToList();
             return View(bonLivraison);
         }
 
